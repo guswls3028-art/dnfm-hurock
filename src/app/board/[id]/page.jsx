@@ -54,7 +54,8 @@ export default function BoardDetailPage({ params }) {
 
   const reloadPost = () => setReloadTick((t) => t + 1);
 
-  async function handleVote(value) {
+  async function handleVote(voteType) {
+    // voteType: "recommend" | "downvote" (backend postVoteTypes enum)
     if (!user) {
       window.location.href = `/login?returnTo=${encodeURIComponent(`/board/${id}`)}`;
       return;
@@ -62,12 +63,13 @@ export default function BoardDetailPage({ params }) {
     setVoteBusy(true);
     setError(null);
     try {
-      const res = await postsApi.vote(id, value);
+      const res = await postsApi.vote(id, voteType);
+      const updated = res?.post || res;
       setPost((p) => ({
         ...p,
-        likes: res?.likes ?? p.likes,
-        dislikes: res?.dislikes ?? p.dislikes,
-        myVote: value,
+        likes: updated?.likes ?? updated?.recommendCount ?? p.likes,
+        dislikes: updated?.dislikes ?? updated?.downvoteCount ?? p.dislikes,
+        myVote: voteType,
       }));
     } catch (err) {
       setError(err instanceof ApiError ? err : { message: err?.message || "투표 실패" });
@@ -166,7 +168,7 @@ export default function BoardDetailPage({ params }) {
         <button
           type="button"
           className="btn btn-sm btn-primary"
-          onClick={() => handleVote(1)}
+          onClick={() => handleVote("recommend")}
           disabled={voteBusy}
         >
           ▲ 추천 {post.likes != null ? `(${post.likes})` : ""}
@@ -174,7 +176,7 @@ export default function BoardDetailPage({ params }) {
         <button
           type="button"
           className="btn btn-sm"
-          onClick={() => handleVote(-1)}
+          onClick={() => handleVote("downvote")}
           disabled={voteBusy}
         >
           ▼ 비추 {post.dislikes != null ? `(${post.dislikes})` : ""}

@@ -89,7 +89,8 @@ export default function AdminContestDetailPage({ params }) {
     setError(null);
     setSuccess(null);
     try {
-      await contestsApi.updateStatus(id, { status: nextStatus });
+      // backend 는 별도 status endpoint 없이 PATCH /contests/:id 로 받음.
+      await contestsApi.update(id, { status: nextStatus });
       setContest((c) => (c ? { ...c, status: nextStatus, statusLabel: labelFor(nextStatus) } : c));
       setSuccess(`상태가 "${labelFor(nextStatus)}" 로 변경되었습니다.`);
     } catch (err) {
@@ -108,11 +109,12 @@ export default function AdminContestDetailPage({ params }) {
     setError(null);
     setSuccess(null);
     try {
-      const podium = resultForm
+      // backend announceResultsDto: { auto?, rankings: [{entryId, rank, note?}] }
+      const rankings = resultForm
         .filter((r) => r.entryId)
-        .map((r) => ({ rank: r.rank, entryId: r.entryId, comment: r.comment }));
-      if (!podium.length) throw new Error("최소 1등 entry 는 선택해야 합니다.");
-      await contestsApi.publishResults(id, { podium });
+        .map((r) => ({ rank: r.rank, entryId: r.entryId, note: r.comment || undefined }));
+      if (!rankings.length) throw new Error("최소 1등 entry 는 선택해야 합니다.");
+      await contestsApi.announceResults(id, { rankings });
       setSuccess("결과를 발표했습니다. 결과 페이지에 노출됩니다.");
     } catch (err) {
       setError(err instanceof ApiError ? err : { message: err?.message || "발표 실패" });
