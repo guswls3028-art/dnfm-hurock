@@ -16,6 +16,31 @@ function LoginInner() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
 
+  // OAuth provider 사전 점검 — 미설정이면 disabled + 안내.
+  // 운영 .env: GOOGLE_OAUTH_CLIENT_ID set, KAKAO_OAUTH_CLIENT_ID empty (2026-05-13 기준).
+  async function probeOAuth(provider, url) {
+    try {
+      const res = await fetch(url, { method: "GET", redirect: "manual" });
+      if (res.status === 503) {
+        setError({
+          message: `${provider === "kakao" ? "카카오" : "구글"} 로그인은 아직 준비 중입니다. 잠시만 기다려 주세요.`,
+        });
+        return false;
+      }
+    } catch {
+      // network 에러는 통과시켜 brower 가 그대로 redirect 시도하게.
+    }
+    return true;
+  }
+
+  async function handleOAuthClick(e, provider, url) {
+    e.preventDefault();
+    setError(null);
+    const ok = await probeOAuth(provider, url);
+    if (!ok) return;
+    window.location.href = url;
+  }
+
   async function handleSubmit(e) {
     e.preventDefault();
     setError(null);
@@ -117,6 +142,9 @@ function LoginInner() {
             href={oauth.googleStart(returnTo)}
             className="btn btn-google"
             style={{ justifyContent: "flex-start" }}
+            onClick={(e) =>
+              handleOAuthClick(e, "google", oauth.googleStart(returnTo))
+            }
           >
             <span aria-hidden="true" style={{ fontWeight: 900 }}>G</span>
             Google 로 계속하기
@@ -125,6 +153,9 @@ function LoginInner() {
             href={oauth.kakaoStart(returnTo)}
             className="btn btn-kakao"
             style={{ justifyContent: "flex-start" }}
+            onClick={(e) =>
+              handleOAuthClick(e, "kakao", oauth.kakaoStart(returnTo))
+            }
           >
             <span aria-hidden="true" style={{ fontWeight: 900 }}>K</span>
             카카오로 계속하기
