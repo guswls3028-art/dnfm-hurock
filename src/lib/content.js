@@ -1,5 +1,5 @@
 /**
- * allow.dnfm.kr — 정적 콘텐츠 SSOT
+ * hurock.dnfm.kr — 정적 콘텐츠 SSOT
  *
  * 허락님(스트리머) placeholder + 콘테스트/게시판/회원 mock 데이터.
  * 외부 URL placeholder 는 `url: null` + `reason` 패턴 유지.
@@ -8,8 +8,7 @@
 
 export const siteMeta = {
   id: "hurock",
-  legacyId: "allow",
-  hostnames: ["hurock.dnfm.kr", "allow.dnfm.kr"],
+  hostnames: ["hurock.dnfm.kr"],
   brand: "허락공대",
   brandShort: "허락공대",
   wordmark: "허락공대",

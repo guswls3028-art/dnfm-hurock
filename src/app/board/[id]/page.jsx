@@ -12,7 +12,7 @@ import AdminPostMenu from "@/components/AdminPostMenu";
 export default function BoardDetailPage({ params }) {
   const { id } = use(params);
   const { user } = useCurrentUser();
-  const userIsAdmin = isAdmin(user, "allow");
+  const userIsAdmin = isAdmin(user, "hurock");
 
   const [post, setPost] = useState(mockDetail);
   const [comments, setComments] = useState(mockDetail.comments || []);

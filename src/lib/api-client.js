@@ -1,5 +1,5 @@
 /**
- * api-client.js — allow.dnfm.kr → api.dnfm.kr
+ * api-client.js — hurock.dnfm.kr → api.dnfm.kr
  *
  * 공통 fetch wrapper.
  *   - base = NEXT_PUBLIC_API_BASE 또는 https://api.dnfm.kr (prod 기본)
@@ -14,7 +14,7 @@
  */
 
 const DEFAULT_BASE = "https://api.dnfm.kr";
-const SITE = "allow";
+const SITE = "hurock";
 const DEFAULT_TIMEOUT_MS = 15_000;
 
 function resolveBase() {

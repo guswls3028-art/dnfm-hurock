@@ -20,7 +20,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { ApiError, heroBanners as bannersApi, uploads } from "@/lib/api-client";
 import { useCurrentUser, isAdmin } from "@/lib/use-current-user";
 
-const SITE = "allow";
+const SITE = "hurock";
 const MAX_SLOTS = 6;
 const MAX_FILE_MB = 5;
 

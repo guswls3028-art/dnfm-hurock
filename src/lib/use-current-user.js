@@ -82,11 +82,11 @@ const ADMIN_ROLES = new Set(["admin", "super"]);
 
 /**
  * 사이트별 admin 권한 확인. backend /auth/me 의 user.siteRoles 를 본다.
- *   user.siteRoles = [{ site: "newb"|"allow"|"*", role: "member"|"admin"|"super" }]
+ *   user.siteRoles = [{ site: "newb"|"hurock"|"*", role: "member"|"admin"|"super" }]
  *
  * 호환: 옛 user.role ("admin" / "superadmin") 도 지원.
  */
-export function isAdmin(user, site = "allow") {
+export function isAdmin(user, site = "hurock") {
   if (!user) return false;
   if (user.role === "admin" || user.role === "superadmin" || user.role === "super") {
     return true;

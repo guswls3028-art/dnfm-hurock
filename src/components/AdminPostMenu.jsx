@@ -13,8 +13,8 @@ import { apiFetch, ApiError } from "@/lib/api-client";
  *   onChange: 토글/삭제 후 호출 (parent 가 reload)
  *
  * Backend:
- *   PATCH /sites/allow/posts/:id  { pinned: true|false }   (admin only)
- *   DELETE /sites/allow/posts/:id                           (admin only, soft delete)
+ *   PATCH /sites/hurock/posts/:id  { pinned: true|false }   (admin only)
+ *   DELETE /sites/hurock/posts/:id                           (admin only, soft delete)
  */
 export default function AdminPostMenu({ postId, pinned, onChange }) {
   const router = useRouter();
@@ -45,7 +45,7 @@ export default function AdminPostMenu({ postId, pinned, onChange }) {
     setBusy(true);
     setMsg(null);
     try {
-      await apiFetch(`/sites/allow/posts/${encodeURIComponent(postId)}`, {
+      await apiFetch(`/sites/hurock/posts/${encodeURIComponent(postId)}`, {
         method: "PATCH",
         json: { pinned: !pinned },
       });
@@ -73,7 +73,7 @@ export default function AdminPostMenu({ postId, pinned, onChange }) {
     setBusy(true);
     setMsg(null);
     try {
-      await apiFetch(`/sites/allow/posts/${encodeURIComponent(postId)}`, {
+      await apiFetch(`/sites/hurock/posts/${encodeURIComponent(postId)}`, {
         method: "DELETE",
       });
       router.push("/board");

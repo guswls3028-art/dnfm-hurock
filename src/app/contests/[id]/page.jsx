@@ -26,7 +26,7 @@ const CATEGORY_TONE_CLASS = [
 export default function ContestDetailPage({ params }) {
   const { id } = use(params);
   const { user } = useCurrentUser();
-  const userIsAdmin = isAdmin(user, "allow");
+  const userIsAdmin = isAdmin(user, "hurock");
   const [contest, setContest] = useState(() => mockContests.find((c) => c.id === id) || null);
   const [entries, setEntries] = useState(() => mockEntries[id] || []);
   const [loading, setLoading] = useState(true);

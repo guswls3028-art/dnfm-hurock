@@ -17,7 +17,7 @@ import PhotoField from "@/components/PhotoField";
  * dnfProfile 이 있으면 prefillFrom 으로 자동 채움. 비로그인이면 비워둠.
  *
  * submit:
- *   POST /sites/allow/contests/:id/entries  body={fields:{...}}
+ *   POST /sites/hurock/contests/:id/entries  body={fields:{...}}
  *   성공 시 redirect: /contests/:id
  */
 export default function ContestForm({ contestId, schema = [], dnfProfile }) {
