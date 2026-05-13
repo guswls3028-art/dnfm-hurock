@@ -9,7 +9,7 @@
 - `src/lib/content.js` — 정적 콘텐츠 SSOT (hero / 프로필 / 공지 placeholder)
 - `docs/` — 도메인 라우팅 / 배포 가이드
 
-자매 사이트 `dnfm.kr` 은 **별도 repo** [`guswls3028-art/dnfm`](https://github.com/guswls3028-art/dnfm) 에서 독립 운영. 한쪽 작업이 다른쪽에 영향 0.
+친구들 `dnfm.kr` 은 **별도 repo** [`guswls3028-art/dnfm`](https://github.com/guswls3028-art/dnfm) 에서 독립 운영. 한쪽 작업이 다른쪽에 영향 0.
 
 ## 실행
 
@@ -22,7 +22,7 @@ pnpm start    # production preview (포트 3001)
 
 ## 배포
 
-EC2 단일 인스턴스 + Cloudflare CDN. 자매 사이트와 같은 EC2 인스턴스에 다른 포트(3001)·다른 디렉토리로 동거. 절차는 `docs/deploy-ec2.md`.
+EC2 단일 인스턴스 + Cloudflare CDN. 친구들와 같은 EC2 인스턴스에 다른 포트(3001)·다른 디렉토리로 동거. 절차는 `docs/deploy-ec2.md`.
 
 ## 운영 메모
 
