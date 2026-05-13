@@ -33,13 +33,13 @@ export default function HeroSlider() {
 
   useEffect(() => {
     if (paused || banners.length < 2) return undefined;
-    const reduced =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-    if (reduced) return undefined;
-    timerRef.current = setTimeout(() => setIdx((p) => (p + 1) % banners.length), ROTATE_MS);
-    return () => clearTimeout(timerRef.current);
-  }, [idx, paused, banners.length]);
+    // 자동 회전 — prefers-reduced-motion 은 의도적으로 무시 (배너 노출이 핵심 UX).
+    timerRef.current = setInterval(
+      () => setIdx((p) => (p + 1) % banners.length),
+      ROTATE_MS
+    );
+    return () => clearInterval(timerRef.current);
+  }, [paused, banners.length]);
 
   if (!banners.length) return null;
   const current = banners[idx];
@@ -68,15 +68,14 @@ export default function HeroSlider() {
             <Image
               src={b.src}
               alt={b.alt || b.title}
-              width={1600}
-              height={260}
+              width={2320}
+              height={464}
               priority={i === 0}
               unoptimized
               className="hero-slider__img"
             />
-            <span className="hero-slider__caption">
-              <strong>{b.title}</strong>
-              <small>{b.subtitle}</small>
+            <span className="hero-slider__hint" aria-hidden="true">
+              {b.title} →
             </span>
           </a>
         ))}
