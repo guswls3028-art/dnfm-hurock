@@ -126,9 +126,15 @@ export default function ContestDetailPage({ params }) {
         <div className="contest-banner-body">
           <strong>{contest.title}</strong>
           <small>
-            마감 {contest.submissionCloses || "-"} · 투표 {contest.voteWindow || "-"} ·{" "}
-            {contest.resultsAt || ""}
+            {contest.eventAt ? `📅 ${contest.eventAt} · ` : ""}
+            마감 {contest.submissionCloses || "-"} · 투표 {contest.voteWindow || "-"}
+            {contest.resultsAt ? ` · ${contest.resultsAt}` : ""}
           </small>
+          {contest.prizePool ? (
+            <small style={{ fontWeight: 900, color: "var(--primary-ink)" }}>
+              🎁 {contest.prizePool}
+            </small>
+          ) : null}
         </div>
         <div className="contest-banner-actions">
           {submissionOpen && (
@@ -193,29 +199,58 @@ export default function ContestDetailPage({ params }) {
             </span>
           </div>
           <div className="grid grid-2">
-            {contest.categories.map((cat, idx) => (
-              <article
-                key={cat.key}
-                className={`card ${CATEGORY_TONE_CLASS[idx % CATEGORY_TONE_CLASS.length]}`}
-              >
-                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                  <span style={{ fontSize: "1.6rem", lineHeight: 1 }} aria-hidden="true">
-                    {cat.emoji}
-                  </span>
-                  <h3 style={{ margin: 0 }}>{cat.label}</h3>
-                </div>
-                {Array.isArray(contest.prizes) && contest.prizes.length ? (
-                  <ul style={{ margin: "10px 0 0 0", paddingLeft: 18, lineHeight: 1.7, color: "var(--ink-soft)" }}>
-                    {contest.prizes.map((p) => (
-                      <li key={p.rank}>
-                        <strong>{p.label}</strong> — {p.reward}
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-              </article>
-            ))}
+            {contest.categories.map((cat, idx) => {
+              const catPrizes = Array.isArray(cat.prizes) && cat.prizes.length
+                ? cat.prizes
+                : cat.prize
+                ? [{ rank: 1, label: "1등", reward: cat.prize }]
+                : [];
+              return (
+                <article
+                  key={cat.key}
+                  className={`card ${CATEGORY_TONE_CLASS[idx % CATEGORY_TONE_CLASS.length]}`}
+                >
+                  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                    <span style={{ fontSize: "1.6rem", lineHeight: 1 }} aria-hidden="true">
+                      {cat.emoji}
+                    </span>
+                    <h3 style={{ margin: 0 }}>{cat.label}</h3>
+                  </div>
+                  {cat.note ? (
+                    <p style={{ margin: "8px 0 0", color: "var(--ink-soft)", fontSize: "0.92rem", lineHeight: 1.55 }}>
+                      {cat.note}
+                    </p>
+                  ) : null}
+                  {catPrizes.length ? (
+                    <ul style={{ margin: "10px 0 0 0", paddingLeft: 18, lineHeight: 1.7, color: "var(--ink-soft)" }}>
+                      {catPrizes.map((p) => (
+                        <li key={p.rank}>
+                          <strong>{p.label}</strong> — {p.reward}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : null}
+                </article>
+              );
+            })}
           </div>
+        </section>
+      ) : null}
+
+      {Array.isArray(contest.rules) && contest.rules.length ? (
+        <section className="section" aria-labelledby="contest-rules">
+          <div className="section-head">
+            <h2 id="contest-rules">
+              공통 사항 <StickerBadge tone="pink" rotate="r">필독</StickerBadge>
+            </h2>
+          </div>
+          <article className="card card-tone-amber">
+            <ol style={{ margin: 0, paddingLeft: 20, lineHeight: 1.7, color: "var(--ink-soft)" }}>
+              {contest.rules.map((r) => (
+                <li key={r}>{r}</li>
+              ))}
+            </ol>
+          </article>
         </section>
       ) : null}
 

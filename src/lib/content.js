@@ -195,75 +195,157 @@ export const noticeBoard = [
 export const contests = [
   {
     id: "c-avatar-1",
-    title: "허락 코스프레 코디 콘테스트 1회",
-    subtitle: "부문별 코디 자랑 — 사용자 투표 + 허락 뽑기",
+    title: "허락 아바타 콘테스트 1회",
+    subtitle: "5개 부문 코디 자랑 — 사용자 투표 + 허락 심사",
     status: "submission",
     statusLabel: "참가 모집중",
     tone: "pink",
     posterEmoji: "👗",
-    submissionCloses: "이번 주 일요일 23:59",
-    voteWindow: "마감 다음 날부터 3일 — 시청자 투표",
-    resultsAt: "투표 마감 직후 발표 (사용자 투표 + 허락 뽑기 합산)",
+    eventAt: "2026-06-13 (토) 19:00",
+    submissionCloses: "6월 13일(토) 저녁 7시 방송 시작 전",
+    voteWindow: "방송 중 — 부문별 시청자 1인 1표",
+    resultsAt: "당일 방송 중 발표 (사용자 투표 + 허락 심사)",
+    prizePool: "총합 30만원 + α — 구글 기프트 카드",
     entries: 14,
     description:
-      "코스프레 코디 콘테스트. 부문 하나 골라서 모험단명/캐릭터명/코디 제목/설명/사진 한 장으로 참가. 잘 입은 코디든 망한 코디든 다 환영. 마감 후 시청자가 직접 투표하고, 허락이 추가로 뽑기로 한 번 더 골라요.",
+      "허락 아바타 콘테스트 1회. 가지고 있는 아바타로 5개 부문 중 골라서 참가. 1~5부문 중복 참가 가능 (단 부문별 1개 코디만). 마감 후 회원이 부문별 1회씩 투표하고, 허락이 방송 중 직접 심사해 1등을 가립니다.",
     judging: {
-      summary: "사용자 투표 메인 + 허락 뽑기 추가",
+      summary: "사용자 투표 메인 + 허락 심사 (방송 중)",
       bullets: [
-        "1차 — 마감 후 후보 전원 공개. 시청자 1인 1표 투표",
-        "2차 — 허락이 방송 중 뽑기로 추가 1팀 픽 (부문별)",
-        "최종 — 부문별 1, 2등 상품 지급"
+        "1차 — 마감 후 후보 전원 공개. 회원이 부문별 1인 1표 투표",
+        "2차 — 6월 13일(토) 19시 방송에서 허락이 직접 심사",
+        "최종 — 부문별 1등(나만의 멋진 코디는 1·2등) 구글 기프트 카드 지급"
       ]
     },
-    categories: [
-      { key: "anime-male", label: "남자 애니 코스프레 코디", emoji: "🧝‍♂️" },
-      { key: "anime-female", label: "여자 애니 코스프레 코디", emoji: "🧝‍♀️" },
-      { key: "funny", label: "웃긴 코디", emoji: "🤡" },
-      { key: "epic", label: "나만의 정말 멋진 코디", emoji: "✨" }
+    rules: [
+      "허락이 심사하는데에 불만/급발진하는 사람은 바로 탈락 (강퇴 가능)",
+      "상품 걸고 재미로 노는 컨텐츠 — 가볍게 참가하기",
+      "시작일자(6월 13일 토 19시) 방송 안 보고 있으면 상품 지급 불가",
+      "아바타 쇼룸 불가 — 가지고 있는 아바타로 참가",
+      "1~5번 부문 중복 참가 가능 (한 사람이 여러 부문 참가 OK)",
+      "각 부문별 1개 코디만 참가 가능",
+      "코디 설명은 디테일하게. 어디를 중점적으로 보면 좋을지도 적어주세요"
     ],
-    prizes: [
-      { rank: 1, label: "1등", reward: "허락 굿즈 + 디스코드 특별 뱃지" },
-      { rank: 2, label: "2등", reward: "디스코드 특별 뱃지" }
+    categories: [
+      {
+        key: "comic",
+        label: "1. 코믹 컨셉 아바타 코스프레",
+        emoji: "🤡",
+        note: "가장 웃기게 코디한 사람 1등",
+        prize: "구글 기프트 50,000원",
+        winners: 1
+      },
+      {
+        key: "sexy",
+        label: "2. 섹시 컨셉 아바타 코스프레",
+        emoji: "💋",
+        note: "그냥 벗기는 게 아닌 섹시한 코디 — 코디에 따라 남캐도 1등 가능",
+        prize: "구글 기프트 50,000원",
+        winners: 1
+      },
+      {
+        key: "anime-male",
+        label: "3. 남캐 애니 아바타 코스프레",
+        emoji: "🧝‍♂️",
+        note: "참고한 애니 사진 첨부 필수. 싱크로율 / 흔하지 않은 / 허락이 알만한 (애니 많이 안 봤음)",
+        prize: "구글 기프트 50,000원",
+        winners: 1
+      },
+      {
+        key: "anime-female",
+        label: "4. 여캐 애니 아바타 코스프레",
+        emoji: "🧝‍♀️",
+        note: "참고한 애니 사진 첨부 필수. 싱크로율 / 흔하지 않은 / 허락이 알만한 (애니 많이 안 봤음)",
+        prize: "구글 기프트 50,000원",
+        winners: 1
+      },
+      {
+        key: "epic",
+        label: "5. 나만의 가장 멋진 코디",
+        emoji: "✨",
+        note: "애니 코스프레 X, 웃긴 거 X. 진짜 잘 꾸민 코디 (남/여 무관)",
+        prizes: [
+          { rank: 1, label: "1등", reward: "구글 기프트 50,000원 + α" },
+          { rank: 2, label: "2등", reward: "구글 기프트 50,000원" }
+        ],
+        winners: 2
+      }
     ],
     rewards: [
-      "부문 — 남자 애니 / 여자 애니 / 웃긴 / 나만의 멋진 (총 4부문)",
-      "각 부문 1등: 허락 굿즈 + 디스코드 특별 뱃지",
-      "각 부문 2등: 디스코드 특별 뱃지",
-      "참가자 전원: 갤러리 등재",
-      "심사: 시청자 투표 + 허락 뽑기"
+      "총합 30만원 + α — 구글 기프트 카드",
+      "1~4부문: 각 1등 1명 — 구글 기프트 50,000원",
+      "5부문(나만의 멋진 코디): 1등 50,000원 + α / 2등 50,000원",
+      "심사: 회원 부문별 1표 투표 + 허락 방송 중 심사"
     ],
     formSchema: [
-      { key: "adventureName", label: "모험단명", required: true, prefillFrom: "dnfProfile.adventureName" },
-      { key: "characterName", label: "캐릭터명", required: true, prefillFrom: "dnfProfile.characterName" },
       {
         key: "category",
         label: "참가 부문",
         required: true,
         type: "select",
         options: [
-          { value: "anime-male", label: "남자 애니 코스프레 코디" },
-          { value: "anime-female", label: "여자 애니 코스프레 코디" },
-          { value: "funny", label: "웃긴 코디" },
-          { value: "epic", label: "나만의 정말 멋진 코디" }
+          { value: "comic", label: "1. 코믹 컨셉" },
+          { value: "sexy", label: "2. 섹시 컨셉" },
+          { value: "anime-male", label: "3. 남캐 애니 코스프레" },
+          { value: "anime-female", label: "4. 여캐 애니 코스프레" },
+          { value: "epic", label: "5. 나만의 가장 멋진 코디" }
         ]
       },
-      { key: "title", label: "코디 제목", required: true, placeholder: "한 줄로 요약" },
-      { key: "description", label: "코디 설명", required: true, type: "textarea", placeholder: "컨셉/포인트 아이템/이야기" },
+      { key: "adventureName", label: "모험단명", required: true, prefillFrom: "dnfProfile.adventureName" },
+      {
+        key: "characterName",
+        label: "참가 캐릭터명",
+        required: true,
+        prefillFrom: "dnfProfile.characterName",
+        help: "가입 시 등록한 모험단 캐릭터 목록에서 선택, 없으면 직접 입력"
+      },
+      {
+        key: "watchPlatform",
+        label: "시청 플랫폼",
+        required: true,
+        type: "select",
+        prefillFrom: "watchAccount.platform",
+        options: [
+          { value: "soop", label: "SOOP" },
+          { value: "chzzk", label: "치지직" },
+          { value: "youtube", label: "유튜브" }
+        ]
+      },
+      {
+        key: "watchNickname",
+        label: "플랫폼 닉네임",
+        required: true,
+        prefillFrom: "watchAccount.nickname",
+        placeholder: "방송 채팅에서 쓰는 닉네임"
+      },
+      {
+        key: "title",
+        label: "코디 제목",
+        required: true,
+        placeholder: "한 줄로 요약 — 게시글 제목: [참가 캐릭터명 / 코디 제목]"
+      },
+      {
+        key: "description",
+        label: "코디 설명",
+        required: true,
+        type: "textarea",
+        placeholder: "어디를 중점적으로 보면 좋을지 / 컨셉 / 포인트 아이템 / 이야기 — 디테일하게"
+      },
       {
         key: "photoLook",
-        label: "내 코디 사진",
+        label: "참가 사진 (인벤토리 - 아바타 탭)",
         required: true,
         type: "photo",
         accept: "image/*",
-        help: "사진을 올린 후 박스를 드래그해서 표시 영역을 잘라요. 원본은 그대로 저장됩니다."
+        help: "인벤토리 → 아바타 탭 스크린샷. 박스를 드래그해서 표시 영역을 잘라요. 원본은 그대로 저장됩니다."
       },
       {
         key: "photoAnimeRef",
-        label: "흉내낸 애니 원본 스크린",
+        label: "참고한 애니 원본 스크린",
         required: true,
         type: "photo",
         accept: "image/*",
-        help: "애니/만화 원본 캐릭터 스크린샷 1장. 표시 영역도 조절 가능.",
+        help: "애니 코스프레 부문 필수 — 흉내낸 애니/만화 원본 캐릭터 스크린샷 1장.",
         showWhen: { field: "category", in: ["anime-male", "anime-female"] }
       }
     ]
