@@ -1,0 +1,20 @@
+{
+  "name": "dnfm-allow",
+  "version": "0.1.0",
+  "private": true,
+  "description": "allow.dnfm.kr — 허락님 스트리머 페이지 + 시청자 참여 이벤트 (콘테스트/투표/경품).",
+  "type": "module",
+  "scripts": {
+    "dev": "next dev -p 3001",
+    "build": "next build",
+    "start": "next start -p 3001"
+  },
+  "dependencies": {
+    "next": "^15.5.7",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

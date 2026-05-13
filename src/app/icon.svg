@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="DNFM">
+  <rect width="64" height="64" rx="8" fill="#10100f"/>
+  <path d="M12 12h40v40H12z" fill="#65e6ba"/>
+  <path d="M20 20h13c9 0 15 5 15 12s-6 12-15 12H20V20zm9 7v10h4c4 0 7-2 7-5s-3-5-7-5h-4z" fill="#10100f"/>
+  <path d="M12 44h40v8H12z" fill="#f3bd4e"/>
+</svg>
