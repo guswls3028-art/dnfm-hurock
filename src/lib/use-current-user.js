@@ -10,7 +10,7 @@ import { ApiError, auth } from "@/lib/api-client";
  *
  * user 모양 (backend 약속):
  *   {
- *     id, username, displayName, email,
+ *     id, username, displayName,
  *     site, role ("user" | "admin" | "superadmin"),
  *     dnfProfile?: { adventureName, characterName, serverName, ... }
  *   }

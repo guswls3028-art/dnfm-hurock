@@ -162,10 +162,10 @@ export const auth = {
   logout: () => apiFetch("/auth/logout", { method: "POST" }),
   loginLocal: ({ username, password }) =>
     apiFetch("/auth/login/local", { method: "POST", json: { username, password } }),
-  signupLocal: ({ username, password, displayName, email, dnfProfile }) =>
+  signupLocal: ({ username, password, displayName, dnfProfile }) =>
     apiFetch("/auth/signup/local", {
       method: "POST",
-      json: { username, password, displayName, email, dnfProfile },
+      json: { username, password, displayName, dnfProfile },
     }),
   checkAvailability: ({ username, displayName }) =>
     apiFetch("/auth/check-availability", { query: { username, displayName } }),

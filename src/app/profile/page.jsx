@@ -76,7 +76,6 @@ export default function ProfilePage() {
   // 사용자 정보 + mock fallback (백엔드에서 contestHistory/captures 가 안 오면 mock 일부 유지)
   const account = {
     nickname: user.displayName || user.username,
-    email: user.email || "(미등록)",
     joinedAt: user.joinedAt || user.created_at || "-",
     provider: user.provider || (user.providerType === "google" ? "Google" : user.providerType === "kakao" ? "Kakao" : "자체"),
     badges: user.badges || profileMock.account.badges || [],
@@ -106,8 +105,6 @@ export default function ProfilePage() {
           <dl className="kvs">
             <dt>닉네임</dt>
             <dd>{account.nickname}</dd>
-            <dt>이메일</dt>
-            <dd>{account.email}</dd>
             <dt>로그인 방식</dt>
             <dd>{account.provider}</dd>
             <dt>가입일</dt>

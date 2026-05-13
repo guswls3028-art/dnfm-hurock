@@ -22,7 +22,6 @@ export default function SignupPage() {
     password: "",
     password2: "",
     displayName: "",
-    email: "",
   });
   const [availability, setAvailability] = useState({}); // { username: true|false|"checking", displayName: ... }
   const [signupError, setSignupError] = useState(null);
@@ -136,7 +135,6 @@ export default function SignupPage() {
         username: form.username,
         password: form.password,
         displayName: form.displayName,
-        email: form.email || undefined,
         dnfProfile,
       });
       // signup 응답이 자동 로그인 cookie 발급함. confirm endpoint 로 verifiedBySelectScreen 계산.
@@ -246,19 +244,6 @@ export default function SignupPage() {
               required
             />
             {availabilityHint("displayName")}
-          </div>
-          <div className="form-row">
-            <label htmlFor="signup-email">이메일 (선택)</label>
-            <input
-              id="signup-email"
-              className="form-input"
-              type="email"
-              autoComplete="email"
-              value={form.email}
-              onChange={(e) => update("email", e.target.value)}
-              placeholder="me@example.com"
-            />
-            <small>비번 분실 시 복구 용도. 없어도 가입 가능.</small>
           </div>
           <div className="form-row">
             <label htmlFor="signup-pw">비밀번호</label>
