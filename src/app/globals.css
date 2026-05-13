@@ -1080,6 +1080,84 @@ button {
   font-weight: 900;
 }
 
+/* ─────────────────────────────────────────────────────────── PhotoField (사진 + 표시 영역 조절) */
+
+.photo-field-canvas-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 6px;
+}
+
+.photo-field-canvas {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: var(--ink);
+  overflow: hidden;
+  touch-action: none;
+  user-select: none;
+}
+
+.photo-field-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+  pointer-events: none;
+}
+
+.photo-field-placeholder {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--paper);
+  font-weight: 800;
+  font-size: 0.78rem;
+}
+
+.photo-field-crop {
+  position: absolute;
+  border: 2px dashed var(--accent);
+  background:
+    linear-gradient(transparent, transparent),
+    rgba(255, 210, 63, 0.08);
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35);
+  cursor: move;
+  touch-action: none;
+}
+
+.photo-field-handle {
+  position: absolute;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--ink);
+  background: var(--accent);
+  border-radius: 50%;
+  touch-action: none;
+}
+
+.photo-field-handle.is-tl { left: -8px;  top: -8px;    cursor: nwse-resize; }
+.photo-field-handle.is-tr { right: -8px; top: -8px;    cursor: nesw-resize; }
+.photo-field-handle.is-bl { left: -8px;  bottom: -8px; cursor: nesw-resize; }
+.photo-field-handle.is-br { right: -8px; bottom: -8px; cursor: nwse-resize; }
+
+.photo-field-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.photo-field-meta small {
+  color: var(--ink-soft);
+  font-weight: 800;
+}
+
 /* ─────────────────────────────────────────────────────────── Hero CTA banner (콘테스트) */
 
 .contest-banner {

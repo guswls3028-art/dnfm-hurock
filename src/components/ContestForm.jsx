@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ApiError, contests as contestsApi } from "@/lib/api-client";
 import { uploadFile } from "@/lib/upload";
+import PhotoField from "@/components/PhotoField";
 
 /**
  * ContestForm — 콘테스트 참가 양식 (form_schema 기반).
@@ -42,14 +43,23 @@ export default function ContestForm({ contestId, schema = [], dnfProfile }) {
 
   async function handleFile(key, file) {
     if (!file) return;
-    setUploads((u) => ({ ...u, [key]: { uploading: true, url: null, error: null, filename: file.name } }));
+    setUploads((u) => ({ ...u, [key]: { uploading: true, r2Key: null, error: null, filename: file.name } }));
     try {
-      const url = await uploadFile(file, { scope: `contest-${contestId}` });
-      setUploads((u) => ({ ...u, [key]: { uploading: false, url, error: null, filename: file.name } }));
-      setField(key, url);
+      const { r2Key } = await uploadFile(file, { purpose: "contest_entry" });
+      setUploads((u) => ({ ...u, [key]: { uploading: false, r2Key, error: null, filename: file.name } }));
+      setField(key, r2Key);
     } catch (err) {
-      setUploads((u) => ({ ...u, [key]: { uploading: false, url: null, error: err, filename: file.name } }));
+      setUploads((u) => ({ ...u, [key]: { uploading: false, r2Key: null, error: err, filename: file.name } }));
     }
+  }
+
+  function isFieldVisible(field) {
+    if (!field.showWhen) return true;
+    const { field: depKey, in: allowed, equals } = field.showWhen;
+    const depVal = values[depKey];
+    if (Array.isArray(allowed)) return allowed.includes(depVal);
+    if (typeof equals !== "undefined") return depVal === equals;
+    return true;
   }
 
   async function handleSubmit(e) {
@@ -57,9 +67,16 @@ export default function ContestForm({ contestId, schema = [], dnfProfile }) {
     setError(null);
     setSubmitting(true);
     try {
-      // 필수 필드 검증
+      // 필수 필드 검증 (보이는 필드만)
       for (const field of schema) {
-        if (field.required && !values[field.key]) {
+        if (!isFieldVisible(field)) continue;
+        if (!field.required) continue;
+        const v = values[field.key];
+        const empty =
+          v == null ||
+          v === "" ||
+          (typeof v === "object" && !v?.r2Key);
+        if (empty) {
           throw new ApiError({
             status: 0,
             code: "validation",
@@ -86,9 +103,21 @@ export default function ContestForm({ contestId, schema = [], dnfProfile }) {
     <form className="form-block" onSubmit={handleSubmit} aria-label="콘테스트 참가 폼">
       <div className="form-step">참가 양식</div>
       {schema.map((field) => {
+        if (!isFieldVisible(field)) return null;
         const id = `field-${field.key}`;
         const v = values[field.key];
         const up = uploads[field.key];
+        if (field.type === "photo") {
+          return (
+            <PhotoField
+              key={field.key}
+              field={field}
+              value={v}
+              onChange={(next) => setField(field.key, next)}
+              purpose="contest_entry"
+            />
+          );
+        }
         if (field.type === "textarea") {
           return (
             <div className="form-row" key={field.key}>

@@ -249,7 +249,23 @@ export const contests = [
       },
       { key: "title", label: "코디 제목", required: true, placeholder: "한 줄로 요약" },
       { key: "description", label: "코디 설명", required: true, type: "textarea", placeholder: "컨셉/포인트 아이템/이야기" },
-      { key: "photo", label: "코디 사진 (1장)", required: true, type: "file", accept: "image/*" }
+      {
+        key: "photoLook",
+        label: "내 코디 사진",
+        required: true,
+        type: "photo",
+        accept: "image/*",
+        help: "사진을 올린 후 박스를 드래그해서 표시 영역을 잘라요. 원본은 그대로 저장됩니다."
+      },
+      {
+        key: "photoAnimeRef",
+        label: "흉내낸 애니 원본 스크린",
+        required: true,
+        type: "photo",
+        accept: "image/*",
+        help: "애니/만화 원본 캐릭터 스크린샷 1장. 표시 영역도 조절 가능.",
+        showWhen: { field: "category", in: ["anime-male", "anime-female"] }
+      }
     ]
   },
   {
