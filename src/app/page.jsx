@@ -74,32 +74,41 @@ export default function HomePage() {
       <section className="section" aria-labelledby="home-contest">
         <div className="section-head">
           <h2 id="home-contest">
-            진행중 콘테스트 <StickerBadge tone="cyan">참여 환영</StickerBadge>
+            이벤트 <StickerBadge tone="cyan">진행중 콘테스트</StickerBadge>
           </h2>
-          <Link href="/contests">전체 보기 →</Link>
+          <Link href="/events">이벤트 전체 →</Link>
         </div>
-        {submission ? (
-          <div className="contest-banner" style={{ marginBottom: 14 }}>
-            <div className="contest-banner-body">
-              <strong>
-                {submission.posterEmoji ? `${submission.posterEmoji} ` : ""}
-                {submission.title}
-              </strong>
-              <small>
-                {submission.eventAt ? `📅 ${submission.eventAt} · ` : ""}
-                마감 {submission.submissionCloses} · 참가 {submission.entries ?? 0}명
-              </small>
-            </div>
-            <Link href={`/contests/${submission.id}/new`} className="btn btn-primary">
-              지금 참가
-            </Link>
+        {usingMock.contests ? (
+          <div className="callout-box">
+            <strong>곧 시작합니다</strong>
+            아직 등록된 콘테스트가 없어요. 첫 콘테스트가 열리면 여기에 표시됩니다.
           </div>
-        ) : null}
-        <div className="grid grid-3">
-          {featuredContests.map((c, i) => (
-            <ContestCard key={c.id} contest={c} tilt={i % 2 === 0 ? "l" : "r"} />
-          ))}
-        </div>
+        ) : (
+          <>
+            {submission ? (
+              <div className="contest-banner" style={{ marginBottom: 14 }}>
+                <div className="contest-banner-body">
+                  <strong>
+                    {submission.posterEmoji ? `${submission.posterEmoji} ` : ""}
+                    {submission.title}
+                  </strong>
+                  <small>
+                    {submission.eventAt ? `📅 ${submission.eventAt} · ` : ""}
+                    마감 {submission.submissionCloses} · 참가 {submission.entries ?? 0}명
+                  </small>
+                </div>
+                <Link href={`/contests/${submission.id}/new`} className="btn btn-primary">
+                  지금 참가
+                </Link>
+              </div>
+            ) : null}
+            <div className="grid grid-3">
+              {featuredContests.map((c, i) => (
+                <ContestCard key={c.id} contest={c} tilt={i % 2 === 0 ? "l" : "r"} />
+              ))}
+            </div>
+          </>
+        )}
       </section>
     </PageShell>
   );

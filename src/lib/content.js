@@ -47,13 +47,14 @@ export const heroBanners = [
   },
 ];
 
-// 첫 랜딩 게시판 카테고리 5종 (방송채널 카드 위치). 클릭 → /board?category={key}
+// 첫 랜딩 진입 5종.
+// "이벤트" 는 콘테스트/추첨/미션 묶음 → /events 로 직행. 나머지는 게시판 카테고리.
 export const boardEntryCategories = [
-  { key: "event",  label: "이벤트",  emoji: "🎉", tone: "pink",  note: "콘테스트 / 추첨 / 미션" },
-  { key: "match",  label: "대회",   emoji: "🏆", tone: "amber", note: "팟 / 경합 일정" },
-  { key: "chat",   label: "잡담",   emoji: "💬", tone: "cyan",  note: "자유 수다" },
-  { key: "clip",   label: "클립",   emoji: "🎬", tone: "lime",  note: "방송 다시보기 / URL 연동" },
-  { key: "report", label: "신고건의", emoji: "🛠️", tone: "ink", note: "버그 / 운영 건의" },
+  { key: "event",  label: "이벤트",  emoji: "🎉", tone: "pink",  note: "콘테스트 / 추첨 / 미션", href: "/events" },
+  { key: "match",  label: "대회",   emoji: "🏆", tone: "amber", note: "팟 / 경합 일정",        href: "/board?category=match" },
+  { key: "chat",   label: "잡담",   emoji: "💬", tone: "cyan",  note: "자유 수다",            href: "/board?category=chat" },
+  { key: "clip",   label: "클립",   emoji: "🎬", tone: "lime",  note: "방송 다시보기 / URL 연동", href: "/board?category=clip" },
+  { key: "report", label: "신고건의", emoji: "🛠️", tone: "ink", note: "버그 / 운영 건의",     href: "/board?category=report" },
 ];
 
 export const loginProviders = [

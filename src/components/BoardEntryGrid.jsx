@@ -13,7 +13,7 @@ export default function BoardEntryGrid() {
       {boardEntryCategories.map((c, i) => (
         <Link
           key={c.key}
-          href={`/board?category=${encodeURIComponent(c.key)}`}
+          href={c.href || `/board?category=${encodeURIComponent(c.key)}`}
           className={`board-entry-card card card-tone-${c.tone}`}
           data-tilt={i % 2 === 0 ? "l" : "r"}
           role="listitem"
