@@ -47,7 +47,7 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/ec2
           chmod 600 ~/.ssh/ec2
-          ssh-keyscan -H "3.36.42.231" >> ~/.ssh/known_hosts
+          ssh-keyscan -T 5 -H "3.36.42.231" >> ~/.ssh/known_hosts || echo "ssh-keyscan timeout — proceeding with StrictHostKeyChecking=no"
 
       - name: Rsync standalone artifact
         env:
