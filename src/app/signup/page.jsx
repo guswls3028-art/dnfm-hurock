@@ -114,17 +114,47 @@ export default function SignupPage() {
     setStep(2);
   }
 
-  async function handleStep2Confirm(dnfProfile) {
+  async function handleStep2Confirm(dnfPayload) {
+    // DnfProfileForm 새 payload shape:
+    //   { adventurerName, mainCharacterName, characters?, characterListNames?,
+    //     characterSelectNames?, captureR2Keys? }
     setSignupError(null);
     try {
+      const dnfProfile = {
+        adventurerName: dnfPayload.adventurerName,
+        mainCharacterName: dnfPayload.mainCharacterName,
+        characters: dnfPayload.characters,
+        captureR2Keys: dnfPayload.captureR2Keys
+          ? {
+              basicInfo: dnfPayload.captureR2Keys.basicInfo,
+              characterList: dnfPayload.captureR2Keys.characterList,
+              characterSelect: dnfPayload.captureR2Keys.characterSelect,
+            }
+          : undefined,
+      };
       await auth.signupLocal({
         username: form.username,
         password: form.password,
         displayName: form.displayName,
         email: form.email || undefined,
         dnfProfile,
-        site: "allow",
       });
+      // signup 응답이 자동 로그인 cookie 발급함. confirm endpoint 로 verifiedBySelectScreen 계산.
+      try {
+        await auth.confirmDnfProfile({
+          adventurerName: dnfPayload.adventurerName,
+          mainCharacterName: dnfPayload.mainCharacterName,
+          characters: dnfPayload.characters,
+          characterListNames: dnfPayload.characterListNames,
+          characterSelectNames: dnfPayload.characterSelectNames,
+          captureR2Keys: dnfPayload.captureR2Keys,
+        });
+      } catch (confirmErr) {
+        // confirm 실패해도 회원 자체는 가입됨 — 안내 후 진행
+        if (typeof console !== "undefined" && console.warn) {
+          console.warn("dnf-profile confirm failed:", confirmErr);
+        }
+      }
       router.push("/");
       router.refresh();
     } catch (err) {

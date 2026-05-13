@@ -5,40 +5,46 @@ import { ApiError, auth } from "@/lib/api-client";
 import { uploadFile } from "@/lib/upload";
 
 /**
- * DnfProfileForm — 가입 2단계.
+ * DnfProfileForm — 가입 2단계 (allow 사이트).
  *
- * 사용자가 모험단/캐릭터/장비 캡처 3장을 업로드 →
- *   1) R2 presigned PUT 으로 업로드
- *   2) /auth/dnf-profile/ocr/:type 호출 → 추출 결과
- *   3) 누적 결과를 사용자에게 보여주고, "다음" 클릭 시 onConfirm({ adventureName, characterName, ... })
+ * 사용자가 던파 모바일 3종 캡처를 업로드:
+ *   1) basic_info        모험단/소속 캐릭 화면 → 모험단명 + 대표 캐릭터명
+ *   2) character_list    보유 캐릭터 화면     → 캐릭터 이름 배열
+ *   3) character_select  캐릭터 선택 화면     → {name, klass} 배열
  *
- * backend 미연결/네트워크 실패 시 사용자가 직접 텍스트 입력하도록 fallback UI 노출.
+ * backend OCR endpoint: POST /auth/dnf-profile/ocr/:type  (multipart, file body)
+ * verifiedBySelectScreen 은 backend 가 2 ∩ 3 overlap 으로 계산.
+ *
+ * 흐름:
+ *   파일 선택 → uploadFile(purpose="dnf_capture") → r2Key 보관
+ *              → OCR endpoint 호출 (file multipart) → manual 자동 채움
+ *   "가입 완료" → onConfirm({ adventurerName, mainCharacterName, characters, captureR2Keys,
+ *                              characterListNames, characterSelectNames })
  */
 
 const SLOTS = [
   {
-    key: "adventure",
-    label: "① 모험단 캡처",
-    hint: "모험단명/소속 캐릭터가 보이는 캡처",
+    key: "basic_info",
+    label: "① 모험단/대표캐릭 캡처",
+    hint: "모험단명·대표 캐릭터가 보이는 화면 (정보 → 모험단 → 기본정보)",
   },
   {
-    key: "character",
-    label: "② 캐릭터 정보 캡처",
-    hint: "캐릭터명/직업/서버가 보이는 캡처",
+    key: "character_list",
+    label: "② 보유 캐릭터 캡처",
+    hint: "캐릭터 카드들이 보이는 화면 (정보 → 보유캐릭터)",
   },
   {
-    key: "equipment",
-    label: "③ 장비 캡처",
-    hint: "현재 장착 장비 일람",
+    key: "character_select",
+    label: "③ 캐릭터 선택 캡처",
+    hint: "로그인 직후 캐릭터 선택 화면 (본인 인증용)",
   },
 ];
 
 export default function DnfProfileForm({ onConfirm, busyText }) {
-  const [slots, setSlots] = useState({}); // { [key]: { file, uploading, url, ocr, error } }
+  const [slots, setSlots] = useState({}); // { [key]: { file, uploading, ocrLoading, r2Key, ocr, error } }
   const [manual, setManual] = useState({
-    adventureName: "",
-    characterName: "",
-    serverName: "",
+    adventurerName: "",
+    mainCharacterName: "",
   });
   const [confirming, setConfirming] = useState(false);
   const [confirmError, setConfirmError] = useState(null);
@@ -47,38 +53,44 @@ export default function DnfProfileForm({ onConfirm, busyText }) {
     if (!file) return;
     setSlots((prev) => ({
       ...prev,
-      [slotKey]: { file, uploading: true, url: null, ocr: null, error: null },
+      [slotKey]: { file, uploading: true, ocrLoading: false, r2Key: null, ocr: null, error: null },
     }));
+
+    // 1) R2 업로드 (audit + 추후 재인식 백업)
+    let r2Key = null;
     try {
-      const url = await uploadFile(file, { scope: `signup-${slotKey}` });
+      const result = await uploadFile(file, { purpose: "dnf_capture" });
+      r2Key = result.r2Key;
       setSlots((prev) => ({
         ...prev,
-        [slotKey]: { ...prev[slotKey], uploading: false, url, ocrLoading: true, error: null },
+        [slotKey]: { ...prev[slotKey], uploading: false, ocrLoading: true, r2Key, error: null },
       }));
-      try {
-        const ocr = await auth.ocrDnfProfile({ type: slotKey, fileUrl: url });
-        setSlots((prev) => ({
-          ...prev,
-          [slotKey]: { ...prev[slotKey], ocrLoading: false, ocr, error: null },
-        }));
-        // OCR 결과로 manual 자동 채움
-        if (ocr) {
-          setManual((m) => ({
-            adventureName: ocr.adventureName || m.adventureName,
-            characterName: ocr.characterName || m.characterName,
-            serverName: ocr.serverName || m.serverName,
-          }));
-        }
-      } catch (err) {
-        setSlots((prev) => ({
-          ...prev,
-          [slotKey]: { ...prev[slotKey], ocrLoading: false, error: err },
+    } catch (err) {
+      setSlots((prev) => ({
+        ...prev,
+        [slotKey]: { ...prev[slotKey], uploading: false, error: err },
+      }));
+      return;
+    }
+
+    // 2) OCR — multipart 으로 file 전송
+    try {
+      const ocrResp = await auth.ocrDnfProfile({ type: slotKey, file });
+      const ocr = ocrResp?.result ?? ocrResp;
+      setSlots((prev) => ({
+        ...prev,
+        [slotKey]: { ...prev[slotKey], ocrLoading: false, ocr, error: null },
+      }));
+      if (ocr) {
+        setManual((m) => ({
+          adventurerName: ocr.adventurerName || m.adventurerName,
+          mainCharacterName: ocr.mainCharacterName || m.mainCharacterName,
         }));
       }
     } catch (err) {
       setSlots((prev) => ({
         ...prev,
-        [slotKey]: { ...prev[slotKey], uploading: false, error: err },
+        [slotKey]: { ...prev[slotKey], ocrLoading: false, error: err },
       }));
     }
   }
@@ -87,16 +99,24 @@ export default function DnfProfileForm({ onConfirm, busyText }) {
     setConfirming(true);
     setConfirmError(null);
     try {
+      const characterList = slots.character_list?.ocr?.characterNames || [];
+      const characterSelect = slots.character_select?.ocr?.characters || [];
       const payload = {
-        adventureName: manual.adventureName.trim(),
-        characterName: manual.characterName.trim(),
-        serverName: manual.serverName.trim(),
-        captures: SLOTS.map((s) => ({
-          key: s.key,
-          url: slots[s.key]?.url || null,
-        })),
+        adventurerName: manual.adventurerName.trim(),
+        mainCharacterName: manual.mainCharacterName.trim(),
+        // character_select 의 {name,klass} 가 표준. character_list 는 name 만 있어 klass 빈 채로
+        // 보내면 backend min(1) 깨짐 → list 는 별도 names 배열로만 전달.
+        characters: characterSelect.length > 0 ? characterSelect : undefined,
+        characterListNames: characterList.length > 0 ? characterList : undefined,
+        characterSelectNames:
+          characterSelect.length > 0 ? characterSelect.map((c) => c.name) : undefined,
+        captureR2Keys: {
+          basicInfo: slots.basic_info?.r2Key || undefined,
+          characterList: slots.character_list?.r2Key || undefined,
+          characterSelect: slots.character_select?.r2Key || undefined,
+        },
       };
-      if (!payload.adventureName || !payload.characterName) {
+      if (!payload.adventurerName || !payload.mainCharacterName) {
         throw new ApiError({
           status: 0,
           code: "validation",
@@ -115,8 +135,8 @@ export default function DnfProfileForm({ onConfirm, busyText }) {
     <div className="form-block">
       <div className="form-step">Step 2 — 던파 캡처 인증</div>
       <p style={{ margin: 0, color: "var(--ink-soft)", fontSize: "0.9rem", lineHeight: 1.6 }}>
-        모험단/캐릭터/장비 정보 캡처 3종을 올리면 OCR 로 자동 추출해 프로필을 채웁니다. 추출이
-        부정확하면 아래 텍스트 칸에서 직접 수정하세요.
+        3종 캡처를 올리면 OCR 로 자동 추출해 프로필을 채웁니다. 추출이 부정확하면 아래 텍스트
+        칸에서 직접 수정하세요. 캡처가 어려우면 텍스트만 입력해도 가입은 가능합니다.
       </p>
 
       {SLOTS.map((slot) => {
@@ -134,7 +154,7 @@ export default function DnfProfileForm({ onConfirm, busyText }) {
             <small>{slot.hint}</small>
             {state?.uploading && <small>업로드 중…</small>}
             {state?.ocrLoading && <small>OCR 인식 중…</small>}
-            {state?.url && !state?.error && (
+            {state?.r2Key && !state?.error && (
               <small style={{ color: "var(--primary-ink)" }}>
                 ✓ 업로드됨 {state.ocr ? "· OCR 완료" : ""}
               </small>
@@ -156,8 +176,8 @@ export default function DnfProfileForm({ onConfirm, busyText }) {
           id="dnf-adv"
           className="form-input"
           type="text"
-          value={manual.adventureName}
-          onChange={(e) => setManual((m) => ({ ...m, adventureName: e.target.value }))}
+          value={manual.adventurerName}
+          onChange={(e) => setManual((m) => ({ ...m, adventurerName: e.target.value }))}
           placeholder="예) 허락팬1단"
         />
       </div>
@@ -167,20 +187,9 @@ export default function DnfProfileForm({ onConfirm, busyText }) {
           id="dnf-char"
           className="form-input"
           type="text"
-          value={manual.characterName}
-          onChange={(e) => setManual((m) => ({ ...m, characterName: e.target.value }))}
+          value={manual.mainCharacterName}
+          onChange={(e) => setManual((m) => ({ ...m, mainCharacterName: e.target.value }))}
           placeholder="예) 라피헌터"
-        />
-      </div>
-      <div className="form-row">
-        <label htmlFor="dnf-server">서버</label>
-        <input
-          id="dnf-server"
-          className="form-input"
-          type="text"
-          value={manual.serverName}
-          onChange={(e) => setManual((m) => ({ ...m, serverName: e.target.value }))}
-          placeholder="예) 안톤"
         />
       </div>
 

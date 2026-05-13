@@ -260,15 +260,20 @@ export const contests = {
     apiFetch(sitePath(`/contests/${contestId}/results`), { method: "POST", json: data }),
 };
 
-/* ---------- Uploads (R2 presigned PUT) ---------- */
+/* ---------- Uploads (R2 presigned PUT) ----------
+   backend dto: { purpose: "avatar"|"dnf_capture"|"contest_entry"|"post_attachment",
+                  contentType, sizeBytes }
+   응답: { uploadId, putUrl, r2Key }
+*/
 
 export const uploads = {
-  presignedPut: ({ filename, contentType, scope = SITE }) =>
+  presignedPut: ({ purpose, contentType, sizeBytes }) =>
     apiFetch("/uploads/presigned-put", {
       method: "POST",
-      json: { filename, contentType, scope },
+      json: { purpose, contentType, sizeBytes },
     }),
-  confirm: (id) => apiFetch(`/uploads/${id}/confirm`, { method: "POST" }),
+  confirm: (id, { sizeBytes } = {}) =>
+    apiFetch(`/uploads/${id}/confirm`, { method: "POST", json: { sizeBytes } }),
 };
 
 /* ---------- OAuth helpers (browser redirect URL builder) ---------- */

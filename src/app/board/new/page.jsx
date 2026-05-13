@@ -27,7 +27,7 @@ export default function BoardNewPage() {
     title: "",
     body: "",
   });
-  const [image, setImage] = useState({ uploading: false, url: null, error: null });
+  const [image, setImage] = useState({ uploading: false, r2Key: null, error: null });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -62,12 +62,12 @@ export default function BoardNewPage() {
 
   async function handleFile(file) {
     if (!file) return;
-    setImage({ uploading: true, url: null, error: null });
+    setImage({ uploading: true, r2Key: null, error: null });
     try {
-      const url = await uploadFile(file, { scope: "board-image" });
-      setImage({ uploading: false, url, error: null });
+      const result = await uploadFile(file, { purpose: "post_attachment" });
+      setImage({ uploading: false, r2Key: result.r2Key, error: null });
     } catch (err) {
-      setImage({ uploading: false, url: null, error: err });
+      setImage({ uploading: false, r2Key: null, error: err });
     }
   }
 
@@ -84,10 +84,7 @@ export default function BoardNewPage() {
         categorySlug: form.categorySlug,
         title: form.title.trim(),
         body: form.body.trim(),
-        // backend 가 attachmentR2Keys array 만 받음. uploadFile 가 url 반환 → key 추출 필요.
-        // 현재는 단일 image url 만 보내는 wrapper 없음 → 첨부 누락 보내지 않음 (no-op).
-        // 다음 cycle: uploads 도메인이 r2Key 도 반환하게 + 여기서 attachmentR2Keys 사용.
-        attachmentR2Keys: undefined,
+        attachmentR2Keys: image.r2Key ? [image.r2Key] : [],
       });
       const newId = res?.id || res?.post?.id;
       router.push(newId ? `/board/${newId}` : "/board");
@@ -178,7 +175,7 @@ export default function BoardNewPage() {
             onChange={(e) => handleFile(e.target.files?.[0])}
           />
           {image.uploading && <small>업로드 중…</small>}
-          {image.url && <small style={{ color: "var(--primary-ink)" }}>✓ 업로드 완료</small>}
+          {image.r2Key && <small style={{ color: "var(--primary-ink)" }}>✓ 업로드 완료</small>}
           {image.error && (
             <small style={{ color: "var(--danger)" }}>
               업로드 실패: {image.error.message || "재시도 해주세요"}

@@ -148,7 +148,7 @@ export default function ContestForm({ contestId, schema = [], dnfProfile }) {
                 className="form-input"
               />
               {up?.uploading && <small>업로드 중… ({up.filename})</small>}
-              {up?.url && (
+              {up?.r2Key && (
                 <small style={{ color: "var(--primary-ink)" }}>
                   ✓ 업로드 완료
                 </small>
