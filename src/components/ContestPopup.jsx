@@ -28,9 +28,7 @@ export default function ContestPopup() {
     } catch { /* localStorage 차단 환경 — 그냥 노출 */ }
     if (suppressed) return;
     setContest(target);
-    // 첫 진입 미세 지연 — hero 페이드 후 자연스럽게.
-    const t = setTimeout(() => setOpen(true), 400);
-    return () => clearTimeout(t);
+    setOpen(true);
   }, []);
 
   function close() {
