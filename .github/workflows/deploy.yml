@@ -47,11 +47,11 @@ jobs:
           mkdir -p ~/.ssh
           echo "$SSH_KEY" > ~/.ssh/ec2
           chmod 600 ~/.ssh/ec2
-          ssh-keyscan -H "${{ secrets.EC2_HOST }}" >> ~/.ssh/known_hosts
+          ssh-keyscan -H "3.36.42.231" >> ~/.ssh/known_hosts
 
       - name: Rsync standalone artifact
         env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_HOST: 3.36.42.231
           REMOTE_DIR: /var/www/dnfm-hurock
         run: |
           rsync -az --delete \
@@ -61,7 +61,7 @@ jobs:
 
       - name: PM2 restart
         env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_HOST: 3.36.42.231
         run: |
           ssh -i ~/.ssh/ec2 -o StrictHostKeyChecking=no \
             ec2-user@${EC2_HOST} \
@@ -69,7 +69,7 @@ jobs:
 
       - name: Smoke test
         env:
-          EC2_HOST: ${{ secrets.EC2_HOST }}
+          EC2_HOST: 3.36.42.231
         run: |
           ssh -i ~/.ssh/ec2 -o StrictHostKeyChecking=no \
             ec2-user@${EC2_HOST} \
