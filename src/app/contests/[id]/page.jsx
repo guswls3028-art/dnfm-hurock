@@ -16,6 +16,13 @@ const STATUS_TONE = {
   announced: "amber",
 };
 
+const CATEGORY_TONE_CLASS = [
+  "card-tone-pink",
+  "card-tone-cyan",
+  "card-tone-lime",
+  "card-tone-amber",
+];
+
 export default function ContestDetailPage({ params }) {
   const { id } = use(params);
   const { user } = useCurrentUser();
@@ -186,8 +193,11 @@ export default function ContestDetailPage({ params }) {
             </span>
           </div>
           <div className="grid grid-2">
-            {contest.categories.map((cat) => (
-              <article key={cat.key} className="card">
+            {contest.categories.map((cat, idx) => (
+              <article
+                key={cat.key}
+                className={`card ${CATEGORY_TONE_CLASS[idx % CATEGORY_TONE_CLASS.length]}`}
+              >
                 <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
                   <span style={{ fontSize: "1.6rem", lineHeight: 1 }} aria-hidden="true">
                     {cat.emoji}
