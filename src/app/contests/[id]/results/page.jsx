@@ -1,17 +1,66 @@
+"use client";
+
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { use, useEffect, useState } from "react";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
-import { contestResults, contests } from "@/lib/content";
+import { contestResults as mockResults, contests as mockContests } from "@/lib/content";
+import { contests as contestsApi } from "@/lib/api-client";
 
-export const metadata = { title: "콘테스트 결과" };
+export default function ContestResultsPage({ params }) {
+  const { id } = use(params);
+  const [contest, setContest] = useState(() => mockContests.find((c) => c.id === id) || null);
+  const [result, setResult] = useState(() => mockResults[id] || null);
+  const [loading, setLoading] = useState(true);
 
-export default async function ContestResultsPage({ params }) {
-  const { id } = await params;
-  const contest = contests.find((c) => c.id === id);
-  if (!contest) notFound();
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      setLoading(true);
+      try {
+        const detail = await contestsApi.detail(id);
+        if (!alive) return;
+        if (detail) setContest(detail.contest || detail);
+      } catch {
+        /* mock 유지 */
+      }
+      try {
+        const data = await contestsApi.results(id);
+        if (!alive) return;
+        if (data && (data.podium || data.results)) {
+          setResult(data);
+        }
+      } catch {
+        /* mock 유지 */
+      }
+      if (alive) setLoading(false);
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [id]);
 
-  const result = contestResults[contest.id];
+  if (!contest && !loading) {
+    return (
+      <PageShell activePath="/contests">
+        <div className="page-head">
+          <h1>콘테스트를 찾을 수 없습니다</h1>
+        </div>
+        <Link href="/contests" className="btn btn-primary">목록</Link>
+      </PageShell>
+    );
+  }
+  if (!contest) {
+    return (
+      <PageShell activePath="/contests">
+        <div className="page-head">
+          <h1>로딩 중…</h1>
+        </div>
+      </PageShell>
+    );
+  }
+
+  const podium = result?.podium || result?.results || [];
 
   return (
     <PageShell activePath="/contests">
@@ -19,18 +68,24 @@ export default async function ContestResultsPage({ params }) {
         <div>
           <Link
             href={`/contests/${contest.id}`}
-            style={{ display: "inline-block", marginBottom: 8, borderBottom: "2px solid var(--ink)", fontSize: "0.84rem", fontWeight: 800 }}
+            style={{
+              display: "inline-block",
+              marginBottom: 8,
+              borderBottom: "2px solid var(--ink)",
+              fontSize: "0.84rem",
+              fontWeight: 800,
+            }}
           >
             ← {contest.title}
           </Link>
           <h1>
             🏆 결과 발표 <StickerBadge tone="amber" rotate="r">발표완료</StickerBadge>
           </h1>
-          <p>{contest.resultsAt}</p>
+          <p>{contest.resultsAt || ""}</p>
         </div>
       </div>
 
-      {!result ? (
+      {!podium.length ? (
         <div className="callout-box is-pending">
           <strong>아직 결과 발표 전</strong>
           허락이 후보 선정 / 투표 마감 후 결과를 입력하면 여기에 표시됩니다.
@@ -39,13 +94,13 @@ export default async function ContestResultsPage({ params }) {
         <>
           <div className="podium">
             {[2, 1, 3].map((rank) => {
-              const item = result.podium.find((p) => p.rank === rank);
+              const item = podium.find((p) => p.rank === rank);
               if (!item) return <div key={rank} />;
               return (
                 <div key={rank} className="podium-step" data-rank={rank}>
                   <div className="podium-rank">{rank}</div>
-                  <strong>{item.name}</strong>
-                  <span>by {item.by}</span>
+                  <strong>{item.name || item.title}</strong>
+                  <span>by {item.by || item.displayName || item.author}</span>
                 </div>
               );
             })}
@@ -56,14 +111,24 @@ export default async function ContestResultsPage({ params }) {
               <h2 id="result-comments">코멘트</h2>
             </div>
             <div className="grid">
-              {result.podium.map((p) => (
-                <article key={p.rank} className={`card card-tone-${p.rank === 1 ? "amber" : p.rank === 2 ? "cyan" : "pink"}`}>
+              {podium.map((p) => (
+                <article
+                  key={p.rank}
+                  className={`card card-tone-${p.rank === 1 ? "amber" : p.rank === 2 ? "cyan" : "pink"}`}
+                >
                   <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-                    <StickerBadge tone={p.rank === 1 ? "amber" : p.rank === 2 ? "cyan" : "pink"} rotate="l">
+                    <StickerBadge
+                      tone={p.rank === 1 ? "amber" : p.rank === 2 ? "cyan" : "pink"}
+                      rotate="l"
+                    >
                       {p.rank}등
                     </StickerBadge>
-                    <strong style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem" }}>{p.name}</strong>
-                    <span style={{ color: "var(--muted)", fontSize: "0.84rem" }}>· by {p.by}</span>
+                    <strong style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem" }}>
+                      {p.name || p.title}
+                    </strong>
+                    <span style={{ color: "var(--muted)", fontSize: "0.84rem" }}>
+                      · by {p.by || p.displayName || p.author}
+                    </span>
                   </div>
                   <p>{p.comment}</p>
                 </article>
@@ -71,9 +136,11 @@ export default async function ContestResultsPage({ params }) {
             </div>
           </section>
 
-          <div className="callout-box" style={{ marginTop: 14 }}>
-            {result.note}
-          </div>
+          {result?.note && (
+            <div className="callout-box" style={{ marginTop: 14 }}>
+              {result.note}
+            </div>
+          )}
         </>
       )}
     </PageShell>

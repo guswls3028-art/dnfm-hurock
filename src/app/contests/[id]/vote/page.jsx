@@ -1,21 +1,88 @@
 "use client";
 
 import Link from "next/link";
-import { use, useState } from "react";
-import { notFound } from "next/navigation";
+import { use, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import VoteCard from "@/components/VoteCard";
 import StickerBadge from "@/components/StickerBadge";
-import { contestEntries, contests } from "@/lib/content";
+import { contestEntries as mockEntries, contests as mockContests } from "@/lib/content";
+import { ApiError, contests as contestsApi } from "@/lib/api-client";
+import { useCurrentUser } from "@/lib/use-current-user";
 
 export default function ContestVotePage({ params }) {
   const { id } = use(params);
-  const contest = contests.find((c) => c.id === id);
-  if (!contest) notFound();
+  const router = useRouter();
+  const { user, loading: userLoading } = useCurrentUser();
 
-  const entries = contestEntries[contest.id] || [];
+  const [contest, setContest] = useState(() => mockContests.find((c) => c.id === id) || null);
+  const [entries, setEntries] = useState(() => (mockEntries[id] || []));
   const [selected, setSelected] = useState(null);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
+  const [voted, setVoted] = useState(false);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const detail = await contestsApi.detail(id);
+        if (!alive) return;
+        if (detail) setContest(detail.contest || detail);
+      } catch {
+        /* mock 유지 */
+      }
+      try {
+        const data = await contestsApi.entries.list(id);
+        if (!alive) return;
+        const list = Array.isArray(data) ? data : data?.entries || [];
+        if (list.length) {
+          // 투표 단계에서는 selectedForVote=true 만 노출
+          const filtered = list.filter((e) => e.selectedForVote || e.state === "candidate" || e.selected_for_vote);
+          setEntries(filtered.length ? filtered : list);
+        }
+      } catch {
+        /* mock 유지 */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, [id]);
+
+  if (!contest) {
+    return (
+      <PageShell activePath="/contests">
+        <div className="page-head">
+          <h1>로딩 중…</h1>
+        </div>
+      </PageShell>
+    );
+  }
+
   const disabled = contest.status !== "voting";
+
+  async function handleSubmit() {
+    if (!selected) {
+      setError({ message: "투표할 entry 를 선택해 주세요." });
+      return;
+    }
+    if (!user) {
+      router.push(`/login?returnTo=${encodeURIComponent(`/contests/${contest.id}/vote`)}`);
+      return;
+    }
+    setSubmitting(true);
+    setError(null);
+    try {
+      await contestsApi.vote(contest.id, { entryId: selected });
+      setVoted(true);
+    } catch (err) {
+      if (err instanceof ApiError) setError(err);
+      else setError({ message: err?.message || "투표 실패" });
+    } finally {
+      setSubmitting(false);
+    }
+  }
 
   return (
     <PageShell activePath="/contests">
@@ -23,7 +90,13 @@ export default function ContestVotePage({ params }) {
         <div>
           <Link
             href={`/contests/${contest.id}`}
-            style={{ display: "inline-block", marginBottom: 8, borderBottom: "2px solid var(--ink)", fontSize: "0.84rem", fontWeight: 800 }}
+            style={{
+              display: "inline-block",
+              marginBottom: 8,
+              borderBottom: "2px solid var(--ink)",
+              fontSize: "0.84rem",
+              fontWeight: 800,
+            }}
           >
             ← {contest.title}
           </Link>
@@ -38,7 +111,31 @@ export default function ContestVotePage({ params }) {
       {disabled && (
         <div className="callout-box is-pending">
           <strong>아직/이미 투표 단계가 아닙니다</strong>
-          {contest.title} 의 현재 상태는 <code>{contest.statusLabel}</code> 입니다.
+          {contest.title} 의 현재 상태는 <code>{contest.statusLabel || contest.status}</code> 입니다.
+        </div>
+      )}
+
+      {!userLoading && !user && !disabled && (
+        <div className="callout-box is-pending">
+          <strong>로그인 필요</strong>
+          1인 1표 검증을 위해 로그인이 필요합니다.{" "}
+          <Link
+            href={`/login?returnTo=${encodeURIComponent(`/contests/${contest.id}/vote`)}`}
+            style={{
+              borderBottom: "2px solid var(--primary)",
+              fontWeight: 800,
+              color: "var(--primary-ink)",
+            }}
+          >
+            로그인 / 가입하기
+          </Link>
+        </div>
+      )}
+
+      {voted && (
+        <div className="callout-box">
+          <strong>투표 완료</strong>
+          소중한 한 표 감사합니다. 결과는 마감 후 발표됩니다.
         </div>
       )}
 
@@ -54,16 +151,29 @@ export default function ContestVotePage({ params }) {
                 groupName={`vote-${contest.id}`}
                 selected={selected === entry.id}
                 onSelect={setSelected}
-                disabled={disabled}
+                disabled={disabled || voted}
               />
             ))}
           </div>
+          {error && (
+            <div className="callout-box is-pending" style={{ marginTop: 12 }}>
+              <strong>오류</strong>
+              {error.message || "다시 시도해 주세요."}
+            </div>
+          )}
           <div style={{ marginTop: 16, display: "flex", gap: 10, alignItems: "center" }}>
-            <button type="button" className="btn btn-primary is-disabled" disabled title="백엔드 연결 전 — 준비중">
-              투표 제출 <span className="btn-note">(준비중)</span>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleSubmit}
+              disabled={disabled || voted || submitting}
+            >
+              {submitting ? "투표 처리중…" : voted ? "투표 완료" : "투표 제출"}
             </button>
             <span style={{ color: "var(--muted)", fontSize: "0.84rem" }}>
-              {selected ? `선택: ${entries.find((e) => e.id === selected)?.title || ""}` : "아직 선택 안 함"}
+              {selected
+                ? `선택: ${entries.find((e) => e.id === selected)?.title || ""}`
+                : "아직 선택 안 함"}
             </span>
           </div>
         </>

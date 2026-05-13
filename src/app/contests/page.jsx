@@ -1,20 +1,48 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import PageShell from "@/components/PageShell";
 import ContestCard from "@/components/ContestCard";
 import StickerBadge from "@/components/StickerBadge";
-import { contests } from "@/lib/content";
-
-export const metadata = { title: "콘테스트" };
+import { contests as mockContests } from "@/lib/content";
+import { contests as contestsApi } from "@/lib/api-client";
 
 const TAB_DEFS = [
   { id: "submission", label: "참가중", matches: (s) => s === "submission" },
   { id: "voting", label: "투표중", matches: (s) => s === "voting" },
-  { id: "announced", label: "결과 발표", matches: (s) => s === "announced" || s === "ended" }
+  { id: "announced", label: "결과 발표", matches: (s) => s === "announced" || s === "ended" },
 ];
 
 export default function ContestsPage() {
+  const [contests, setContests] = useState(mockContests);
+  const [usingMock, setUsingMock] = useState(true);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const data = await contestsApi.list();
+        if (!alive) return;
+        const list = Array.isArray(data) ? data : data?.contests || [];
+        if (list.length) {
+          setContests(list);
+          setUsingMock(false);
+        }
+      } catch {
+        /* mock 유지 */
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+
   const grouped = TAB_DEFS.map((t) => ({
     ...t,
-    items: contests.filter((c) => t.matches(c.status))
+    items: contests.filter((c) => t.matches(c.status)),
   }));
 
   return (
@@ -30,11 +58,21 @@ export default function ContestsPage() {
         </div>
       </div>
 
+      {usingMock && !loading && (
+        <div className="callout-box" style={{ marginBottom: 12 }}>
+          <strong>안내</strong>
+          백엔드에 등록된 콘테스트가 없어 샘플 콘테스트를 표시 중입니다.
+        </div>
+      )}
+
       {grouped.map((tab) => (
         <section key={tab.id} className="section" aria-labelledby={`tab-${tab.id}`}>
           <div className="section-head">
             <h2 id={`tab-${tab.id}`}>
-              {tab.label} <span style={{ color: "var(--muted)", fontSize: "0.9rem", fontWeight: 800 }}>({tab.items.length})</span>
+              {tab.label}{" "}
+              <span style={{ color: "var(--muted)", fontSize: "0.9rem", fontWeight: 800 }}>
+                ({tab.items.length})
+              </span>
             </h2>
           </div>
           {tab.items.length === 0 ? (

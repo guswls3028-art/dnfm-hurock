@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { hero } from "@/lib/content";
+import { hero, host } from "@/lib/content";
 import StickerBadge from "@/components/StickerBadge";
 
 /**
@@ -84,10 +84,11 @@ export default function HeroBanner() {
       <div className="allow-hero-portrait" aria-hidden="false">
         <div className="allow-hero-portrait-inner">
           <div className="allow-hero-portrait-avatar" />
-          <strong>{hero.portraitName}</strong>
-          <small>{hero.portraitNote}</small>
+          <strong>{host.name}</strong>
+          <small>{host.channelName} · {host.channelHandle}</small>
+          <small style={{ opacity: 0.78 }}>{host.tagline}</small>
           <StickerBadge tone="pink" rotate="r">
-            방송 준비중
+            {hero.portraitNote || "방송 준비중"}
           </StickerBadge>
         </div>
       </div>

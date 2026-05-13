@@ -1,11 +1,41 @@
+"use client";
+
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Suspense, useState } from "react";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
-import { loginProviders } from "@/lib/content";
+import { ApiError, auth, oauth } from "@/lib/api-client";
 
-export const metadata = { title: "로그인" };
+function LoginInner() {
+  const router = useRouter();
+  const params = useSearchParams();
+  const returnTo = params.get("returnTo") || "/";
 
-export default function LoginPage() {
+  const [form, setForm] = useState({ username: "", password: "" });
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState(null);
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError(null);
+    if (!form.username || !form.password) {
+      setError({ message: "아이디 / 비번을 입력해 주세요." });
+      return;
+    }
+    setBusy(true);
+    try {
+      await auth.loginLocal({ username: form.username, password: form.password });
+      router.push(returnTo);
+      router.refresh();
+    } catch (err) {
+      if (err instanceof ApiError) setError(err);
+      else setError({ message: err?.message || "로그인 실패" });
+    } finally {
+      setBusy(false);
+    }
+  }
+
   return (
     <PageShell activePath="/login">
       <div className="page-head">
@@ -14,33 +44,65 @@ export default function LoginPage() {
           <p>허락방에서 콘테스트 참가하고 글 쓰려면 로그인이 필요해요.</p>
         </div>
         <StickerBadge tone="cyan" rotate="r">
-          소셜 로그인 예정
+          소셜 로그인 OK
         </StickerBadge>
       </div>
 
       <div className="grid grid-2">
         <form
           className="form-block"
-          action="#"
-          method="post"
+          onSubmit={handleSubmit}
           aria-label="자체 로그인 폼"
         >
           <div className="form-step">자체 계정</div>
           <div className="form-row">
-            <label htmlFor="login-email">이메일 또는 닉네임</label>
-            <input id="login-email" className="form-input" type="text" placeholder="허락방에서 쓰는 이름" />
+            <label htmlFor="login-username">아이디</label>
+            <input
+              id="login-username"
+              className="form-input"
+              type="text"
+              autoComplete="username"
+              value={form.username}
+              onChange={(e) => setForm((f) => ({ ...f, username: e.target.value }))}
+              placeholder="가입할 때 정한 아이디"
+              required
+            />
           </div>
           <div className="form-row">
             <label htmlFor="login-pw">비밀번호</label>
-            <input id="login-pw" className="form-input" type="password" placeholder="4자 이상" />
+            <input
+              id="login-pw"
+              className="form-input"
+              type="password"
+              autoComplete="current-password"
+              value={form.password}
+              onChange={(e) => setForm((f) => ({ ...f, password: e.target.value }))}
+              placeholder="4자 이상"
+              required
+            />
             <small>최소 4자. 짧아도 괜찮아요 — brute force 방어는 서버에서.</small>
           </div>
-          <button type="submit" className="btn btn-primary is-disabled" disabled title="백엔드 연결 전 — 준비중">
-            로그인 <span className="btn-note">(준비중)</span>
+
+          {error && (
+            <div className="callout-box is-pending">
+              <strong>로그인 실패</strong>
+              {error.message || "다시 시도해 주세요."}
+            </div>
+          )}
+
+          <button type="submit" className="btn btn-primary" disabled={busy}>
+            {busy ? "로그인 중…" : "로그인"}
           </button>
           <div style={{ fontSize: "0.84rem", color: "var(--muted)" }}>
             계정이 없으신가요?{" "}
-            <Link href="/signup" style={{ borderBottom: "2px solid var(--primary)", color: "var(--primary-ink)", fontWeight: 800 }}>
+            <Link
+              href="/signup"
+              style={{
+                borderBottom: "2px solid var(--primary)",
+                color: "var(--primary-ink)",
+                fontWeight: 800,
+              }}
+            >
               가입하기
             </Link>
           </div>
@@ -48,24 +110,39 @@ export default function LoginPage() {
 
         <div className="form-block">
           <div className="form-step">소셜 로그인</div>
-          {loginProviders.map((p) => (
-            <button
-              key={p.id}
-              type="button"
-              className="btn is-disabled"
-              disabled
-              title={p.note}
-              style={{ justifyContent: "flex-start" }}
-            >
-              {p.label} <span className="btn-note">({p.note})</span>
-            </button>
-          ))}
-          <div className="callout-box is-pending">
-            <strong>안내</strong>
-            구글/카카오 OAuth 는 backend(api.allow.dnfm.kr) 연결 후 활성화됩니다.
+          <p style={{ margin: 0, color: "var(--ink-soft)", fontSize: "0.88rem", lineHeight: 1.6 }}>
+            구글 / 카카오 계정으로 한 번에 입장. 처음 로그인하면 자동으로 가입됩니다.
+          </p>
+          <a
+            href={oauth.googleStart(returnTo)}
+            className="btn btn-google"
+            style={{ justifyContent: "flex-start" }}
+          >
+            <span aria-hidden="true" style={{ fontWeight: 900 }}>G</span>
+            Google 로 계속하기
+          </a>
+          <a
+            href={oauth.kakaoStart(returnTo)}
+            className="btn btn-kakao"
+            style={{ justifyContent: "flex-start" }}
+          >
+            <span aria-hidden="true" style={{ fontWeight: 900 }}>K</span>
+            카카오로 계속하기
+          </a>
+          <div className="callout-box">
+            <strong>처음이신가요?</strong>
+            소셜 로그인은 1단계 가입 후 던파 캡처 인증(2단계)로 안내됩니다.
           </div>
         </div>
       </div>
     </PageShell>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<PageShell activePath="/login"><div className="page-head"><h1>로그인</h1></div></PageShell>}>
+      <LoginInner />
+    </Suspense>
   );
 }
