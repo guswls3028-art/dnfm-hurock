@@ -172,6 +172,19 @@ button {
   font-size: 1.15rem;
   font-weight: 900;
   color: var(--ink);
+  overflow: hidden;
+}
+
+.allow-brand-mark--image {
+  padding: 0;
+  background: var(--paper-2);
+}
+
+.allow-brand-mark--image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .allow-brand-wordmark {
@@ -540,12 +553,26 @@ button {
 }
 
 .allow-hero-portrait-avatar {
-  width: 96px;
-  height: 96px;
+  display: grid;
+  place-items: center;
+  width: 120px;
+  height: 120px;
   border: 3px solid var(--ink);
   border-radius: 50%;
   background: linear-gradient(135deg, var(--primary), var(--accent));
   box-shadow: var(--shadow-1);
+  overflow: hidden;
+}
+
+.allow-hero-portrait-avatar.has-image {
+  background: var(--paper);
+}
+
+.allow-hero-portrait-avatar.has-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
 .allow-hero-portrait strong {
@@ -1980,4 +2007,263 @@ button {
   background: var(--accent);
   transform: translate(-1px, -1px);
   box-shadow: 3px 3px 0 var(--ink);
+}
+
+/* ─────────────────────────────────────────────────────────── 버튼 안 플랫폼 아이콘 */
+
+.btn-platform-icon {
+  display: inline-grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  margin-right: 2px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.btn-platform-icon img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* ─────────────────────────────────────────────────────────── Live card 썸 — 플랫폼 아이콘 */
+
+.live-card-thumb.has-platform {
+  background: var(--paper-2);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+
+.live-card-thumb.has-platform::after {
+  content: none;
+}
+
+.live-card-thumb.has-platform img {
+  width: 68%;
+  height: 68%;
+  object-fit: contain;
+  display: block;
+}
+
+/* ─────────────────────────────────────────────────────────── Hero Slider (최상단 회전 배너) */
+
+.hero-slider {
+  position: relative;
+  margin-top: 6px;
+  border: 3px solid var(--ink);
+  border-radius: var(--radius-lg);
+  background: var(--paper-2);
+  box-shadow: var(--shadow-1);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.hero-slider__track {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 6 / 1;
+  min-height: 120px;
+}
+
+.hero-slider__slide {
+  position: absolute;
+  inset: 0;
+  display: block;
+  color: var(--ink);
+  text-decoration: none;
+  opacity: 0;
+  transition: opacity 320ms ease;
+  pointer-events: none;
+}
+
+.hero-slider__slide.is-active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.hero-slider__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.hero-slider__caption {
+  position: absolute;
+  left: 14px;
+  bottom: 12px;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 12px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: rgba(250, 246, 234, 0.86);
+  backdrop-filter: blur(4px);
+  box-shadow: 3px 3px 0 var(--ink);
+  transform: rotate(-1.5deg);
+  max-width: calc(100% - 120px);
+}
+
+.hero-slider__caption strong {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  word-break: keep-all;
+}
+
+.hero-slider__caption small {
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+  word-break: keep-all;
+}
+
+.hero-slider__nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  color: var(--ink);
+  font-size: 1.6rem;
+  font-weight: 900;
+  line-height: 1;
+  cursor: pointer;
+  box-shadow: 2px 2px 0 var(--ink);
+  z-index: 2;
+}
+
+.hero-slider__nav:hover {
+  background: var(--accent);
+}
+
+.hero-slider__nav--prev {
+  left: 10px;
+}
+
+.hero-slider__nav--next {
+  right: 10px;
+}
+
+.hero-slider__dots {
+  position: absolute;
+  bottom: 10px;
+  right: 14px;
+  display: inline-flex;
+  gap: 6px;
+  padding: 4px 8px;
+  border: 2px solid var(--ink);
+  border-radius: 99px;
+  background: rgba(250, 246, 234, 0.86);
+  z-index: 2;
+}
+
+.hero-slider__dot {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 2px solid var(--ink);
+  border-radius: 50%;
+  background: var(--paper);
+  cursor: pointer;
+}
+
+.hero-slider__dot.is-active {
+  background: var(--primary);
+}
+
+@media (max-width: 720px) {
+  .hero-slider__track {
+    aspect-ratio: 4 / 1;
+    min-height: 110px;
+  }
+  .hero-slider__caption {
+    left: 10px;
+    bottom: 10px;
+    padding: 6px 10px;
+    max-width: calc(100% - 90px);
+  }
+  .hero-slider__caption strong {
+    font-size: 0.92rem;
+  }
+  .hero-slider__caption small {
+    font-size: 0.72rem;
+  }
+  .hero-slider__nav {
+    width: 32px;
+    height: 32px;
+    font-size: 1.3rem;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────── 게시판 카테고리 진입 그리드 */
+
+.grid-5 {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.board-entry-grid {
+  margin-top: 4px;
+}
+
+.board-entry-card {
+  align-items: flex-start;
+  gap: 6px;
+  padding: 16px 14px;
+  text-decoration: none;
+  color: var(--ink);
+}
+
+.board-entry-card__emoji {
+  font-size: 1.8rem;
+  line-height: 1;
+}
+
+.board-entry-card__label {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  color: var(--ink);
+}
+
+.board-entry-card__note {
+  color: var(--ink-soft);
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.45;
+  word-break: keep-all;
+}
+
+@media (max-width: 980px) {
+  .grid-5 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .grid-5 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .board-entry-card__emoji {
+    font-size: 1.5rem;
+  }
+  .board-entry-card__label {
+    font-size: 0.98rem;
+  }
 }

@@ -3,19 +3,17 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import PageShell from "@/components/PageShell";
+import HeroSlider from "@/components/HeroSlider";
 import HeroBanner from "@/components/HeroBanner";
-import LiveCard from "@/components/LiveCard";
+import BoardEntryGrid from "@/components/BoardEntryGrid";
 import ContestCard from "@/components/ContestCard";
 import StickerBadge from "@/components/StickerBadge";
 import SiblingSiteCard from "@/components/SiblingSiteCard";
-import OpenChatBanner from "@/components/OpenChatBanner";
 import { ApiError, posts as postsApi, contests as contestsApi } from "@/lib/api-client";
 import {
   contests as mockContests,
-  liveCards,
   noticeBoard,
   boardPosts as mockBoardPosts,
-  openChats,
 } from "@/lib/content";
 
 const TARGET_FEATURED = "submission";
@@ -70,20 +68,17 @@ export default function HomePage() {
 
   return (
     <PageShell activePath="/">
+      <HeroSlider />
       <HeroBanner />
 
-      <section className="section" aria-labelledby="home-live">
+      <section className="section" aria-labelledby="home-entry">
         <div className="section-head">
-          <h2 id="home-live">
-            방송 채널 <StickerBadge tone="pink" rotate="r">LIVE / VOD</StickerBadge>
+          <h2 id="home-entry">
+            게시판 바로가기 <StickerBadge tone="cyan" rotate="r">카테고리</StickerBadge>
           </h2>
-          <Link href="/profile">내 페이지 →</Link>
+          <Link href="/board">허락방 전체 →</Link>
         </div>
-        <div className="grid grid-2">
-          {liveCards.map((card) => (
-            <LiveCard key={card.id} card={card} />
-          ))}
-        </div>
+        <BoardEntryGrid />
       </section>
 
       <section className="section" aria-labelledby="home-contest">
@@ -147,19 +142,6 @@ export default function HomePage() {
             * 백엔드 미가용 — 샘플 데이터 표시 중
           </small>
         )}
-      </section>
-
-      <section className="section" aria-labelledby="home-openchat">
-        <div className="section-head">
-          <h2 id="home-openchat">
-            오픈톡 <StickerBadge tone="lime" rotate="l">카카오 입장</StickerBadge>
-          </h2>
-        </div>
-        <div className="grid grid-2 openchat-grid">
-          {openChats.map((chat, i) => (
-            <OpenChatBanner key={chat.id} chat={chat} tilt={i % 2 === 0 ? "l" : "r"} />
-          ))}
-        </div>
       </section>
 
       <section className="section" aria-labelledby="home-notice">
