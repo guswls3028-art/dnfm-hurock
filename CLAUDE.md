@@ -1,15 +1,15 @@
-# dnfm-allow Project
+# dnfm-hurock Project
 
 ## A. Project Overview
 
 - **Stack**: Next.js 15.5.7 (App Router, standalone) + React 19, Node 20.
-- **사이트**: `allow.dnfm.kr` — 인터넷 방송인 **허락님** 의 방송/이벤트 페이지. 던파 모바일 스트리머.
+- **사이트**: `hurock.dnfm.kr` — 인터넷 방송인 **허락님** 의 방송/이벤트 페이지. 던파 모바일 스트리머.
 - **본업**: 방송 페이지 + 시청자 참여형 이벤트 (콘테스트, 투표, 경품).
 - **운영 주체 — self-service 가 절대 요구**: 허락님(비개발자) 이 평소 운영. 방장(친구들 운영자) 도 봐주긴 하지만 **방장 없이 돌아가야 함**. 어드민 UI 만으로 콘테스트 생성·마감·심사·투표·발표 가능해야 함.
 - **디자인**: B급 감성. 친구들 newb 의 라이트 톤과 의도적으로 다름.
 - **친구들**: `dnfm.kr` — 별도 git repo (`guswls3028-art/dnfm`). frontend 코드/디자인 시스템 완전 격리. 공유 = backend api (Stage 2 `api.dnfm.kr`) + 회원/세션 (쿠키 `.dnfm.kr`) + R2 뿐.
 - **호스팅**: EC2 단일 인스턴스 (포트 3001) + Cloudflare proxy.
-- **Git**: `https://github.com/guswls3028-art/dnfm-allow`.
+- **Git**: `https://github.com/guswls3028-art/dnfm-hurock`.
 - **현재 버전**: 0.1.0.
 
 ## B. Workflow

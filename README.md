@@ -1,6 +1,6 @@
-# dnfm-allow
+# dnfm-hurock
 
-`allow.dnfm.kr` — 허락님 스트리머 페이지 + 시청자 참여 이벤트 (콘테스트/투표/경품).
+`hurock.dnfm.kr` — 허락(스트리머) 페이지 + 시청자 참여 이벤트 (콘테스트/투표/경품). 옛 `dnfm-allow` / `allow.dnfm.kr` (2026-05-13 rename).
 
 ## 구조
 
