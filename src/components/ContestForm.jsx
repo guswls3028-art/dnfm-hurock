@@ -109,6 +109,30 @@ export default function ContestForm({ contestId, schema = [], dnfProfile }) {
             </div>
           );
         }
+        if (field.type === "select") {
+          const opts = Array.isArray(field.options) ? field.options : [];
+          return (
+            <div className="form-row" key={field.key}>
+              <label htmlFor={id}>
+                {field.label}
+                {field.required ? " *" : ""}
+              </label>
+              <select
+                id={id}
+                className="form-input"
+                value={v || ""}
+                onChange={(e) => setField(field.key, e.target.value)}
+              >
+                <option value="">선택하세요</option>
+                {opts.map((o) => (
+                  <option key={o.value} value={o.value}>
+                    {o.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+          );
+        }
         if (field.type === "file") {
           return (
             <div className="form-row" key={field.key}>

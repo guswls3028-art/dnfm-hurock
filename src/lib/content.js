@@ -97,6 +97,20 @@ export const chatRooms = [
   },
 ];
 
+/**
+ * 후원 / 도네이션 (toon.donate).
+ * 시청자가 방송 중 후원 시 perks 의 트리거에 따라 인게임/방송 이벤트.
+ */
+export const sponsor = {
+  label: "후원하기",
+  shortLabel: "후원",
+  url: "https://toon.donate/dnfmhurock",
+  perkHeadline: "2000원 뽑기박스 룰렛 추가",
+  perks: [
+    { amount: "2000원", trigger: "뽑기박스 룰렛 추가" },
+  ],
+};
+
 export const hero = {
   kicker: "ALLOW BROADCAST",
   headlineSegments: [
@@ -112,6 +126,7 @@ export const hero = {
     { label: "SOOP 라이브", url: "https://ch.sooplive.co.kr/hurock0101", tone: "primary" },
     { label: "치지직", url: "https://chzzk.naver.com/290f875e595cef717d10deeab70a8b71", tone: "accent" },
     { label: "유튜브", url: "https://youtube.com/@허락공대", tone: "cyan" },
+    { label: "후원하기", url: "https://toon.donate/dnfmhurock", tone: "primary", note: "2000원 뽑기박스 룰렛 추가" },
   ],
 };
 
@@ -180,22 +195,58 @@ export const noticeBoard = [
 export const contests = [
   {
     id: "c-avatar-1",
-    title: "허락 아바타 콘테스트 1회",
-    subtitle: "이번 주 코디 자랑",
+    title: "허락 코스프레 코디 콘테스트 1회",
+    subtitle: "부문별 코디 자랑 — 사용자 투표 + 허락 뽑기",
     status: "submission",
     statusLabel: "참가 모집중",
     tone: "pink",
     posterEmoji: "👗",
     submissionCloses: "이번 주 일요일 23:59",
-    voteWindow: "마감 다음 날부터 3일",
-    resultsAt: "결과 발표는 투표 마감 직후",
+    voteWindow: "마감 다음 날부터 3일 — 시청자 투표",
+    resultsAt: "투표 마감 직후 발표 (사용자 투표 + 허락 뽑기 합산)",
     entries: 14,
     description:
-      "모험단명/캐릭터명/코디 제목/설명/사진 한 장. 잘 입은 코디든 망한 코디든 다 환영. 허락이 직접 후보 추려서 투표 열게요.",
-    rewards: ["1등: 허락 굿즈 (준비중)", "2~3등: 디스코드 특별 뱃지", "참가자 전원: 갤러리 등재"],
+      "코스프레 코디 콘테스트. 부문 하나 골라서 모험단명/캐릭터명/코디 제목/설명/사진 한 장으로 참가. 잘 입은 코디든 망한 코디든 다 환영. 마감 후 시청자가 직접 투표하고, 허락이 추가로 뽑기로 한 번 더 골라요.",
+    judging: {
+      summary: "사용자 투표 메인 + 허락 뽑기 추가",
+      bullets: [
+        "1차 — 마감 후 후보 전원 공개. 시청자 1인 1표 투표",
+        "2차 — 허락이 방송 중 뽑기로 추가 1팀 픽 (부문별)",
+        "최종 — 부문별 1, 2등 상품 지급"
+      ]
+    },
+    categories: [
+      { key: "anime-male", label: "남자 애니 코스프레 코디", emoji: "🧝‍♂️" },
+      { key: "anime-female", label: "여자 애니 코스프레 코디", emoji: "🧝‍♀️" },
+      { key: "funny", label: "웃긴 코디", emoji: "🤡" },
+      { key: "epic", label: "나만의 정말 멋진 코디", emoji: "✨" }
+    ],
+    prizes: [
+      { rank: 1, label: "1등", reward: "허락 굿즈 + 디스코드 특별 뱃지" },
+      { rank: 2, label: "2등", reward: "디스코드 특별 뱃지" }
+    ],
+    rewards: [
+      "부문 — 남자 애니 / 여자 애니 / 웃긴 / 나만의 멋진 (총 4부문)",
+      "각 부문 1등: 허락 굿즈 + 디스코드 특별 뱃지",
+      "각 부문 2등: 디스코드 특별 뱃지",
+      "참가자 전원: 갤러리 등재",
+      "심사: 시청자 투표 + 허락 뽑기"
+    ],
     formSchema: [
       { key: "adventureName", label: "모험단명", required: true, prefillFrom: "dnfProfile.adventureName" },
       { key: "characterName", label: "캐릭터명", required: true, prefillFrom: "dnfProfile.characterName" },
+      {
+        key: "category",
+        label: "참가 부문",
+        required: true,
+        type: "select",
+        options: [
+          { value: "anime-male", label: "남자 애니 코스프레 코디" },
+          { value: "anime-female", label: "여자 애니 코스프레 코디" },
+          { value: "funny", label: "웃긴 코디" },
+          { value: "epic", label: "나만의 정말 멋진 코디" }
+        ]
+      },
       { key: "title", label: "코디 제목", required: true, placeholder: "한 줄로 요약" },
       { key: "description", label: "코디 설명", required: true, type: "textarea", placeholder: "컨셉/포인트 아이템/이야기" },
       { key: "photo", label: "코디 사진 (1장)", required: true, type: "file", accept: "image/*" }

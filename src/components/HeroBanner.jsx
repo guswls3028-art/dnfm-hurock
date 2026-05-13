@@ -59,24 +59,31 @@ export default function HeroBanner() {
               );
             }
             const isExternal = action.url.startsWith("http");
-            if (isExternal) {
-              return (
-                <a
-                  key={action.label}
-                  href={action.url}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`btn ${toneCls}`}
-                >
-                  {action.label}
-                </a>
-              );
-            }
-            return (
-              <Link key={action.label} href={action.url} className={`btn ${toneCls}`}>
+            const buttonEl = isExternal ? (
+              <a
+                href={action.url}
+                target="_blank"
+                rel="noreferrer"
+                className={`btn ${toneCls}`}
+              >
+                {action.label}
+              </a>
+            ) : (
+              <Link href={action.url} className={`btn ${toneCls}`}>
                 {action.label}
               </Link>
             );
+            if (action.note) {
+              return (
+                <span key={action.label} className="allow-hero-action-stack">
+                  {buttonEl}
+                  <StickerBadge tone="lime" rotate="r">
+                    {action.note}
+                  </StickerBadge>
+                </span>
+              );
+            }
+            return <span key={action.label}>{buttonEl}</span>;
           })}
         </div>
       </div>

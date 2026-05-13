@@ -175,6 +175,60 @@ export default function ContestDetailPage({ params }) {
         </div>
       </section>
 
+      {Array.isArray(contest.categories) && contest.categories.length ? (
+        <section className="section" aria-labelledby="contest-categories">
+          <div className="section-head">
+            <h2 id="contest-categories">
+              부문 <StickerBadge tone="cyan" rotate="r">{contest.categories.length}개 부문</StickerBadge>
+            </h2>
+            <span style={{ color: "var(--muted)", fontSize: "0.84rem", fontWeight: 800 }}>
+              참가 시 부문 하나 선택
+            </span>
+          </div>
+          <div className="grid grid-2">
+            {contest.categories.map((cat) => (
+              <article key={cat.key} className="card">
+                <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                  <span style={{ fontSize: "1.6rem", lineHeight: 1 }} aria-hidden="true">
+                    {cat.emoji}
+                  </span>
+                  <h3 style={{ margin: 0 }}>{cat.label}</h3>
+                </div>
+                {Array.isArray(contest.prizes) && contest.prizes.length ? (
+                  <ul style={{ margin: "10px 0 0 0", paddingLeft: 18, lineHeight: 1.7, color: "var(--ink-soft)" }}>
+                    {contest.prizes.map((p) => (
+                      <li key={p.rank}>
+                        <strong>{p.label}</strong> — {p.reward}
+                      </li>
+                    ))}
+                  </ul>
+                ) : null}
+              </article>
+            ))}
+          </div>
+        </section>
+      ) : null}
+
+      {contest.judging ? (
+        <section className="section" aria-labelledby="contest-judging">
+          <div className="section-head">
+            <h2 id="contest-judging">
+              심사 방식 <StickerBadge tone="pink" rotate="r">사용자 투표 + 허락 뽑기</StickerBadge>
+            </h2>
+          </div>
+          <article className="card card-tone-cyan">
+            <p style={{ fontWeight: 800, margin: 0 }}>{contest.judging.summary}</p>
+            {Array.isArray(contest.judging.bullets) && contest.judging.bullets.length ? (
+              <ul style={{ margin: "10px 0 0 0", paddingLeft: 18, lineHeight: 1.7, color: "var(--ink-soft)" }}>
+                {contest.judging.bullets.map((b) => (
+                  <li key={b}>{b}</li>
+                ))}
+              </ul>
+            ) : null}
+          </article>
+        </section>
+      ) : null}
+
       <section className="section" aria-labelledby="contest-entries">
         <div className="section-head">
           <h2 id="contest-entries">

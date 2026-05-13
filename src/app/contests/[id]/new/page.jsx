@@ -125,9 +125,10 @@ export default function ContestNewPage({ params }) {
             <div className="form-step">참가 안내</div>
             <ul style={{ paddingLeft: 18, margin: 0, lineHeight: 1.7, color: "var(--ink-soft)" }}>
               <li>모험단명/캐릭터명은 내 페이지의 던파 프로필에서 자동 채워집니다.</li>
+              <li>참가 부문을 하나 골라주세요 (남자 애니 / 여자 애니 / 웃긴 / 나만의 멋진).</li>
               <li>코디 사진은 1장. 식별 가능한 화질이면 충분.</li>
               <li>제출 후에도 마감 전까진 수정 가능.</li>
-              <li>마감 후 허락이 후보를 추리고 시청자 투표가 시작됩니다.</li>
+              <li>마감 후 후보 전원이 시청자 투표에 올라가고, 허락이 방송 중 뽑기로 추가 1팀을 더 골라요.</li>
             </ul>
             <div className="callout-box">
               <strong>로그인 계정</strong>
