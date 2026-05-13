@@ -296,8 +296,11 @@ export const contests = [
         key: "characterName",
         label: "참가 캐릭터명",
         required: true,
-        prefillFrom: "dnfProfile.characterName",
-        help: "가입 시 등록한 모험단 캐릭터 목록에서 선택, 없으면 직접 입력"
+        type: "select-or-input",
+        prefillFrom: "dnfProfile.mainCharacterName",
+        optionsFrom: "dnfProfile.characters",
+        optionLabelKey: "name",
+        help: "회원가입 OCR로 등록된 캐릭터 목록에서 선택. 없으면 직접 입력."
       },
       {
         key: "watchPlatform",

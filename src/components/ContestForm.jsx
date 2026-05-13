@@ -138,6 +138,66 @@ export default function ContestForm({ contestId, schema = [], dnfProfile }) {
             </div>
           );
         }
+        if (field.type === "select-or-input") {
+          const opts = resolvePath(dnfProfile ? { dnfProfile } : {}, field.optionsFrom);
+          const optionList = Array.isArray(opts)
+            ? opts
+                .map((o) => (typeof o === "string" ? o : o?.[field.optionLabelKey || "name"]))
+                .filter(Boolean)
+            : [];
+          const FREEFORM = "__freeform__";
+          const isFreeform = v && !optionList.includes(v);
+          const selectVal = isFreeform ? FREEFORM : v || "";
+          return (
+            <div className="form-row" key={field.key}>
+              <label htmlFor={id}>
+                {field.label}
+                {field.required ? " *" : ""}
+              </label>
+              {optionList.length > 0 ? (
+                <>
+                  <select
+                    id={id}
+                    className="form-input"
+                    value={selectVal}
+                    onChange={(e) => {
+                      const next = e.target.value;
+                      if (next === FREEFORM) setField(field.key, "");
+                      else setField(field.key, next);
+                    }}
+                  >
+                    <option value="">선택하세요</option>
+                    {optionList.map((label) => (
+                      <option key={label} value={label}>
+                        {label}
+                      </option>
+                    ))}
+                    <option value={FREEFORM}>+ 직접 입력</option>
+                  </select>
+                  {(isFreeform || selectVal === FREEFORM) && (
+                    <input
+                      type="text"
+                      className="form-input"
+                      placeholder="직접 입력"
+                      value={v || ""}
+                      onChange={(e) => setField(field.key, e.target.value)}
+                    />
+                  )}
+                </>
+              ) : (
+                <input
+                  id={id}
+                  type="text"
+                  className="form-input"
+                  placeholder={field.placeholder || ""}
+                  value={v || ""}
+                  onChange={(e) => setField(field.key, e.target.value)}
+                />
+              )}
+              {field.help && <small style={{ color: "var(--muted)" }}>{field.help}</small>}
+            </div>
+          );
+        }
         if (field.type === "select") {
           const opts = Array.isArray(field.options) ? field.options : [];
           return (
@@ -230,6 +290,14 @@ export default function ContestForm({ contestId, schema = [], dnfProfile }) {
       </button>
     </form>
   );
+}
+
+function resolvePath(obj, path) {
+  if (!path || !obj) return undefined;
+  const segs = path.split(".");
+  let cur = obj;
+  for (const s of segs) cur = cur?.[s];
+  return cur;
 }
 
 function initialValues(schema, dnfProfile) {
