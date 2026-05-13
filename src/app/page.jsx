@@ -65,16 +65,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className="section" aria-labelledby="home-entry">
-        <div className="section-head">
-          <h2 id="home-entry">
-            게시판 <StickerBadge tone="cyan" rotate="r">5개 카테고리</StickerBadge>
-          </h2>
-          <Link href="/board">허락방 전체 →</Link>
-        </div>
-        <BoardEntryGrid />
-      </section>
-
       <section className="section" aria-labelledby="home-contest">
         <div className="section-head">
           <h2 id="home-contest">
@@ -82,7 +72,7 @@ export default function HomePage() {
           </h2>
           <Link href="/events">이벤트 전체 →</Link>
         </div>
-        {usingMock.contests ? (
+        {featuredContests.length === 0 ? (
           <div className="callout-box">
             <strong>곧 시작합니다</strong>
             아직 등록된 콘테스트가 없어요. 첫 콘테스트가 열리면 여기에 표시됩니다.
@@ -111,8 +101,31 @@ export default function HomePage() {
                 <ContestCard key={c.id} contest={c} tilt={i % 2 === 0 ? "l" : "r"} />
               ))}
             </div>
+            {usingMock.contests && (
+              <small style={{ color: "var(--muted)", marginTop: 6, display: "inline-block" }}>
+                * 백엔드 미가용 — 샘플 콘테스트 표시 중
+              </small>
+            )}
           </>
         )}
+        <div style={{ marginTop: 14, display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <Link href="/events/history" className="btn btn-sm">
+            🗂️ 지난 회차 기록
+          </Link>
+          <Link href="/play" className="btn btn-sm">
+            🎰 방송 게임 포탈
+          </Link>
+        </div>
+      </section>
+
+      <section className="section" aria-labelledby="home-community">
+        <div className="section-head">
+          <h2 id="home-community">
+            커뮤니티 <StickerBadge tone="cyan" rotate="r">5개 카테고리</StickerBadge>
+          </h2>
+          <Link href="/board">허락방 전체 →</Link>
+        </div>
+        <BoardEntryGrid />
       </section>
     </PageShell>
   );
