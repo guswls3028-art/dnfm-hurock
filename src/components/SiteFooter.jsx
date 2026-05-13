@@ -1,8 +1,8 @@
 import { siblingSite, siteMeta } from "@/lib/content";
 
 /**
- * SiteFooter — disclaimer + 자매 사이트 cross-link.
- *  - 자매 사이트 카드는 home 의 hero 아래에 별도로 SiblingSiteCard 로도 노출.
+ * SiteFooter — disclaimer + 친구들 cross-link.
+ *  - 친구들 카드는 home 의 hero 아래에 별도로 SiblingSiteCard 로도 노출.
  */
 export default function SiteFooter() {
   return (

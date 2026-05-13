@@ -27,7 +27,7 @@ export const navItems = [
 export const siblingSite = {
   label: "뉴비 훈련소",
   href: "https://dnfm.kr",
-  note: "던파 모바일 입문 가이드 (자매 사이트)"
+  note: "던파 모바일 입문 가이드 (친구들)"
 };
 
 export const loginProviders = [

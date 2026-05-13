@@ -1,5 +1,5 @@
 /**
- * SiblingSiteCard — 자매 사이트(뉴비 훈련소) 크로스링크 카드.
+ * SiblingSiteCard — 친구들(뉴비 훈련소) 크로스링크 카드.
  *  - 이미지: https://dnfm.kr/banner.jpg (newb 의 public 자산 — Cloudflare CDN)
  *  - B급 톤 sticker 카드 (살짝 기울어짐, dashed 테두리, 핫핑크 그림자)
  *  - href: https://dnfm.kr (target=_blank)
@@ -22,7 +22,7 @@ export default function SiblingSiteCard({ compact = false }) {
             e.currentTarget.style.display = "none";
           }}
         />
-        <span className="sibling-cdn-card__sticker">↗ 자매 사이트</span>
+        <span className="sibling-cdn-card__sticker">↗ 친구들</span>
       </div>
       <div className="sibling-cdn-card__body">
         <strong>뉴비 훈련소</strong>

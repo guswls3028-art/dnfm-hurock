@@ -173,7 +173,7 @@ export default function HomePage() {
 
       <section className="section" aria-labelledby="home-sibling">
         <div className="section-head">
-          <h2 id="home-sibling">자매 사이트</h2>
+          <h2 id="home-sibling">친구들</h2>
         </div>
         <SiblingSiteCard />
       </section>

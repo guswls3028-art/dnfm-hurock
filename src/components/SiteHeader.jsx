@@ -9,7 +9,7 @@ import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
  * SiteHeader — B급 톤 sticky 헤더.
  *  - wordmark: "허락!" 노란 sticker
  *  - nav: 홈/콘테스트/허락방/내 페이지 (+ admin 일 때 어드민)
- *  - 우측: 자매 사이트 dashed pill + 로그인 / 사용자 정보 토글
+ *  - 우측: 친구들 dashed pill + 로그인 / 사용자 정보 토글
  *
  * activePath = "/contests" 등 prefix 매칭.
  */
