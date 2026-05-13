@@ -37,6 +37,19 @@ ssh -i /tmp/dnfm/ic ec2-user@43.202.246.97 \
    && curl -sk -H "Host: hurock.dnfm.kr" https://127.0.0.1/ -o /dev/null -w "smoke %{http_code}\n"'
 ```
 
+또는 EC2 onbox build (사용자 SSH 가능 시 — local build 불안정/오래 걸릴 때):
+```bash
+ssh -i /tmp/dnfm/ic ec2-user@43.202.246.97 \
+  'cd /var/www/dnfm-hurock \
+   && git fetch && git reset --hard origin/main \
+   && pnpm install --frozen-lockfile \
+   && pnpm build \
+   && cp -r .next/static .next/standalone/.next/ \
+   && cp -r public .next/standalone/ \
+   && pm2 restart dnfm-hurock --update-env'
+```
+**중요**: onbox 빌드에서 `cp -r .next/static .next/standalone/.next/` + `cp -r public .next/standalone/` 두 줄 필수. 누락 시 `/_next/static/chunks/.../page-{hash}.js` 404 + `/hurock-avatar.png` 404 + 라이브 ChunkLoadError. 자세한 발견 이력: `~/.claude/projects/.../memory/feedback_ec2_standalone_assemble.md`.
+
 EC2 좌표 SSOT: `C:/academy/dnfm/api/docs/deployment-credentials.md` §0.
 
 ## C. Harness Architecture
