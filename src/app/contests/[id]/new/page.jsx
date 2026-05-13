@@ -42,8 +42,42 @@ export default function ContestNewPage({ params }) {
     );
   }
 
+  // contest.status 가드 — 마감/심사/투표/종료 단계는 새 참가 불가. backend 도 거부하지만 UX 측면.
+  const acceptingEntries =
+    contest.status === "open" ||
+    contest.status === "submission" || // mock 데이터 호환
+    !contest.status; // status 없는 mock 도 허용
+  if (!acceptingEntries) {
+    return (
+      <PageShell activePath="/contests">
+        <div className="page-head">
+          <div>
+            <Link
+              href={`/contests/${contest.id}`}
+              style={{
+                display: "inline-block",
+                marginBottom: 8,
+                borderBottom: "2px solid var(--ink)",
+                fontSize: "0.84rem",
+                fontWeight: 800,
+              }}
+            >
+              ← {contest.title}
+            </Link>
+            <h1>지금은 참가 모집 단계가 아니에요</h1>
+            <p>현재 상태: {contest.statusLabel || contest.status}. 결과 발표 / 투표는 콘테스트 페이지에서 확인하세요.</p>
+          </div>
+          <StickerBadge tone="amber" rotate="r">
+            {contest.statusLabel || "마감"}
+          </StickerBadge>
+        </div>
+      </PageShell>
+    );
+  }
+
   // 비회원 정책 SSOT (project_anonymous_posting_policy 2026-05-14):
   // 콘테스트 참가 = 비회원 가능. 회원이면 dnfProfile 자동 채움 편의.
+  // userLoading 동안엔 isGuest 결정 보류 — form 깜빡임 방지.
   const isGuest = !userLoading && !user;
   const schema = Array.isArray(contest.formSchema) ? contest.formSchema : [];
 
@@ -76,6 +110,12 @@ export default function ContestNewPage({ params }) {
       {schema.length === 0 ? (
         <div className="callout-box">
           이 콘테스트는 따로 참가 양식이 없습니다 (스크린샷 업로드만 받는 형식).
+        </div>
+      ) : userLoading ? (
+        // user 결정 전 form 깜빡임 방지 — skeleton
+        <div className="form-block" aria-busy="true">
+          <div className="form-step">참가 양식 로딩 중…</div>
+          <div style={{ minHeight: 320 }} />
         </div>
       ) : (
         <div className="grid grid-2">

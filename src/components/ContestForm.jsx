@@ -96,7 +96,17 @@ export default function ContestForm({ contestId, schema = [], dnfProfile, isGues
       if (isGuest) {
         const nick = guestNickname.trim();
         if (nick) payload.guestNickname = nick;
-        if (guestPassword) payload.guestPassword = guestPassword;
+        if (guestPassword) {
+          // backend dto: min(4). client 도 사전 검증.
+          if (guestPassword.length < 4) {
+            throw new ApiError({
+              status: 0,
+              code: "validation",
+              message: "비밀번호는 4자 이상이어야 합니다 (비울 거면 완전히 비워주세요).",
+            });
+          }
+          payload.guestPassword = guestPassword;
+        }
       }
       await contestsApi.entries.create(contestId, payload);
       setSuccess(true);
