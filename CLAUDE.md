@@ -68,3 +68,22 @@
 - **Stage 4 — 핵심 기능**: **아바타 콘테스트** (참가 글쓰기 + 마감 컷 + 어드민 심사 + 투표 + 등수).
 - **Stage 5**: 경품 이벤트 (추첨 풀, 당첨자 히스토리), 라이브 임베드, newb 메인 1줄 카드 (cross-link 중간).
 - **Stage 6**: CI quality gate, EC2 자동 배포 webhook.
+
+---
+
+## 📌 Next Session Entry — 필독 (이 줄을 무시하지 말 것)
+
+**자격증명·배포·인프라 좌표 SSOT** → `C:\academy\dnfm\api\docs\deployment-credentials.md`
+
+해당 파일 한 곳에 정리됨:
+- 라이브 EC2 IP / SSH key / .env 경로 / PM2 / Nginx / R2 / Cloudflare zone
+- 자격증명 현황표 (✅ 주입 완료 / ❌ empty / 🟡 미확인) — EC2 `.env` 실측 기준
+- 새로 발급해야 할 cred 절차 (Kakao OAuth / Cloudflare Origin Cert / Vision API)
+- 다음 세션 진입 조건 A/B/C
+- 흩어진 자료 인덱스
+
+allow 단독 작업이라도 backend `.env` / EC2 / Cloudflare 관련 신호 마주치면 그 파일부터 확인.
+
+**같은 그룹 sibling repo (별도 git remote, frontend 코드는 완전 독립):**
+- `C:\academy\dnfm\newb\` — 던파+군대 뉴비 페이지 (dnfm.kr)
+- `C:\academy\dnfm\api\` — 공용 backend (api.dnfm.kr)
