@@ -37,45 +37,109 @@ export const loginProviders = [
 ];
 
 /**
- * 허락님 hero 영역 — 사용자가 사진/철학/방송 URL 받은 뒤 채움.
- * 현재는 placeholder. url: null + reason 으로 비활성 명시.
+ * 허락님 — 던파 모바일 스트리머 (채널: 허락공대, @허락공대).
+ * 가입 2025-04-07 / 구독자 497 / 동영상 258 / 조회수 164,444.
  */
+export const host = {
+  name: "허락",
+  channelName: "허락공대",
+  channelHandle: "@허락공대",
+  tagline: "[던파모바일] 뉴비·부캐 지원 + 컨설팅 + 미션",
+  contents: [
+    "레이드/각종 던전 뉴비 및 부캐 지원",
+    "뉴비 육성 방향 / 효율성 컨설팅",
+    "강화 / 상자깡 / 합성 등 다양한 콘텐츠",
+    "재밌는 미션 수행",
+  ],
+  schedule: {
+    summary: "평일 19시 이후 / 주말 약속 없으면 일찍 / 휴방 랜덤",
+    bullets: ["평일 저녁 7시 이후", "주말 약속 없으면 일찍", "휴방 랜덤"],
+  },
+  recentQuotes: [
+    "허락은 절대 포기안해",
+    "오늘은 꼭 클리어 하고 만다 하드아스마르",
+  ],
+};
+
+export const platforms = [
+  {
+    id: "soop",
+    label: "SOOP (메인)",
+    url: "https://ch.sooplive.co.kr/hurock0101",
+    note: "허락공대 SOOP",
+  },
+  {
+    id: "chzzk",
+    label: "치지직 (네이버)",
+    url: "https://chzzk.naver.com/290f875e595cef717d10deeab70a8b71",
+    note: "허락공대 치지직",
+  },
+  {
+    id: "youtube",
+    label: "유튜브",
+    url: "https://youtube.com/@허락공대",
+    note: "VOD / 클립",
+  },
+];
+
+export const chatRooms = [
+  {
+    id: "announce",
+    label: "방송 공지 / 일정 알림방",
+    url: "https://open.kakao.com/o/gSGi8myh",
+    primary: true,
+  },
+  {
+    id: "dm",
+    label: "허락 1:1 오픈 채팅",
+    url: "https://open.kakao.com/o/s8W56myh",
+    primary: false,
+  },
+];
+
 export const hero = {
   kicker: "ALLOW BROADCAST",
-  // headline 의 segments 는 SiteHero 에서 sticker/strike 스타일 분기.
   headlineSegments: [
     { text: "허락의 던파모바일,", style: "plain" },
     { text: "방송에 놀러", style: "plain" },
-    { text: "오세요", style: "mark" }
+    { text: "오세요", style: "mark" },
   ],
   body:
-    "방송 시간이 정해지면 라이브 카드부터 켜집니다. 그동안엔 아바타 콘테스트로 시청자분들이 코디 자랑하실 수 있게 페이지를 열어 둘게요.",
+    "평일 19시 이후 / 주말은 일찍 켭니다. 뉴비·부캐 컨설팅, 레이드 도전, 미션, 강화 / 상자깡까지. SOOP·치지직·유튜브 동시 운영.",
   portraitName: "허락",
   portraitNote: "프로필 사진 등록 전",
   primaryActions: [
-    { label: "라이브 입장", url: null, reason: "방송 URL 등록 전" },
-    { label: "콘테스트 보러가기", url: "/contests", tone: "accent" },
-    { label: "허락방 글쓰기", url: "/board/new", tone: "cyan" }
-  ]
+    { label: "SOOP 라이브", url: "https://ch.sooplive.co.kr/hurock0101", tone: "primary" },
+    { label: "치지직", url: "https://chzzk.naver.com/290f875e595cef717d10deeab70a8b71", tone: "accent" },
+    { label: "유튜브", url: "https://youtube.com/@허락공대", tone: "cyan" },
+  ],
 };
 
 export const liveCards = [
   {
-    id: "live-1",
+    id: "live-soop",
     state: "scheduled",
-    title: "오늘 방송 — 신규 던전 도전",
-    body: "방송 URL이 등록되면 이 카드에서 바로 입장할 수 있게 됩니다.",
-    meta: ["요일 미정", "플랫폼 미정"],
-    cta: { label: "방송 보러가기", url: null, reason: "방송 URL 등록 전" }
+    title: "SOOP 라이브 — 메인 방송",
+    body: "평일 19시 이후 / 주말 일찍. 던파 모바일 뉴비 컨설팅 + 레이드 도전.",
+    meta: ["평일 19시+", "SOOP"],
+    cta: { label: "SOOP 채널", url: "https://ch.sooplive.co.kr/hurock0101" },
   },
   {
-    id: "live-2",
+    id: "live-chzzk",
+    state: "scheduled",
+    title: "치지직 — 동시 송출",
+    body: "네이버 치지직에도 동시 송출. 채팅·다시보기 OK.",
+    meta: ["네이버 치지직"],
+    cta: { label: "치지직 채널", url: "https://chzzk.naver.com/290f875e595cef717d10deeab70a8b71" },
+  },
+  {
+    id: "live-youtube",
     state: "vod",
-    title: "지난 방송 다시보기",
-    body: "유튜브 / 클립 채널 연결 후 자동으로 최근 5개가 표시됩니다.",
-    meta: ["VOD", "최근 30일"],
-    cta: { label: "유튜브 채널", url: null, reason: "유튜브 URL 등록 전" }
-  }
+    title: "유튜브 — 다시보기 / 클립",
+    body: "최근 라이브 다시보기 + 던파 모바일 가이드 클립.",
+    meta: ["VOD", "@허락공대"],
+    cta: { label: "유튜브 채널", url: "https://youtube.com/@허락공대" },
+  },
 ];
 
 export const noticeBoard = [
