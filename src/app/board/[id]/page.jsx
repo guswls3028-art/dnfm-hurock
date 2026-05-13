@@ -6,11 +6,13 @@ import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
 import { boardPostDetail as mockDetail } from "@/lib/content";
 import { ApiError, posts as postsApi } from "@/lib/api-client";
-import { useCurrentUser } from "@/lib/use-current-user";
+import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
+import AdminPostMenu from "@/components/AdminPostMenu";
 
 export default function BoardDetailPage({ params }) {
   const { id } = use(params);
   const { user } = useCurrentUser();
+  const userIsAdmin = isAdmin(user, "allow");
 
   const [post, setPost] = useState(mockDetail);
   const [comments, setComments] = useState(mockDetail.comments || []);
@@ -19,6 +21,7 @@ export default function BoardDetailPage({ params }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [voteBusy, setVoteBusy] = useState(false);
+  const [reloadTick, setReloadTick] = useState(0);
 
   useEffect(() => {
     let alive = true;
@@ -47,7 +50,9 @@ export default function BoardDetailPage({ params }) {
     return () => {
       alive = false;
     };
-  }, [id]);
+  }, [id, reloadTick]);
+
+  const reloadPost = () => setReloadTick((t) => t + 1);
 
   async function handleVote(value) {
     if (!user) {
@@ -113,7 +118,10 @@ export default function BoardDetailPage({ params }) {
           >
             ← 허락방 목록
           </Link>
-          <h1>{post.title}</h1>
+          <h1>
+            {post.pinned ? "📌 " : ""}
+            {post.title}
+          </h1>
           <p>
             <StickerBadge tone="cyan" rotate="l">
               {post.category}
@@ -121,6 +129,13 @@ export default function BoardDetailPage({ params }) {
             {post.author || post.displayName || "익명"} · {post.date || ""} · 조회 {post.views ?? "-"} · 글 ID: {id}
           </p>
         </div>
+        {userIsAdmin && !usingMock ? (
+          <AdminPostMenu
+            postId={id}
+            pinned={Boolean(post.pinned)}
+            onChange={reloadPost}
+          />
+        ) : null}
       </div>
 
       {usingMock && (

@@ -78,7 +78,32 @@ export function useCurrentUser() {
   return { user, loading, error, refresh: fetchMe, logout };
 }
 
-export function isAdmin(user) {
+const ADMIN_ROLES = new Set(["admin", "super"]);
+
+/**
+ * 사이트별 admin 권한 확인. backend /auth/me 의 user.siteRoles 를 본다.
+ *   user.siteRoles = [{ site: "newb"|"allow"|"*", role: "member"|"admin"|"super" }]
+ *
+ * 호환: 옛 user.role ("admin" / "superadmin") 도 지원.
+ */
+export function isAdmin(user, site = "allow") {
   if (!user) return false;
-  return user.role === "admin" || user.role === "superadmin";
+  if (user.role === "admin" || user.role === "superadmin" || user.role === "super") {
+    return true;
+  }
+  const roles = Array.isArray(user.siteRoles) ? user.siteRoles : [];
+  for (const r of roles) {
+    if (!r || !r.role) continue;
+    if (!ADMIN_ROLES.has(r.role)) continue;
+    if (r.site === "*") return true;
+    if (r.site === site) return true;
+  }
+  return false;
+}
+
+export function isSuperAdmin(user) {
+  if (!user) return false;
+  if (user.role === "superadmin" || user.role === "super") return true;
+  const roles = Array.isArray(user.siteRoles) ? user.siteRoles : [];
+  return roles.some((r) => r && r.role === "super");
 }

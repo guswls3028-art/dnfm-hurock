@@ -1364,6 +1364,24 @@ button {
   .allow-footer-links {
     justify-self: start;
   }
+
+  .contest-banner {
+    grid-template-columns: minmax(0, 1fr);
+    padding: 16px 18px;
+  }
+
+  .contest-banner-actions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .page-head {
+    flex-wrap: wrap;
+  }
+
+  .form-block {
+    padding: 18px 16px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -1419,6 +1437,120 @@ button {
 
   .kvs {
     grid-template-columns: 100px minmax(0, 1fr);
+  }
+
+  /* 페이지 헤더 — 모바일에서 wrap + admin 메뉴를 다음 줄로 */
+  .page-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .page-head h1 {
+    font-size: clamp(1.4rem, 6vw, 1.9rem);
+    line-height: 1.25;
+    word-break: keep-all;
+  }
+
+  .page-head p {
+    font-size: 0.86rem;
+  }
+
+  /* 콘테스트 배너 — 액션이 본문 아래로 */
+  .contest-banner {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 12px;
+    padding: 14px 14px;
+  }
+
+  .contest-banner-body strong {
+    font-size: 1.05rem;
+  }
+
+  .contest-banner-actions {
+    width: 100%;
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+
+  .contest-banner-actions .btn {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  /* Vote / entry 카드 모바일에서 wrap 풀기 */
+  .entry-card {
+    width: 100%;
+  }
+
+  /* 폼 — 모바일 padding 축소 + 텍스트 영역 자연 wrap */
+  .form-block {
+    padding: 14px 12px;
+    gap: 12px;
+  }
+
+  .form-row label {
+    font-size: 0.82rem;
+  }
+
+  .form-input,
+  .form-textarea,
+  .form-select {
+    font-size: 0.92rem;
+    padding: 10px 12px;
+  }
+
+  /* 어드민 메뉴 패널 — 너무 넓어 화면 밖으로 나가지 않도록 */
+  .admin-menu__panel {
+    right: 0;
+    left: auto;
+    min-width: 180px;
+    max-width: calc(100vw - 32px);
+  }
+
+  /* sticker 배지가 wrap 영역에서 자연 줄바꿈 가능 */
+  .sticker-badge {
+    word-break: keep-all;
+  }
+}
+
+@media (max-width: 480px) {
+  .allow-main {
+    padding: 12px 10px 32px;
+  }
+
+  .allow-hero {
+    padding: 18px 12px;
+  }
+
+  .allow-hero h1 {
+    font-size: clamp(1.4rem, 7vw, 1.8rem);
+  }
+
+  .allow-hero p.allow-hero-body {
+    font-size: 0.92rem;
+  }
+
+  .btn {
+    padding: 10px 14px;
+    font-size: 0.88rem;
+  }
+
+  .btn-sm {
+    padding: 6px 10px;
+    font-size: 0.78rem;
+  }
+
+  /* board head — 좁은 폭에서 글쓰기 버튼이 세로로 */
+  .page-head .btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* admin 메뉴 trigger 도 한 줄에 깔끔히 */
+  .admin-menu {
+    width: 100%;
+    justify-content: flex-start;
   }
 }
 
@@ -1526,4 +1658,182 @@ button {
   .sibling-cdn-card__media {
     min-height: 110px;
   }
+}
+
+/* ─────────────────────────────────────────────────────────── 페이지네이션 */
+
+.pagination {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  gap: 6px;
+  margin-top: 18px;
+  padding: 12px 0;
+}
+
+.pagination__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-decoration: none;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 2px 2px 0 var(--ink);
+  transition: transform 100ms ease, box-shadow 100ms ease, background-color 100ms ease;
+}
+
+.pagination__btn:hover:not(.is-disabled):not(.is-current) {
+  background: var(--accent);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.pagination__btn.is-current {
+  background: var(--primary);
+  color: #fff;
+  cursor: default;
+  transform: rotate(-1.5deg);
+}
+
+.pagination__btn.is-disabled {
+  opacity: 0.4;
+  pointer-events: none;
+  cursor: not-allowed;
+  box-shadow: 1px 1px 0 var(--ink);
+}
+
+.pagination__gap {
+  display: inline-flex;
+  align-items: center;
+  min-width: 20px;
+  height: 36px;
+  color: var(--muted);
+  font-weight: 900;
+}
+
+@media (max-width: 480px) {
+  .pagination__btn {
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    font-size: 0.8rem;
+  }
+}
+
+/* ─────────────────────────────────────────────────────────── 운영(admin) 드롭다운 */
+
+.admin-menu {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.admin-menu__trigger {
+  background: var(--warn);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  font-weight: 900;
+  font-size: 0.84rem;
+  padding: 6px 12px;
+  white-space: nowrap;
+  box-shadow: 2px 2px 0 var(--ink);
+  cursor: pointer;
+}
+
+.admin-menu__trigger:hover:not(:disabled) {
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
+}
+
+.admin-menu__panel {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 30;
+  min-width: 200px;
+  padding: 6px;
+  border: 2px solid var(--ink);
+  border-radius: var(--radius-sm);
+  background: var(--paper);
+  box-shadow: 4px 4px 0 var(--ink);
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.admin-menu__item {
+  display: block;
+  width: 100%;
+  padding: 8px 12px;
+  border: 0;
+  background: transparent;
+  color: var(--ink);
+  font-family: inherit;
+  font-size: 0.88rem;
+  font-weight: 800;
+  text-align: left;
+  cursor: pointer;
+  border-radius: var(--radius-sm);
+}
+
+.admin-menu__item:hover:not(:disabled) {
+  background: var(--accent);
+}
+
+.admin-menu__item--danger {
+  color: var(--danger);
+}
+
+.admin-menu__item--danger:hover:not(:disabled) {
+  background: var(--danger);
+  color: #fff;
+}
+
+.admin-menu__item:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.admin-menu__msg {
+  display: inline-block;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-left: 8px;
+}
+
+/* ─────────────────────────────────────────────────────────── 콘테스트 배너 액션 / 어드민 버튼 */
+
+.contest-banner-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-admin {
+  background: var(--warn);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.btn-admin:hover {
+  background: var(--accent);
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0 var(--ink);
 }

@@ -1,31 +1,69 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import BoardRow from "@/components/BoardRow";
+import Pagination from "@/components/Pagination";
 import StickerBadge from "@/components/StickerBadge";
 import { boardCategories, boardPosts as mockPosts } from "@/lib/content";
 import { posts as postsApi } from "@/lib/api-client";
 
+const PAGE_SIZE = 20;
+
 export default function BoardPage() {
+  return (
+    <Suspense fallback={<BoardLoading />}>
+      <BoardInner />
+    </Suspense>
+  );
+}
+
+function BoardLoading() {
+  return (
+    <PageShell activePath="/board">
+      <div className="page-head">
+        <div>
+          <h1>허락방</h1>
+          <p>불러오는 중…</p>
+        </div>
+      </div>
+    </PageShell>
+  );
+}
+
+function BoardInner() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const activeCat = searchParams.get("category") || boardCategories[0];
+  const pageParam = Math.max(1, parseInt(searchParams.get("page") || "1", 10) || 1);
+
   const [posts, setPosts] = useState(mockPosts);
+  const [total, setTotal] = useState(0);
   const [usingMock, setUsingMock] = useState(true);
-  const [activeCat, setActiveCat] = useState(boardCategories[0]);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
         const category = activeCat === "전체" ? undefined : activeCat;
-        const data = await postsApi.list({ category });
+        const data = await postsApi.list({ category, page: pageParam });
         if (!alive) return;
-        const list = Array.isArray(data) ? data : data?.posts || [];
+        const list = Array.isArray(data) ? data : data?.items || data?.posts || [];
+        const t =
+          typeof data?.total === "number"
+            ? data.total
+            : Array.isArray(list)
+              ? list.length
+              : 0;
         if (list.length) {
           setPosts(list);
+          setTotal(t);
           setUsingMock(false);
         } else if (!usingMock) {
           setPosts([]);
+          setTotal(0);
         }
       } catch {
         /* mock 유지 */
@@ -35,13 +73,27 @@ export default function BoardPage() {
       alive = false;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeCat]);
+  }, [activeCat, pageParam]);
 
-  const visiblePosts = usingMock
-    ? activeCat === "전체"
-      ? posts
-      : posts.filter((p) => p.category === activeCat)
-    : posts;
+  const visiblePosts = useMemo(() => {
+    if (!usingMock) return posts;
+    return activeCat === "전체" ? posts : posts.filter((p) => p.category === activeCat);
+  }, [posts, usingMock, activeCat]);
+
+  function setActiveCat(cat) {
+    const qs = new URLSearchParams();
+    if (cat && cat !== boardCategories[0]) qs.set("category", cat);
+    const s = qs.toString();
+    router.push(s ? `/board?${s}` : "/board");
+  }
+
+  const buildPageHref = (n) => {
+    const qs = new URLSearchParams();
+    if (activeCat && activeCat !== boardCategories[0]) qs.set("category", activeCat);
+    if (n > 1) qs.set("page", String(n));
+    const s = qs.toString();
+    return s ? `/board?${s}` : "/board";
+  };
 
   return (
     <PageShell activePath="/board">
@@ -89,6 +141,15 @@ export default function BoardPage() {
           visiblePosts.map((p) => <BoardRow key={p.id} post={p} />)
         )}
       </div>
+
+      {!usingMock && (
+        <Pagination
+          current={pageParam}
+          total={total}
+          pageSize={PAGE_SIZE}
+          buildHref={buildPageHref}
+        />
+      )}
     </PageShell>
   );
 }

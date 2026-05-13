@@ -7,6 +7,7 @@ import ContestEntryCard from "@/components/ContestEntryCard";
 import StickerBadge from "@/components/StickerBadge";
 import { contestEntries as mockEntries, contests as mockContests } from "@/lib/content";
 import { contests as contestsApi } from "@/lib/api-client";
+import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
 
 const STATUS_TONE = {
   submission: "pink",
@@ -17,6 +18,8 @@ const STATUS_TONE = {
 
 export default function ContestDetailPage({ params }) {
   const { id } = use(params);
+  const { user } = useCurrentUser();
+  const userIsAdmin = isAdmin(user, "allow");
   const [contest, setContest] = useState(() => mockContests.find((c) => c.id === id) || null);
   const [entries, setEntries] = useState(() => mockEntries[id] || []);
   const [loading, setLoading] = useState(true);
@@ -120,21 +123,32 @@ export default function ContestDetailPage({ params }) {
             {contest.resultsAt || ""}
           </small>
         </div>
-        {submissionOpen && (
-          <Link className="btn btn-primary" href={`/contests/${contest.id}/new`}>
-            지금 참가
-          </Link>
-        )}
-        {voteOpen && (
-          <Link className="btn btn-cyan" href={`/contests/${contest.id}/vote`}>
-            투표하러 가기
-          </Link>
-        )}
-        {announced && (
-          <Link className="btn btn-accent" href={`/contests/${contest.id}/results`}>
-            결과 보기
-          </Link>
-        )}
+        <div className="contest-banner-actions">
+          {submissionOpen && (
+            <Link className="btn btn-primary" href={`/contests/${contest.id}/new`}>
+              지금 참가
+            </Link>
+          )}
+          {voteOpen && (
+            <Link className="btn btn-cyan" href={`/contests/${contest.id}/vote`}>
+              투표하러 가기
+            </Link>
+          )}
+          {announced && (
+            <Link className="btn btn-accent" href={`/contests/${contest.id}/results`}>
+              결과 보기
+            </Link>
+          )}
+          {userIsAdmin && !usingMock ? (
+            <Link
+              className="btn btn-sm btn-admin"
+              href={`/admin/contests/${contest.id}`}
+              title="콘테스트 운영 — 참가작 심사 / 결과 입력"
+            >
+              🛡️ 어드민 도구로 이동 →
+            </Link>
+          ) : null}
+        </div>
       </div>
 
       <section className="section" aria-labelledby="contest-desc">
