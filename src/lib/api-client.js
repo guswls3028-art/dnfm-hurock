@@ -260,10 +260,12 @@ export const contests = {
     apiFetch(sitePath(`/contests/${contestId}/results`), { method: "POST", json: data }),
 };
 
-/* ---------- Uploads (R2 presigned PUT) ----------
-   backend dto: { purpose: "avatar"|"dnf_capture"|"contest_entry"|"post_attachment",
+/* ---------- Uploads (R2 presigned PUT + multipart direct) ----------
+   backend dto: { purpose: "avatar"|"dnf_capture"|"contest_entry"|"post_attachment"|"hero_banner",
                   contentType, sizeBytes }
    응답: { uploadId, putUrl, r2Key }
+   - hero_banner purpose 는 admin 게이트 (backend 측 hasAnyAdminRole 검증)
+   - file(): multipart 직접 업로드. CORS / presigned 흐름 회피용. 응답: { upload: {...}, url }
 */
 
 export const uploads = {
@@ -274,6 +276,33 @@ export const uploads = {
     }),
   confirm: (id, { sizeBytes } = {}) =>
     apiFetch(`/uploads/${id}/confirm`, { method: "POST", json: { sizeBytes } }),
+  file: ({ purpose, file }) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    fd.append("purpose", purpose);
+    return apiFetch("/uploads/file", { method: "POST", form: fd });
+  },
+};
+
+/* ---------- Hero banners (사이트 어드민 inline edit) ----------
+   GET = public list (active only). admin 시 ?includeInactive=1 로 inactive 포함.
+   POST/PATCH/DELETE = admin only. backend isSiteAdmin(site) 게이트.
+*/
+
+export const heroBanners = {
+  list: ({ includeInactive } = {}) =>
+    apiFetch(sitePath("/hero-banners"), {
+      query: { includeInactive: includeInactive ? "1" : undefined },
+    }),
+  create: ({ imageUrl, linkUrl, label, sortOrder, active }) =>
+    apiFetch(sitePath("/hero-banners"), {
+      method: "POST",
+      json: { imageUrl, linkUrl, label, sortOrder, active },
+    }),
+  update: (id, input) =>
+    apiFetch(sitePath(`/hero-banners/${id}`), { method: "PATCH", json: input }),
+  remove: (id) =>
+    apiFetch(sitePath(`/hero-banners/${id}`), { method: "DELETE" }),
 };
 
 /* ---------- OAuth helpers (browser redirect URL builder) ---------- */
