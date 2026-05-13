@@ -1062,13 +1062,15 @@ button {
 /* signup 중복체크 / 비밀번호 일치 inline hint — B급 sticker 톤 */
 .avail-hint {
   display: inline-flex;
+  align-self: flex-start;
+  width: auto;
   align-items: center;
   gap: 6px;
   margin-top: 6px;
-  padding: 4px 10px;
+  padding: 5px 12px;
   border: 2px solid var(--ink);
   border-radius: 999px;
-  font-size: 0.78rem;
+  font-size: 0.82rem;
   font-weight: 800;
   letter-spacing: 0.01em;
   background: var(--paper);
