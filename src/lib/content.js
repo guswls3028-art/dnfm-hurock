@@ -8,29 +8,53 @@
 
 export const siteMeta = {
   id: "hurock",
-  // backend 호환 — 옛 'allow' 도 alias 로 수용되는 동안 둘 다 명시
   legacyId: "allow",
   hostnames: ["hurock.dnfm.kr", "allow.dnfm.kr"],
-  brand: "허락",
-  brandShort: "허락",
-  wordmark: "허락!",
+  brand: "허락공대",
+  brandShort: "허락공대",
+  wordmark: "허락공대",
   tagline: "던파 모바일 인터넷 방송",
   footerNote:
-    "허락 (hurock.dnfm.kr) 은 인터넷 방송인 허락의 비공식 팬 페이지 겸 방송 동선 정리 페이지입니다. 게임 관련 상표권은 각 권리자에게 있으며, 본 페이지는 어떠한 공식 인증도 받지 않았습니다."
+    "허락공대 (hurock.dnfm.kr) 은 인터넷 방송인 허락의 비공식 팬 페이지 겸 방송 동선 정리 페이지입니다. 게임 관련 상표권은 각 권리자에게 있으며, 본 페이지는 어떠한 공식 인증도 받지 않았습니다."
 };
 
-export const navItems = [
-  { href: "/", label: "홈" },
-  { href: "/contests", label: "콘테스트" },
-  { href: "/board", label: "허락방" },
-  { href: "/profile", label: "내 페이지" }
-];
+// 헤더 상단 nav 제거 — 빈 배열 (호환). 진입은 첫 화면 게시판 카테고리/콘테스트 카드로.
+export const navItems = [];
 
 export const siblingSite = {
   label: "뉴비 훈련소",
   href: "https://dnfm.kr",
-  note: "던파 모바일 입문 가이드 (친구들)"
+  note: "던파 모바일 입문 가이드 (연결 플랫폼)"
 };
+
+// 최상단 슬라이딩 배너 — 5초 자동 회전. 뉴비훈련소 + 아스시로코 클럽.
+export const heroBanners = [
+  {
+    id: "newbie",
+    title: "뉴비 훈련소",
+    subtitle: "던파 모바일 입문 가이드 — dnfm.kr",
+    src: "/openchat-newbie-banner.png",
+    alt: "뉴비 훈련소 배너",
+    href: "https://dnfm.kr",
+  },
+  {
+    id: "asicoroco",
+    title: "아스시로코 클럽",
+    subtitle: "허락 운영 오픈채팅",
+    src: "/openchat-jaehae-banner.png",
+    alt: "아스시로코 클럽 배너",
+    href: "https://open.kakao.com/o/gITUzMWg",
+  },
+];
+
+// 첫 랜딩 게시판 카테고리 5종 (방송채널 카드 위치). 클릭 → /board?category={key}
+export const boardEntryCategories = [
+  { key: "event",  label: "이벤트",  emoji: "🎉", tone: "pink",  note: "콘테스트 / 추첨 / 미션" },
+  { key: "match",  label: "대회",   emoji: "🏆", tone: "amber", note: "팟 / 경합 일정" },
+  { key: "chat",   label: "잡담",   emoji: "💬", tone: "cyan",  note: "자유 수다" },
+  { key: "clip",   label: "클립",   emoji: "🎬", tone: "lime",  note: "방송 다시보기 / URL 연동" },
+  { key: "report", label: "신고건의", emoji: "🛠️", tone: "ink", note: "버그 / 운영 건의" },
+];
 
 export const loginProviders = [
   { id: "self", label: "허락 계정으로 로그인", note: "이메일/비번 (준비중)" },
@@ -47,6 +71,8 @@ export const host = {
   channelName: "허락공대",
   channelHandle: "@허락공대",
   tagline: "[던파모바일] 뉴비·부캐 지원 + 컨설팅 + 미션",
+  avatarSrc: "/hurock-avatar.png",
+  avatarAlt: "허락 프로필 — 오니 마스크 캐릭터",
   contents: [
     "레이드/각종 던전 뉴비 및 부캐 지원",
     "뉴비 육성 방향 / 효율성 컨설팅",
@@ -69,18 +95,24 @@ export const platforms = [
     label: "SOOP (메인)",
     url: "https://ch.sooplive.co.kr/hurock0101",
     note: "허락공대 SOOP",
+    iconSrc: "/platform-soop.png",
+    iconAlt: "SOOP",
   },
   {
     id: "chzzk",
     label: "치지직 (네이버)",
     url: "https://chzzk.naver.com/290f875e595cef717d10deeab70a8b71",
     note: "허락공대 치지직",
+    iconSrc: "/platform-chzzk.png",
+    iconAlt: "치지직",
   },
   {
     id: "youtube",
     label: "유튜브",
     url: "https://youtube.com/@허락공대",
     note: "VOD / 클립",
+    iconSrc: "/platform-youtube.png",
+    iconAlt: "유튜브",
   },
 ];
 
@@ -114,21 +146,21 @@ export const sponsor = {
 };
 
 export const hero = {
-  kicker: "ALLOW BROADCAST",
+  kicker: "HUROCK BROADCAST",
+  philosophy: "즐겁게 게임하자",
   headlineSegments: [
-    { text: "허락의 던파모바일,", style: "plain" },
-    { text: "방송에 놀러", style: "plain" },
-    { text: "오세요", style: "mark" },
+    { text: "허락공대,", style: "plain" },
+    { text: "즐겁게", style: "plain" },
+    { text: "게임하자", style: "mark" },
   ],
   body:
     "평일 19시 이후 / 주말은 일찍 켭니다. 뉴비·부캐 컨설팅, 레이드 도전, 미션, 강화 / 상자깡까지. SOOP·치지직·유튜브 동시 운영.",
   portraitName: "허락",
-  portraitNote: "프로필 사진 등록 전",
+  portraitNote: "오늘도 방송 켭니다",
   primaryActions: [
-    { label: "SOOP 라이브", url: "https://ch.sooplive.co.kr/hurock0101", tone: "primary" },
+    { label: "SOOP", url: "https://ch.sooplive.co.kr/hurock0101", tone: "primary" },
     { label: "치지직", url: "https://chzzk.naver.com/290f875e595cef717d10deeab70a8b71", tone: "accent" },
     { label: "유튜브", url: "https://youtube.com/@허락공대", tone: "cyan" },
-    { label: "후원하기", url: "https://toon.donate/dnfmhurock", tone: "primary", note: "2000원 뽑기박스 룰렛 추가" },
   ],
 };
 
@@ -140,6 +172,7 @@ export const liveCards = [
     body: "평일 19시 이후 / 주말 일찍. 던파 모바일 뉴비 컨설팅 + 레이드 도전.",
     meta: ["평일 19시+", "SOOP"],
     cta: { label: "SOOP 채널", url: "https://ch.sooplive.co.kr/hurock0101" },
+    platformId: "soop",
   },
   {
     id: "live-chzzk",
@@ -148,6 +181,7 @@ export const liveCards = [
     body: "네이버 치지직에도 동시 송출. 채팅·다시보기 OK.",
     meta: ["네이버 치지직"],
     cta: { label: "치지직 채널", url: "https://chzzk.naver.com/290f875e595cef717d10deeab70a8b71" },
+    platformId: "chzzk",
   },
   {
     id: "live-youtube",
@@ -156,6 +190,7 @@ export const liveCards = [
     body: "최근 라이브 다시보기 + 던파 모바일 가이드 클립.",
     meta: ["VOD", "@허락공대"],
     cta: { label: "유튜브 채널", url: "https://youtube.com/@허락공대" },
+    platformId: "youtube",
   },
 ];
 

@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { navItems, siblingSite, siteMeta } from "@/lib/content";
+import { host, navItems, siblingSite, siteMeta } from "@/lib/content";
 import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
 
 /**
@@ -32,13 +33,25 @@ export default function SiteHeader({ activePath = "/" }) {
     <header className="allow-header">
       <div className="allow-header-inner">
         <Link className="allow-brand" href="/" aria-label={`${siteMeta.brand} 홈`}>
-          <span className="allow-brand-mark" aria-hidden="true">
-            허
+          <span className="allow-brand-mark allow-brand-mark--image" aria-hidden="true">
+            {host.avatarSrc ? (
+              <Image
+                src={host.avatarSrc}
+                alt=""
+                width={32}
+                height={32}
+                priority
+                unoptimized
+              />
+            ) : (
+              "허"
+            )}
           </span>
           <span className="allow-brand-wordmark">{siteMeta.wordmark}</span>
-          <span className="allow-brand-sub">allow.dnfm.kr</span>
+          <span className="allow-brand-sub">hurock.dnfm.kr</span>
         </Link>
 
+        {/* 상단 nav 탭 제거 — 첫 화면 게시판 카테고리/콘테스트 카드로 진입 */}
         <nav className="allow-nav" aria-label="사이트 메뉴">
           {visibleNav.map((item) => {
             const isActive =

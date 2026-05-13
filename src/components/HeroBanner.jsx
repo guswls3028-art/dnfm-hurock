@@ -1,11 +1,25 @@
 import Link from "next/link";
-import { hero, host } from "@/lib/content";
+import Image from "next/image";
+import { hero, host, platforms } from "@/lib/content";
 import StickerBadge from "@/components/StickerBadge";
+
+const PLATFORM_BY_ID = platforms.reduce((acc, p) => {
+  acc[p.id] = p;
+  return acc;
+}, {});
+
+function actionPlatform(action) {
+  if (!action.url) return null;
+  if (action.url.includes("sooplive")) return PLATFORM_BY_ID.soop;
+  if (action.url.includes("chzzk")) return PLATFORM_BY_ID.chzzk;
+  if (action.url.includes("youtube")) return PLATFORM_BY_ID.youtube;
+  return null;
+}
 
 /**
  * HeroBanner — B급 톤 hero.
- *  - 좌측: kicker sticker + 헤드라인(mark/strike segment) + body + actions
- *  - 우측: 살짝 기울어진 portrait placeholder (사진 등록 자리)
+ *  - 좌측: kicker sticker + 헤드라인(mark/strike segment) + body + actions(아이콘 동반)
+ *  - 우측: 살짝 기울어진 portrait + 허락 프사 (오니 마스크)
  *  - 배경: 노랑/시안 radial + ALLOW! outline 거대 텍스트
  */
 export default function HeroBanner() {
@@ -44,6 +58,18 @@ export default function HeroBanner() {
                 : action.tone === "cyan"
                 ? "btn-cyan"
                 : "btn-primary";
+            const platform = actionPlatform(action);
+            const iconNode = platform?.iconSrc ? (
+              <span className="btn-platform-icon" aria-hidden="true">
+                <Image
+                  src={platform.iconSrc}
+                  alt=""
+                  width={20}
+                  height={20}
+                  unoptimized
+                />
+              </span>
+            ) : null;
             if (!action.url) {
               return (
                 <button
@@ -53,6 +79,7 @@ export default function HeroBanner() {
                   disabled
                   title={action.reason}
                 >
+                  {iconNode}
                   {action.label}
                   <span className="btn-note">({action.reason})</span>
                 </button>
@@ -66,10 +93,12 @@ export default function HeroBanner() {
                 rel="noreferrer"
                 className={`btn ${toneCls}`}
               >
+                {iconNode}
                 {action.label}
               </a>
             ) : (
               <Link href={action.url} className={`btn ${toneCls}`}>
+                {iconNode}
                 {action.label}
               </Link>
             );
@@ -90,7 +119,20 @@ export default function HeroBanner() {
 
       <div className="allow-hero-portrait" aria-hidden="false">
         <div className="allow-hero-portrait-inner">
-          <div className="allow-hero-portrait-avatar" />
+          {host.avatarSrc ? (
+            <span className="allow-hero-portrait-avatar has-image">
+              <Image
+                src={host.avatarSrc}
+                alt={host.avatarAlt || host.name}
+                width={120}
+                height={120}
+                priority
+                unoptimized
+              />
+            </span>
+          ) : (
+            <span className="allow-hero-portrait-avatar" />
+          )}
           <strong>{host.name}</strong>
           <small>{host.channelName} · {host.channelHandle}</small>
           <small style={{ opacity: 0.78 }}>{host.tagline}</small>
