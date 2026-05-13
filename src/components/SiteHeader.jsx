@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
-import { host, navItems, siblingSite, siteMeta } from "@/lib/content";
+import { host, navItems, siteMeta } from "@/lib/content";
 import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
 
 /**
@@ -72,15 +72,6 @@ export default function SiteHeader({ activePath = "/" }) {
         </nav>
 
         <div className="allow-header-right">
-          <a
-            className="allow-sibling-pill"
-            href={siblingSite.href}
-            target="_blank"
-            rel="noreferrer"
-            title={siblingSite.note}
-          >
-            ↗ {siblingSite.label}
-          </a>
           {loading ? (
             <span className="allow-header-cta" style={{ opacity: 0.55 }}>...</span>
           ) : user ? (
