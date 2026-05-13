@@ -15,6 +15,7 @@ const TARGET_FEATURED = "submission";
 
 export default function HomePage() {
   const [contests, setContests] = useState(mockContests);
+  const [usingMock, setUsingMock] = useState({ contests: true });
 
   useEffect(() => {
     let alive = true;
@@ -23,7 +24,10 @@ export default function HomePage() {
         const data = await contestsApi.list();
         if (!alive) return;
         const list = Array.isArray(data) ? data : data?.contests || [];
-        if (list.length) setContests(list);
+        if (list.length) {
+          setContests(list);
+          setUsingMock((m) => ({ ...m, contests: false }));
+        }
       } catch (err) {
         if (!(err instanceof ApiError) || err.status === 0) { /* mock */ }
       }
