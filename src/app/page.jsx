@@ -7,6 +7,7 @@ import HeroSlider from "@/components/HeroSlider";
 import HeroBanner from "@/components/HeroBanner";
 import BoardEntryGrid from "@/components/BoardEntryGrid";
 import ContestCard from "@/components/ContestCard";
+import ContestPopup from "@/components/ContestPopup";
 import StickerBadge from "@/components/StickerBadge";
 import { ApiError, contests as contestsApi } from "@/lib/api-client";
 import { contests as mockContests, noticeBoard } from "@/lib/content";
@@ -42,6 +43,7 @@ export default function HomePage() {
 
   return (
     <PageShell activePath="/">
+      <ContestPopup />
       <HeroSlider />
       <HeroBanner />
 
@@ -60,7 +62,7 @@ export default function HomePage() {
         ) : (
           <>
             {submission ? (
-              <div className="contest-banner" style={{ marginBottom: 14 }}>
+              <div className="contest-banner" style={{ marginBottom: 0 }}>
                 <div className="contest-banner-body">
                   <strong>
                     {submission.posterEmoji ? `${submission.posterEmoji} ` : ""}
@@ -75,12 +77,13 @@ export default function HomePage() {
                   지금 참가
                 </Link>
               </div>
-            ) : null}
-            <div className="grid grid-3">
-              {featuredContests.map((c, i) => (
-                <ContestCard key={c.id} contest={c} tilt={i % 2 === 0 ? "l" : "r"} />
-              ))}
-            </div>
+            ) : (
+              <div className="grid grid-3">
+                {featuredContests.map((c, i) => (
+                  <ContestCard key={c.id} contest={c} tilt={i % 2 === 0 ? "l" : "r"} />
+                ))}
+              </div>
+            )}
             {usingMock.contests && (
               <small style={{ color: "var(--muted)", marginTop: 6, display: "inline-block" }}>
                 * 백엔드 미가용 — 샘플 콘테스트 표시 중
