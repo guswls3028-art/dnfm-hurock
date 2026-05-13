@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
 import { boardCategories } from "@/lib/content";
@@ -10,10 +10,23 @@ import { ApiError, posts as postsApi } from "@/lib/api-client";
 import { uploadFile } from "@/lib/upload";
 import { useCurrentUser } from "@/lib/use-current-user";
 
+// allow 사이트 mock 카테고리 fallback (backend fetch 실패 시).
+// backend seed (src/shared/db/seed.ts) 와 slug 매핑 일치 유지.
+const ALLOW_CATEGORY_FALLBACK = [
+  { slug: "talk", name: "잡담" },
+  { slug: "cheer", name: "응원" },
+  { slug: "contest_qa", name: "콘테스트 Q&A" },
+];
+
 export default function BoardNewPage() {
   const router = useRouter();
   const { user, loading: userLoading } = useCurrentUser();
-  const [form, setForm] = useState({ category: "잡담", title: "", body: "" });
+  const [categories, setCategories] = useState(ALLOW_CATEGORY_FALLBACK);
+  const [form, setForm] = useState({
+    categorySlug: ALLOW_CATEGORY_FALLBACK[0].slug,
+    title: "",
+    body: "",
+  });
   const [image, setImage] = useState({ uploading: false, url: null, error: null });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -21,6 +34,31 @@ export default function BoardNewPage() {
   function update(k, v) {
     setForm((f) => ({ ...f, [k]: v }));
   }
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const data = await postsApi.categories();
+        const items = Array.isArray(data) ? data : data?.items || [];
+        if (!alive || items.length === 0) return;
+        const writable = items
+          .filter((c) => c.writeRoleMin !== "admin")
+          .map((c) => ({ slug: c.slug, name: c.name }));
+        if (writable.length > 0) {
+          setCategories(writable);
+          setForm((f) => ({ ...f, categorySlug: writable[0].slug }));
+        }
+      } catch {
+        /* fallback to mock */
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
+  // satisfy linter — boardCategories 는 향후 list 페이지 카테고리 표시용 reserve.
+  void boardCategories;
 
   async function handleFile(file) {
     if (!file) return;
@@ -43,10 +81,13 @@ export default function BoardNewPage() {
     setSubmitting(true);
     try {
       const res = await postsApi.create({
-        category: form.category,
+        categorySlug: form.categorySlug,
         title: form.title.trim(),
         body: form.body.trim(),
-        imageUrl: image.url || undefined,
+        // backend 가 attachmentR2Keys array 만 받음. uploadFile 가 url 반환 → key 추출 필요.
+        // 현재는 단일 image url 만 보내는 wrapper 없음 → 첨부 누락 보내지 않음 (no-op).
+        // 다음 cycle: uploads 도메인이 r2Key 도 반환하게 + 여기서 attachmentR2Keys 사용.
+        attachmentR2Keys: undefined,
       });
       const newId = res?.id || res?.post?.id;
       router.push(newId ? `/board/${newId}` : "/board");
@@ -94,16 +135,14 @@ export default function BoardNewPage() {
           <select
             id="post-cat"
             className="form-select"
-            value={form.category}
-            onChange={(e) => update("category", e.target.value)}
+            value={form.categorySlug}
+            onChange={(e) => update("categorySlug", e.target.value)}
           >
-            {boardCategories
-              .filter((c) => c !== "전체")
-              .map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
+            {categories.map((c) => (
+              <option key={c.slug} value={c.slug}>
+                {c.name}
+              </option>
+            ))}
           </select>
         </div>
         <div className="form-row">

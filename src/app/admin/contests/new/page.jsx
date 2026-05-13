@@ -22,13 +22,12 @@ export default function AdminContestNewPage() {
 
   const [form, setForm] = useState({
     title: "",
-    subtitle: "",
     description: "",
-    submissionCloses: "",
-    voteWindow: "",
-    rewards: "",
-    posterEmoji: "👗",
-    tone: "pink",
+    entryDeadlineAt: "", // ISO datetime — datetime-local input
+    voteStartAt: "",
+    voteEndAt: "",
+    maxEntries: "",
+    coverR2Key: "",
   });
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -46,22 +45,30 @@ export default function AdminContestNewPage() {
     }
     setSubmitting(true);
     try {
+      // backend createContestDto 와 정합한 payload (subtitle/voteWindow/rewards/posterEmoji 같은
+      // mock-only field 는 보내지 않음. 운영용 schema 는 title/description/maxEntries/
+      // entryDeadlineAt/voteStartAt/voteEndAt/coverR2Key/status/formSchema).
+      // datetime-local 값 → ISO 변환. 빈 값은 omit.
+      const toIso = (v) => {
+        if (!v) return undefined;
+        const d = new Date(v);
+        return Number.isNaN(d.getTime()) ? undefined : d.toISOString();
+      };
       const payload = {
         title: form.title.trim(),
-        subtitle: form.subtitle.trim(),
-        description: form.description.trim(),
-        submissionCloses: form.submissionCloses || null,
-        voteWindow: form.voteWindow || null,
-        rewards: form.rewards
-          ? form.rewards.split("\n").map((s) => s.trim()).filter(Boolean)
-          : [],
-        posterEmoji: form.posterEmoji,
-        tone: form.tone,
-        status: "submission",
-        formSchema: DEFAULT_FORM_SCHEMA,
+        description: form.description.trim() || undefined,
+        maxEntries: form.maxEntries ? Number(form.maxEntries) : 0,
+        entryDeadlineAt: toIso(form.entryDeadlineAt),
+        voteStartAt: toIso(form.voteStartAt),
+        voteEndAt: toIso(form.voteEndAt),
+        coverR2Key: form.coverR2Key || undefined,
+        // backend 의 contestStatuses enum: draft / open / judging / voting / completed.
+        // 어드민이 막 생성한 콘테스트는 참가 모집 가능 = "open".
+        status: "open",
+        formSchema: { fields: DEFAULT_FORM_SCHEMA },
       };
       const res = await contestsApi.create(payload);
-      const newId = res?.id || res?.contest?.id;
+      const newId = res?.contest?.id || res?.id;
       router.push(newId ? `/admin/contests/${newId}` : "/admin");
       router.refresh();
     } catch (err) {
@@ -135,17 +142,6 @@ export default function AdminContestNewPage() {
           />
         </div>
         <div className="form-row">
-          <label htmlFor="ac-sub">부제 (한 줄)</label>
-          <input
-            id="ac-sub"
-            className="form-input"
-            type="text"
-            value={form.subtitle}
-            onChange={(e) => update("subtitle", e.target.value)}
-            placeholder="이번 주 코디 자랑"
-          />
-        </div>
-        <div className="form-row">
           <label htmlFor="ac-desc">설명</label>
           <textarea
             id="ac-desc"
@@ -164,22 +160,43 @@ export default function AdminContestNewPage() {
             <input
               id="ac-close"
               className="form-input"
-              type="text"
-              value={form.submissionCloses}
-              onChange={(e) => update("submissionCloses", e.target.value)}
-              placeholder="이번 주 일요일 23:59"
+              type="datetime-local"
+              value={form.entryDeadlineAt}
+              onChange={(e) => update("entryDeadlineAt", e.target.value)}
             />
-            <small>자유 텍스트. 추후 datetime picker 로 교체 예정.</small>
           </div>
           <div className="form-row">
-            <label htmlFor="ac-vote">투표 기간</label>
+            <label htmlFor="ac-vote-start">투표 시작</label>
             <input
-              id="ac-vote"
+              id="ac-vote-start"
               className="form-input"
-              type="text"
-              value={form.voteWindow}
-              onChange={(e) => update("voteWindow", e.target.value)}
-              placeholder="마감 다음 날부터 3일"
+              type="datetime-local"
+              value={form.voteStartAt}
+              onChange={(e) => update("voteStartAt", e.target.value)}
+            />
+          </div>
+        </div>
+        <div className="grid grid-2">
+          <div className="form-row">
+            <label htmlFor="ac-vote-end">투표 종료</label>
+            <input
+              id="ac-vote-end"
+              className="form-input"
+              type="datetime-local"
+              value={form.voteEndAt}
+              onChange={(e) => update("voteEndAt", e.target.value)}
+            />
+          </div>
+          <div className="form-row">
+            <label htmlFor="ac-max">최대 참가자 수 (0=무제한)</label>
+            <input
+              id="ac-max"
+              className="form-input"
+              type="number"
+              min="0"
+              value={form.maxEntries}
+              onChange={(e) => update("maxEntries", e.target.value)}
+              placeholder="0"
             />
           </div>
         </div>
@@ -210,18 +227,6 @@ export default function AdminContestNewPage() {
         </div>
 
         <div className="form-divider" />
-
-        <div className="form-step">경품 (선택)</div>
-        <div className="form-row">
-          <label htmlFor="ac-rew">경품 목록 (한 줄에 하나)</label>
-          <textarea
-            id="ac-rew"
-            className="form-textarea"
-            value={form.rewards}
-            onChange={(e) => update("rewards", e.target.value)}
-            placeholder={"1등: ?\n2~3등: ?\n참가자 전원: ?"}
-          />
-        </div>
 
         {error && (
           <div className="callout-box is-pending">

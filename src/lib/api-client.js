@@ -197,10 +197,10 @@ export const posts = {
       query: { categoryId, flair, postType, bestOnly, q, page, pageSize, sort },
     }),
   detail: (id) => apiFetch(sitePath(`/posts/${id}`)),
-  create: ({ categoryId, title, body, bodyFormat, flair, postType, attachmentR2Keys }) =>
+  create: ({ categoryId, categorySlug, title, body, bodyFormat, flair, postType, attachmentR2Keys }) =>
     apiFetch(sitePath("/posts"), {
       method: "POST",
-      json: { categoryId, title, body, bodyFormat, flair, postType, attachmentR2Keys },
+      json: { categoryId, categorySlug, title, body, bodyFormat, flair, postType, attachmentR2Keys },
     }),
   update: (id, input) =>
     apiFetch(sitePath(`/posts/${id}`), { method: "PATCH", json: input }),
