@@ -2,19 +2,34 @@
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
 import { ApiError, auth, oauth } from "@/lib/api-client";
+import { useCurrentUser } from "@/lib/use-current-user";
+
+function safeReturnTo(to) {
+  if (!to || typeof to !== "string") return "/";
+  if (!to.startsWith("/") || to.startsWith("//")) return "/";
+  return to;
+}
 
 function LoginInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const returnTo = params.get("returnTo") || "/";
+  const returnTo = safeReturnTo(params.get("returnTo") || "/");
+  const { user, loading: userLoading } = useCurrentUser();
 
   const [form, setForm] = useState({ username: "", password: "" });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(null);
+
+  // 이미 로그인된 사용자가 /login 진입 시 returnTo 또는 / 로 보냄.
+  useEffect(() => {
+    if (!userLoading && user) {
+      router.replace(returnTo);
+    }
+  }, [userLoading, user, returnTo, router]);
 
   // OAuth provider 사전 점검 — 미설정이면 disabled + 안내.
   // 운영 .env: GOOGLE_OAUTH_CLIENT_ID set, KAKAO_OAUTH_CLIENT_ID empty (2026-05-13 기준).
