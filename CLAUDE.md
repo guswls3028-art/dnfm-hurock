@@ -19,6 +19,26 @@
 - **local dev rendering**: build 통과 ≠ 정상. 실제 렌더링 확인 후 E2E.
 - **E2E**: 격리 환경, `[E2E-{timestamp}]` 태그, cleanup 필수.
 
+### B-1. Manual Deploy (CI 자동화 불가 상태)
+
+EC2 SG inbound 22 = 사용자 IP only — GitHub runner 차단. GitHub Actions `Build & Deploy to EC2` workflow 는 `workflow_dispatch` 만 등록. 일반 배포는 사용자 머신에서 직접:
+
+```bash
+cd C:/academy/dnfm/hurock
+pnpm build                                                # output: "standalone" 강제
+cp -r .next/static .next/standalone/.next/
+cp -r public .next/standalone/
+tar -czf /tmp/standalone.tgz -C .next standalone
+scp -i /tmp/dnfm/ic /tmp/standalone.tgz ec2-user@43.202.246.97:/tmp/
+ssh -i /tmp/dnfm/ic ec2-user@43.202.246.97 \
+  'cd /var/www/dnfm-hurock && rm -rf .next/standalone \
+   && tar -xzf /tmp/standalone.tgz -C .next/ \
+   && pm2 restart dnfm-hurock --update-env \
+   && curl -sk -H "Host: hurock.dnfm.kr" https://127.0.0.1/ -o /dev/null -w "smoke %{http_code}\n"'
+```
+
+EC2 좌표 SSOT: `C:/academy/dnfm/api/docs/deployment-credentials.md` §0.
+
 ## C. Harness Architecture
 
 역할 분리 아님 — **관심사 계층화.** AI는 모든 관심사를 동시에 적용.

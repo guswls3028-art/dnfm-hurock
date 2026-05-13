@@ -1,8 +1,10 @@
 name: Build & Deploy to EC2
 
 on:
-  push:
-    branches: [main]
+  # push trigger 비활성화 — EC2 SG inbound 22 = 사용자 IP only.
+  # GitHub runner IP 가 차단되어 rsync timeout. main 마다 빨간 X 방지.
+  # Deploy 경로: (a) 사용자 머신 manual scp (CLAUDE.md §B 참조) 또는
+  #            (b) SG 임시 확장 후 workflow_dispatch 수동 트리거.
   workflow_dispatch:
 
 concurrency:
