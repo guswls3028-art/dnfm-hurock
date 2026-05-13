@@ -169,11 +169,34 @@ export default function SignupPage() {
 
   function availabilityHint(field) {
     const v = availability[field];
-    if (v === "checking") return <small>확인중…</small>;
-    if (v === true) return <small style={{ color: "var(--primary-ink)" }}>사용 가능</small>;
-    if (v === false) return <small style={{ color: "var(--danger)" }}>이미 사용 중</small>;
+    if (v === "checking")
+      return (
+        <small className="avail-hint avail-hint--checking">
+          <span aria-hidden="true">⏳</span> 확인중…
+        </small>
+      );
+    if (v === true)
+      return (
+        <small className="avail-hint avail-hint--ok">
+          <span aria-hidden="true">✓</span> 사용 가능
+        </small>
+      );
+    if (v === false)
+      return (
+        <small className="avail-hint avail-hint--bad">
+          <span aria-hidden="true">✗</span> 이미 사용 중
+        </small>
+      );
     return null;
   }
+
+  // 비밀번호 일치 inline 표시.
+  const passwordMatch =
+    !form.password || !form.password2
+      ? null
+      : form.password === form.password2
+        ? "ok"
+        : "mismatch";
 
   return (
     <PageShell activePath="/signup">
@@ -262,6 +285,15 @@ export default function SignupPage() {
               onChange={(e) => update("password2", e.target.value)}
               required
             />
+            {passwordMatch === "ok" ? (
+              <small className="avail-hint avail-hint--ok">
+                <span aria-hidden="true">✓</span> 일치합니다
+              </small>
+            ) : passwordMatch === "mismatch" ? (
+              <small className="avail-hint avail-hint--bad">
+                <span aria-hidden="true">✗</span> 비밀번호가 다릅니다
+              </small>
+            ) : null}
           </div>
 
           {signupError && (
