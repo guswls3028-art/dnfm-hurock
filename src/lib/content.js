@@ -58,7 +58,7 @@ export const boardEntryCategories = [
 ];
 
 export const loginProviders = [
-  { id: "self", label: "허락 계정으로 로그인", note: "이메일/비번 (준비중)" },
+  { id: "self", label: "허락 계정으로 로그인", note: "아이디/비번 (준비중)" },
   { id: "google", label: "Google 로그인", note: "OAuth 연결 예정" },
   { id: "kakao", label: "카카오 로그인", note: "카카오 디벨로퍼스 연결 예정" }
 ];
@@ -390,40 +390,6 @@ export const contests = [
         showWhen: { field: "category", in: ["anime-male", "anime-female"] }
       }
     ]
-  },
-  {
-    id: "c-screenshot-1",
-    title: "스크린샷 한 컷",
-    subtitle: "방송 중 인상깊었던 순간",
-    status: "voting",
-    statusLabel: "투표중",
-    tone: "cyan",
-    posterEmoji: "📸",
-    submissionCloses: "(마감됨)",
-    voteWindow: "오늘 자정까지",
-    resultsAt: "내일 정오 발표",
-    entries: 22,
-    description:
-      "방송 다시보기에서 캡처한 장면을 올려주세요. 코미디/감동/대참사 다 환영.",
-    rewards: ["1등: 굿즈 추첨권", "2~3등: 닉네임 색 변경권"],
-    formSchema: []
-  },
-  {
-    id: "c-name-0",
-    title: "허락방 이름 짓기",
-    subtitle: "공식 별칭 공모",
-    status: "announced",
-    statusLabel: "결과 발표",
-    tone: "amber",
-    posterEmoji: "🏷️",
-    submissionCloses: "(마감됨)",
-    voteWindow: "(종료)",
-    resultsAt: "지난 주 일요일 발표",
-    entries: 38,
-    description:
-      "허락방 시청자 별칭을 모집했습니다. 1등은 페이지 헤더에 새겨질 예정입니다.",
-    rewards: ["1등: 헤더 등재 + 굿즈", "2~3등: 닉네임 색"],
-    formSchema: []
   }
 ];
 
@@ -440,27 +406,10 @@ export const contestEntries = {
     { id: "e5", adventureName: "허락팬2단", characterName: "비오는날", title: "장마 일기", description: "노란 우비 + 장화. 비 오는 날만 입음.", tone: "pink" },
     { id: "e6", adventureName: "도전자모임", characterName: "철권왕", title: "도장깨기", description: "도복 + 머리띠. 진지하게 보이려고 노력함.", tone: "cyan" }
   ],
-  "c-screenshot-1": [
-    { id: "s1", adventureName: "방송시청자", characterName: "(N/A)", title: "보스 패턴 회피 실패", description: "마지막 1% 에서 누운 컷.", tone: "pink" },
-    { id: "s2", adventureName: "방송시청자", characterName: "(N/A)", title: "허락 감동 장면", description: "100일 기념 멘트.", tone: "amber" },
-    { id: "s3", adventureName: "방송시청자", characterName: "(N/A)", title: "채팅 단체 도배", description: "ㅋㅋㅋㅋ 가 화면을 덮은 순간.", tone: "cyan" }
-  ],
-  "c-name-0": []
 };
 
-/**
- * 결과 발표 mock — c-name-0
- */
-export const contestResults = {
-  "c-name-0": {
-    podium: [
-      { rank: 1, name: "허락방", by: "익명1", comment: "원안. 가장 많이 부르던 이름이라 그대로 채택." },
-      { rank: 2, name: "허락 클럽", by: "익명2", comment: "느낌 좋음. 디스코드 클럽 별칭으로 추가 검토." },
-      { rank: 3, name: "허락존", by: "익명3", comment: "짧고 직관적." }
-    ],
-    note: "투표 결과는 1인 1표 기준이며 중복 IP 는 제외했습니다."
-  }
-};
+// 결과 발표 mock — 아직 발표 콘테스트 없음.
+export const contestResults = {};
 
 /**
  * 자유 게시판 mock — 디시 톤 단순화, 허락방 카테고리.
@@ -502,7 +451,6 @@ export const boardPostDetail = {
 export const profileMock = {
   account: {
     nickname: "라피헌터",
-    email: "demo@allow.dnfm.kr",
     joinedAt: "가입일 미정",
     provider: "자체",
     badges: ["콘테스트 참가 1회"]
@@ -518,8 +466,7 @@ export const profileMock = {
     ]
   },
   contestHistory: [
-    { id: "c-avatar-1", title: "허락 아바타 콘테스트 1회", status: "submission", role: "참가자", entry: "여름 골목 산책" },
-    { id: "c-name-0", title: "허락방 이름 짓기", status: "announced", role: "참가자", entry: "허락 클럽", rank: 2 }
+    { id: "c-avatar-1", title: "허락 아바타 콘테스트 1회", status: "submission", role: "참가자", entry: "여름 골목 산책" }
   ]
 };
 

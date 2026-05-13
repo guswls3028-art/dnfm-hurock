@@ -45,32 +45,12 @@ export default function HomePage() {
       <HeroSlider />
       <HeroBanner />
 
-      <section className="section" aria-labelledby="home-notice">
-        <div className="section-head">
-          <h2 id="home-notice">
-            공지 <StickerBadge tone="pink" rotate="r">필독</StickerBadge>
-          </h2>
-        </div>
-        <div className="grid grid-2">
-          {noticeBoard.map((n) => (
-            <article key={n.id} className="card" data-tilt={n.pinned ? "l" : undefined}>
-              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
-                {n.pinned && <StickerBadge tone="pink" rotate="l">고정</StickerBadge>}
-                <StickerBadge tone="cyan" rotate="0">{n.posted}</StickerBadge>
-              </div>
-              <h3>{n.title}</h3>
-              <p>{n.body}</p>
-            </article>
-          ))}
-        </div>
-      </section>
-
-      <section className="section" aria-labelledby="home-contest">
+      <section className="section section-hero-event" aria-labelledby="home-contest">
         <div className="section-head">
           <h2 id="home-contest">
-            이벤트 <StickerBadge tone="cyan">진행중 콘테스트</StickerBadge>
+            🏆 이벤트 <StickerBadge tone="pink" rotate="r">메인 — 진행중 콘테스트</StickerBadge>
           </h2>
-          <Link href="/events">이벤트 전체 →</Link>
+          <Link href="/events" className="btn btn-sm">이벤트 전체 →</Link>
         </div>
         {featuredContests.length === 0 ? (
           <div className="callout-box">
@@ -118,10 +98,30 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="section" aria-labelledby="home-notice">
+        <div className="section-head">
+          <h2 id="home-notice">
+            📢 공지 <StickerBadge tone="amber" rotate="r">필독</StickerBadge>
+          </h2>
+        </div>
+        <div className="grid grid-2">
+          {noticeBoard.map((n) => (
+            <article key={n.id} className="card" data-tilt={n.pinned ? "l" : undefined}>
+              <div style={{ display: "flex", gap: 6, alignItems: "center" }}>
+                {n.pinned && <StickerBadge tone="pink" rotate="l">고정</StickerBadge>}
+                <StickerBadge tone="cyan" rotate="0">{n.posted}</StickerBadge>
+              </div>
+              <h3>{n.title}</h3>
+              <p>{n.body}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
       <section className="section" aria-labelledby="home-community">
         <div className="section-head">
           <h2 id="home-community">
-            커뮤니티 <StickerBadge tone="cyan" rotate="r">5개 카테고리</StickerBadge>
+            💬 커뮤니티 <StickerBadge tone="cyan" rotate="r">5개 카테고리</StickerBadge>
           </h2>
           <Link href="/board">허락방 전체 →</Link>
         </div>
