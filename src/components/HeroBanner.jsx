@@ -18,9 +18,10 @@ function actionPlatform(action) {
 
 /**
  * HeroBanner — B급 톤 hero.
- *  - 좌측: kicker sticker + 헤드라인(mark/strike segment) + body + actions(아이콘 동반)
- *  - 우측: 살짝 기울어진 portrait + 허락 프사 (오니 마스크)
- *  - 배경: 노랑/시안 radial + ALLOW! outline 거대 텍스트
+ *  - 좌측: kicker sticker + 헤드라인(mark/strike segment) + body + 액션
+ *      · 플랫폼 액션(SOOP / 치지직 / 유튜브) = 아이콘 전용 동그란 버튼 (텍스트 X, aria-label 만)
+ *      · 그 외 액션 = 텍스트 버튼
+ *  - 우측: 살짝 기울어진 portrait + 허락 프사 (오니 마스크) + 빨강/노랑 ring frame
  */
 export default function HeroBanner() {
   return (
@@ -52,24 +53,45 @@ export default function HeroBanner() {
         <p className="allow-hero-body">{hero.body}</p>
         <div className="allow-hero-actions">
           {hero.primaryActions.map((action) => {
+            const platform = actionPlatform(action);
             const toneCls =
               action.tone === "accent"
                 ? "btn-accent"
                 : action.tone === "cyan"
                 ? "btn-cyan"
                 : "btn-primary";
-            const platform = actionPlatform(action);
-            const iconNode = platform?.iconSrc ? (
-              <span className="btn-platform-icon" aria-hidden="true">
-                <Image
-                  src={platform.iconSrc}
-                  alt=""
-                  width={20}
-                  height={20}
-                  unoptimized
-                />
-              </span>
-            ) : null;
+
+            // 플랫폼 액션 = 아이콘 자체만 (컨테이너 X, 한글 라벨 X)
+            if (platform) {
+              const label = platform.iconAlt || platform.label || action.label;
+              if (!action.url) {
+                return (
+                  <button
+                    key={platform.id}
+                    type="button"
+                    className={`platform-action platform-action--${platform.id} is-disabled`}
+                    disabled
+                    aria-label={label}
+                  >
+                    <Image src={platform.iconSrc} alt="" width={64} height={64} unoptimized />
+                  </button>
+                );
+              }
+              return (
+                <a
+                  key={platform.id}
+                  href={action.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={`platform-action platform-action--${platform.id}`}
+                  aria-label={label}
+                >
+                  <Image src={platform.iconSrc} alt="" width={64} height={64} unoptimized />
+                </a>
+              );
+            }
+
+            // 일반 텍스트 액션 (후원하기 등)
             if (!action.url) {
               return (
                 <button
@@ -79,7 +101,6 @@ export default function HeroBanner() {
                   disabled
                   title={action.reason}
                 >
-                  {iconNode}
                   {action.label}
                   <span className="btn-note">({action.reason})</span>
                 </button>
@@ -93,12 +114,10 @@ export default function HeroBanner() {
                 rel="noreferrer"
                 className={`btn ${toneCls}`}
               >
-                {iconNode}
                 {action.label}
               </a>
             ) : (
               <Link href={action.url} className={`btn ${toneCls}`}>
-                {iconNode}
                 {action.label}
               </Link>
             );
@@ -124,8 +143,8 @@ export default function HeroBanner() {
               <Image
                 src={host.avatarSrc}
                 alt={host.avatarAlt || host.name}
-                width={120}
-                height={120}
+                width={500}
+                height={500}
                 priority
                 unoptimized
               />

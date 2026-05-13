@@ -7,11 +7,12 @@ import { heroBanners } from "@/lib/content";
 const ROTATE_MS = 5000;
 
 /**
- * HeroSlider — 최상단 슬라이딩 배너.
- *  - heroBanners 배열 자동 5초 회전
- *  - hover / 키보드 포커스 시 일시 정지
- *  - 좌우 화살표 + 도트 인디케이터 (수동 조작)
- *  - prefers-reduced-motion 존중 (자동 회전 끔)
+ * HeroSlider — 최상단 슬라이딩 배너 (던파 공홈 메인 슬라이더 레이어).
+ *  - banner.kind === "portrait": 허락 본인 portrait + 사이드 텍스트 (왕대가리 슬라이드)
+ *  - banner.kind === "wide": 카카오 오픈톡 배너 (가로 5:1 띠)
+ *  - 자동 5초 회전 (hover/focus 시 일시정지)
+ *  - 좌하단 N/total 인디케이터 (공홈 1/17 형식)
+ *  - 좌우 화살표 + 도트
  */
 export default function HeroSlider() {
   const banners = heroBanners;
@@ -33,16 +34,15 @@ export default function HeroSlider() {
 
   useEffect(() => {
     if (paused || banners.length < 2) return undefined;
-    // 자동 회전 — prefers-reduced-motion 은 의도적으로 무시 (배너 노출이 핵심 UX).
-    timerRef.current = setInterval(
+    timerRef.current = setTimeout(
       () => setIdx((p) => (p + 1) % banners.length),
       ROTATE_MS
     );
-    return () => clearInterval(timerRef.current);
-  }, [paused, banners.length]);
+    return () => clearTimeout(timerRef.current);
+  }, [idx, paused, banners.length]);
 
   if (!banners.length) return null;
-  const current = banners[idx];
+  const total = banners.length;
 
   return (
     <section
@@ -60,20 +60,40 @@ export default function HeroSlider() {
             href={b.href}
             target="_blank"
             rel="noreferrer"
-            className={`hero-slider__slide${i === idx ? " is-active" : ""}`}
+            className={`hero-slider__slide hero-slider__slide--${b.kind || "wide"}${i === idx ? " is-active" : ""}`}
             aria-hidden={i === idx ? undefined : true}
             tabIndex={i === idx ? 0 : -1}
             aria-label={`${b.title} — ${b.subtitle}`}
           >
-            <Image
-              src={b.src}
-              alt={b.alt || b.title}
-              width={2320}
-              height={464}
-              priority={i === 0}
-              unoptimized
-              className="hero-slider__img"
-            />
+            {b.kind === "portrait" ? (
+              <div className="hero-slider__portrait">
+                <span className="hero-slider__portrait-avatar">
+                  <Image
+                    src={b.src}
+                    alt={b.alt || b.title}
+                    width={500}
+                    height={500}
+                    priority={i === 0}
+                    unoptimized
+                  />
+                </span>
+                <div className="hero-slider__portrait-copy">
+                  <strong>{b.title}</strong>
+                  <small>{b.subtitle}</small>
+                  {b.cta && <span className="hero-slider__portrait-cta">{b.cta} →</span>}
+                </div>
+              </div>
+            ) : (
+              <Image
+                src={b.src}
+                alt={b.alt || b.title}
+                width={2320}
+                height={464}
+                priority={i === 0}
+                unoptimized
+                className="hero-slider__img"
+              />
+            )}
             <span className="hero-slider__hint" aria-hidden="true">
               {b.title} →
             </span>
@@ -81,13 +101,17 @@ export default function HeroSlider() {
         ))}
       </div>
 
+      <span className="hero-slider__counter" aria-hidden="true">
+        <strong>{idx + 1}</strong>/{total}
+      </span>
+
       {banners.length > 1 && (
         <>
           <button
             type="button"
             className="hero-slider__nav hero-slider__nav--prev"
             onClick={prev}
-            aria-label={`이전 배너 — 현재 ${idx + 1}/${banners.length}`}
+            aria-label={`이전 배너 — 현재 ${idx + 1}/${total}`}
           >
             ‹
           </button>
@@ -95,7 +119,7 @@ export default function HeroSlider() {
             type="button"
             className="hero-slider__nav hero-slider__nav--next"
             onClick={next}
-            aria-label={`다음 배너 — 현재 ${idx + 1}/${banners.length}`}
+            aria-label={`다음 배너 — 현재 ${idx + 1}/${total}`}
           >
             ›
           </button>

@@ -27,10 +27,22 @@ export const siblingSite = {
   note: "던파 모바일 입문 가이드 (연결 플랫폼)"
 };
 
-// 최상단 슬라이딩 배너 — 5초 자동 회전. 뉴비훈련소 + 아스시로코 클럽.
+// 최상단 슬라이딩 배너 — 5초 자동 회전. 던파 공홈 메인 슬라이더 레이어.
+// 허락 본인 portrait("왕대가리") 도 한 슬라이드로 흡수.
 export const heroBanners = [
   {
+    id: "hurock-portrait",
+    kind: "portrait",
+    title: "허락공대 — 던파 모바일 방송",
+    subtitle: "평일 19시 이후 / 주말 일찍 ON",
+    src: "/hurock-avatar.png",
+    alt: "허락 프로필 — 오니 마스크",
+    href: "https://ch.sooplive.co.kr/hurock0101",
+    cta: "방송 보러가기",
+  },
+  {
     id: "newbie",
+    kind: "wide",
     title: "뉴비 훈련소",
     subtitle: "던파 모바일 입문 가이드 — dnfm.kr",
     src: "/openchat-newbie-banner.png",
@@ -39,6 +51,7 @@ export const heroBanners = [
   },
   {
     id: "asicoroco",
+    kind: "wide",
     title: "아스시로코 클럽",
     subtitle: "허락 운영 오픈채팅",
     src: "/openchat-jaehae-banner.png",
@@ -47,8 +60,93 @@ export const heroBanners = [
   },
 ];
 
-// 첫 랜딩 진입 5종.
-// "이벤트" 는 콘테스트/추첨/미션 묶음 → /events 로 직행. 나머지는 게시판 카테고리.
+// 빠른 안내 — 던파 공홈의 [공지] 1줄 + [업데이트] 1줄 + 펼치기 ⌄
+export const quickNotices = [
+  { id: "qn-1", tag: "공지", tagTone: "cyan", text: "허락방 이용 안내 — 욕설·차별·도배는 즉시 차단", href: "/board?category=notice" },
+  { id: "qn-2", tag: "업데이트", tagTone: "amber", text: "아바타 콘테스트 1회 마감 임박 — 일요일 23:59", href: "/events" },
+  // 펼치기 후 추가 노출
+  { id: "qn-3", tag: "공지", tagTone: "cyan", text: "방송 URL 곧 공개 — 헤더 LIVE 버튼 색 변경 예정", href: "/board?category=notice", folded: true },
+];
+
+// 가운데 커뮤니티+ 게시판 탭 — 톡방 합의: 공지사항 / 이벤트 / 대회 / 자유
+export const communityTabs = [
+  { key: "notice", label: "공지사항", tone: "cyan",  href: "/board?category=notice" },
+  { key: "event",  label: "이벤트",  tone: "pink",  href: "/events" },
+  { key: "match",  label: "대회",    tone: "amber", href: "/board?category=match" },
+  { key: "free",   label: "자유",    tone: "lime",  href: "/board?category=free" },
+];
+
+// 이벤트 슬라이딩 카드 — 큰 비주얼 카드 (열혈패스 류)
+export const eventBanners = [
+  {
+    id: "evt-avatar-1",
+    title: "아바타 콘테스트 1회",
+    subtitle: "5개 부문 코디 자랑 — 사용자 투표 + 허락 심사",
+    accentTone: "pink",
+    emoji: "👗",
+    href: "/contests/c-avatar-1",
+  },
+  {
+    id: "evt-screenshot-1",
+    title: "스크린샷 한 컷",
+    subtitle: "방송 중 인상깊었던 장면 투표",
+    accentTone: "cyan",
+    emoji: "📸",
+    href: "/contests/c-screenshot-1",
+  },
+  {
+    id: "evt-name-0",
+    title: "허락방 이름 짓기",
+    subtitle: "결과 발표 — 1등 굿즈 / 닉네임 색",
+    accentTone: "amber",
+    emoji: "🏷️",
+    href: "/contests/c-name-0",
+  },
+];
+
+// 햄버거 사이드 메뉴 — 던파 공홈 다단 구조 차용
+export const sideMenu = [
+  {
+    section: "새소식",
+    items: [
+      { label: "공지사항", href: "/board?category=notice" },
+      { label: "업데이트", href: "/board?category=notice&kind=update" },
+      { label: "이벤트", href: "/events" },
+    ],
+  },
+  {
+    section: "방송",
+    items: [
+      { label: "SOOP 라이브", href: "https://ch.sooplive.co.kr/hurock0101", external: true },
+      { label: "치지직", href: "https://chzzk.naver.com/290f875e595cef717d10deeab70a8b71", external: true },
+      { label: "유튜브", href: "https://youtube.com/@허락공대", external: true },
+    ],
+  },
+  {
+    section: "커뮤니티",
+    items: [
+      { label: "자유 게시판", href: "/board?category=free" },
+      { label: "공지사항", href: "/board?category=notice" },
+      { label: "이벤트", href: "/events" },
+      { label: "대회", href: "/board?category=match" },
+    ],
+  },
+  {
+    section: "내 정보",
+    items: [
+      { label: "내 페이지", href: "/profile" },
+      { label: "로그인 / 가입", href: "/login" },
+    ],
+  },
+  {
+    section: "친구들",
+    items: [
+      { label: "뉴비 훈련소 (dnfm.kr) ↗", href: "https://dnfm.kr", external: true },
+    ],
+  },
+];
+
+// 기존 5종 진입 카드 — 호환 유지 (이미 다른 페이지에서 import 가능). 신규 홈은 communityTabs 사용.
 export const boardEntryCategories = [
   { key: "event",  label: "이벤트",  emoji: "🎉", tone: "pink",  note: "콘테스트 / 추첨 / 미션", href: "/events" },
   { key: "match",  label: "대회",   emoji: "🏆", tone: "amber", note: "팟 / 경합 일정",        href: "/board?category=match" },
