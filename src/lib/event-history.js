@@ -1,0 +1,77 @@
+/**
+ * 허락 방송 이벤트 룰렛 기록 — 1~62회차 (2026-05-13 기준 mock).
+ * 향후 backend 운영 시 /events/rounds API 로 교체 예정.
+ *
+ * 회차 한 entry:
+ *   round       : 회차 번호
+ *   takenBy     : "찌오 먹음" 같은 회차 부제 (선택)
+ *   winner      : 당첨자 (회차 한 줄 결과)
+ *   prize       : 상품 / 결과 ("5,000원 당첨", "핀볼만 당첨된 운좋은 사람" 등)
+ *   participants: 참가자 목록 (raw)
+ *
+ * 편집 (수정/추가/제거) 은 frontend 정적 데이터로 시작 — admin backend endpoint 도입 후 wire.
+ */
+export const eventRounds = [
+  { round: 1,  type: "이벤트", winner: "Lynn-kr5ky", prize: "1만 기프트카드", participants: ["외계가재(치)", "던모뉴비(치)", "테섭컷(치)", "Lynn-kr5ky(유)", "리저브(유)", "T라미숙헤이(치)", "남거너고수(유)", "수야(유)", "D점멸(유)", "로즈(유)", "다솜(유)", "encantar3057(유)", "amazingshot6623(유)", "던모사부(치)"] },
+  { round: 2,  takenBy: "낙무 먹음", winner: "코얀스카야", prize: "꽝", participants: ["심심한 아잡토*3", "본섭매출꼬쏘Hi 테섭컷*3", "D점멸-n2n*3", "user-ghost456*3", "부레옥잠 르베르트*3", "코얀스카야*3", "Lynn-kr5ky*3", "타작반*3", "o부추o*3", "ib6025*3"] },
+  { round: 3,  type: "이벤트", winner: "정가요정83", prize: "꽝", participants: ["외계가재*3", "아른거린*3", "갓핸드-d8w*3", "D점멸-n2n*3", "충주험멜-m9o*3", "정가요정83*3", "NEOHYUNMusic*3"] },
+  { round: 4,  takenBy: "찌오 먹음", winner: "네오현뮤직", prize: "1만 기프트카드", participants: ["Lynn-kr5ky*3", "D점멸-n2n*3", "nameless-gn3xc*3", "NEOHYUNMusic*3", "세팔이-w8k*3", "ib6025*3", "코얀스카야*3", "스나-k9*3"] },
+  { round: 5,  takenBy: "짱짱이 먹음", winner: "JMF0322", prize: "룰렛만 당첨 — 운좋은 사람", participants: ["스나-k9*3", "o부추o*3", "수야-e5m*3", "본섭매출꼬쏘Hi 테섭컷*3", "JMF0322*3", "D점멸-n2n*3", "타작반*3", "저리가-r9b*3", "nameless-gn3xc*3"] },
+  { round: 6,  takenBy: "포챠 먹음", winner: "곱뚱이", prize: "룰렛만 당첨 — 운좋은 사람", participants: ["스나-k9*3", "본섭매출꼬쏘Hi 테섭컷*3", "프다-i9j*3", "JMF0322*3", "저리가-r9b*3", "NEOHYUNMusic*3", "곱뚱이-r5q3q*3", "o부추o*3"] },
+  { round: 7,  takenBy: "까만 먹음", winner: "아른거린", prize: "룰렛만 당첨 — 운좋은 사람", participants: ["심심한 아잡토*3", "아른거린*3", "던모뉴비입니다*3", "세팔이-w8k*3", "cuirartisan*3", "프다-i9j*3", "코얀스카야*3", "12315mas*3", "본섭매출꼬쏘Hi 테섭컷*3", "o부추o*3"] },
+  { round: 8,  takenBy: "찌오 먹음", winner: "외계가재(치지직)", prize: "5,000 기프트카드 (지급 전)", participants: ["외계가재(치지직)", "남거너고수(유튜브)", "세팔이(유튜브)", "로즈향(치지직)"] },
+  { round: 9,  takenBy: "낙무 먹음", winner: "로즈향(치지직)", prize: "핀볼만 당첨된 운좋은 사람", participants: ["로즈향(치지직)", "역고(치지직)"] },
+  { round: 10, takenBy: "포챠 먹음", winner: "남거너고수(유튜브)", prize: "핀볼만 당첨된 운좋은 사람", participants: ["저리가-r9b(유튜브)", "남거너고수(유튜브)", "수야-e5m(유튜브)"] },
+  { round: 11, takenBy: "포챠 먹음", winner: "곱뚱이(유튜브)", prize: "핀볼만 당첨된 운좋은 사람", participants: ["곱뚱이-r5q3q", "본섭매출꼬쏘Hi 테섭컷", "수야-e5m", "holydrop123", "지나가는사람-h3p6e", "o부추o", "polaris1208"] },
+  { round: 12, takenBy: "허락 먹음", winner: "holydrop123(치지직)", prize: "핀볼만 당첨된 운좋은 사람", participants: ["쨩쌤", "primeshoes2858", "holydrop123"] },
+  { round: 13, takenBy: "찌오 먹음", winner: "프다-i9j(유튜브)", prize: "핀볼만 당첨된 운좋은 사람", participants: ["세팔이-w8k", "역고", "던모뉴비입니다", "프다-i9j"] },
+  { round: 14, takenBy: "갈팡이 먹음", winner: "수야-e5m(유튜브)", prize: "5,000원", participants: ["본섭매출꼬쏘Hi 테섭컷", "외계가재", "곱뚱이-r5q3q", "수야-e5m", "아른거린", "상어바바"] },
+  { round: 15, takenBy: "찌오 먹음", winner: "던모뉴비입니다(치지직)", prize: "핀볼만 당첨된 운좋은 사람", participants: ["외계가재", "던모뉴비입니다", "곱뚱이-r5q3q", "아른거린", "상어바바"] },
+  { round: 16, takenBy: "낙무 먹음", winner: "곱뚱이-r5q3q(유튜브)", prize: "10,000원", participants: ["곱뚱이-r5q3q", "던모뉴비입니다"] },
+  { round: 17, takenBy: "윤허 먹음", winner: "드래곤볼(숲)", prize: "10,000원", participants: ["마테카(유)", "ib6025(유)", "던모뉴비입니다(치)", "km-fvc1et(손)", "고스트(유)", "원턴(유)", "하유민(유)", "드래곤볼(숲)", "D점멸(유)", "어메이징(유)"] },
+  { round: 18, takenBy: "빙빙이 먹음", winner: "외계가재(치)", prize: "오픈런이지만 꽝", participants: ["외계가재(치)"] },
+  { round: 19, takenBy: "허락 먹음", winner: "마테카(유)", prize: "핀볼만 당첨된 사람", participants: ["던모뉴비입니다", "눈빛-uhr", "남거너고수", "휘연-c2c", "최현준-g2z", "마테카", "ib6025", "o부추o"] },
+  { round: 20, takenBy: "유리안 먹음", winner: "뉴비쿤", prize: "핀볼만 당첨된 사람", participants: ["부추", "뉴비쿤"] },
+  { round: 21, takenBy: "갈팡이 먹음", winner: "홀리드랍", prize: "핀볼만 — 운 50% 좋은 사람", participants: ["외계가재", "holydrop123", "꽝손쾅손", "던모뉴비입니다"] },
+  { round: 22, takenBy: "포챠 먹음", winner: "부추", prize: "핀볼만 — 운 50% 좋은 사람", participants: ["holydrop123", "원턴", "지나가는사람-h3p6e", "프다", "부추"] },
+  { round: 23, takenBy: "유리안 먹음", winner: "원턴", prize: "핀볼만 당첨된 사람", participants: ["프다", "홀리드랍", "부추", "원턴", "어어어러"] },
+  { round: 24, takenBy: "질팡이 먹음", winner: "눈빛", prize: "10,000원", participants: ["눈빛-uhr", "남거너고수", "윤하-s1l", "본섭매출꼬쏘Hi 테섭컷", "양반-c2u", "Dustgoodvov", "외계가재", "부추-dnf"] },
+  { round: 25, takenBy: "빙빙이 먹음", winner: "르베르트", prize: "5,000원", participants: ["primeshoes2858", "남거너고수", "르베르트", "DNF유이나", "본섭매출꼬쏘Hi 테섭컷", "프다-i9j"] },
+  { round: 26, takenBy: "짱짱이 먹음", winner: "holydrop123", prize: "5,000원", participants: ["D점멸-n2n", "윤하-s1l", "본섭매출꼬쏘Hi 테섭컷", "남거너고수", "눈빛-uhr", "외계가재", "하유민-p3z", "holydrop123", "유솜강탈자", "안준희-h2i"] },
+  { round: 27, takenBy: "짱짱이 먹음", winner: "눈빛", prize: "5,000원", participants: ["아른거린", "홀리드랍", "드래곤볼", "프라임슈즈", "눈빛", "하유민"] },
+  { round: 28, takenBy: "낙무 먹음", winner: "잉어맛", prize: "5,000원", participants: ["D점멸", "잉어맛"] },
+  { round: 29, takenBy: "허락 먹음", winner: "양반", prize: "5,000원 (양도)", participants: ["primeshoes2858", "양반-c2u", "하유민-p3z", "holydrop123", "눈빛-uhr", "고요한아침-q5y", "정10요", "드래곤볼Z"] },
+  { round: 30, takenBy: "허락 먹음", winner: "남거너고수", prize: "꽝", participants: ["남거너고수", "눈빛"] },
+  { round: 31, takenBy: "마도 먹음", winner: "D점멸-n2n", prize: "10,000원", participants: ["o부추o", "하유민-p3z", "외계가재", "수야-e5m", "체인소맨-721", "holydrop123", "본섭매출꼬쏘Hi 테섭컷", "눈빛-uhr", "polaris1208", "ib6025", "D점멸-n2n"] },
+  { round: 32, takenBy: "허락 먹음", winner: "던모사부", prize: "10,000원", participants: ["D점멸-n2n", "holydrop123", "user-ghost456", "던모사부", "드래곤볼Z", "부추-dnf"] },
+  { round: 33, takenBy: "갈팡이 먹음", winner: "o부추o", prize: "핀볼만 당첨", participants: ["D점멸-n2n", "드래곤볼Z", "눈빛-uhr", "o부추o", "하유민-p3z", "윤하-s1l", "0301-r9b"] },
+  { round: 34, takenBy: "질팡이 먹음", winner: "남거너고수", prize: "핀볼만 당첨", participants: ["D점멸-n2n", "윤하-s1l", "본섭매출꼬쏘Hi 테섭컷", "holydrop123", "남거너고수", "user-ghost456"] },
+  { round: 35, takenBy: "향난 먹음", winner: "하유민", prize: "핀볼만 당첨", participants: ["chsoisenungho", "왕동까스지은", "o부추o", "D점멸-n2n", "프다-i9j", "수야-e5m", "외계가재", "빌머", "윤하-s1l", "남거너고수", "하유민-p3z", "passover5578", "저리가-r9b"] },
+  { round: 36, takenBy: "유리안 먹음", winner: "user-ghost456", prize: "10,000원", participants: ["본섭매출꼬쏘Hi 테섭컷", "user-ghost456", "눈빛-luck", "프다-i9j", "holydrop123", "박명숱", "빌머", "리저브1001", "D점멸-n2n"] },
+  { round: 37, takenBy: "허락 먹음", winner: "눈빛-luck", prize: "5,000원", participants: ["하유민-p3z", "holydrop123", "눈빛-luck", "저리가-r9b"] },
+  { round: 38, takenBy: "라무 먹음", winner: "chromehearts1026", prize: "5,000원", participants: ["코얀스카야", "본섭매출꼬쏘Hi 테섭컷", "눈빛-luck", "수야-e5m", "chromehearts1026", "드래곤볼Z", "더줘-j1v", "부휴", "user-ghost456", "저리가-r9b", "DNF유이나"] },
+  { round: 39, takenBy: "합조 먹음", winner: "자아를가진바나나", prize: "핀볼만 당첨", participants: ["프다-i9j", "저리가-r9b", "눈빛-luck", "holydrop123", "자아를가진바나나", "수야-e5m", "본섭매출꼬쏘Hi 테섭컷"] },
+  { round: 40, takenBy: "찌오 먹음", winner: "토모", prize: "5,000원", participants: ["하유민-p3z", "user-ghost456", "토모-j1y", "D점멸-n2n", "눈빛-luck", "holydrop123", "존잘짠돌", "자아를가진바나나"] },
+  { round: 41, takenBy: "허락 먹음", winner: "디레지에", prize: "5,000원", participants: ["짱-0301", "왕동까스지은", "디레지에", "holydrop123", "부추-dnf"] },
+  { round: 42, takenBy: "라무 먹음", winner: "토모", prize: "5,000원", participants: ["D점멸-n2n", "부추-dnf", "원턴", "holydrop123", "토모-j1y", "눈빛-luck", "머하노-i7g", "프다-i9j"] },
+  { round: 43, takenBy: "질팡이 먹음", winner: "홀리드랍", prize: "10,000원", participants: ["holydrop123", "프다-i9j", "토모-j1y", "본섭매출꼬쏘Hi 테섭컷", "눈빛-luck", "원턴"] },
+  { round: 44, takenBy: "향난 먹음", winner: "(핀볼만 당첨된 운좋은 사람)", prize: "핀볼만 당첨", participants: ["머하노-i7g", "토모-j1y", "짱-0301", "제이에스Js", "눈빛-luck", "프다-i9j"] },
+  { round: 45, takenBy: "유리안", winner: "머하노-i7g", prize: "5,000원", participants: ["본섭매출꼬쏘Hi 테섭컷", "머하노-i7g", "토모-j1y", "눈빛-luck", "부휴", "왕동까스지은", "원턴", "완투차차", "o부추o"] },
+  { round: 46, takenBy: "찌오", winner: "왕돈까스지은", prize: "핀볼만 당첨된 운좋은 사람", participants: ["세팔이-w8k", "12315mas", "머하노-i7g", "하유민-p3z", "눈빛-luck", "왕동까스지은", "자아를가진바나나", "bin224bin"] },
+  { round: 47, takenBy: "유리안", winner: "남거너고수", prize: "핀볼만 당첨된 운좋은 사람", participants: ["머하노-i7g", "holydrop123", "왕동까스지은", "남거너고수", "뱩어택", "蔡承祐-t3w", "D점멸-n2n", "토모-j1y"] },
+  { round: 48, type: "이벤트", winner: "(핀볼 룰렛)", prize: "20,000 구글 기프트 카드", participants: ["디레지에", "머하노-i7g", "holydrop123", "로얍", "윤하-s1l", "원턴", "토모-j1y", "제이에스Js", "이브-r6z", "D점멸-n2n", "하유민-p3z", "프다-i9j", "왕동까스지은", "방울-c2l"] },
+  { round: 49, takenBy: "향난", winner: "지은", prize: "핀볼만 당첨된 운 좋은 사람", participants: ["머하노", "지은", "t3w", "저리가"] },
+  { round: 50, takenBy: "향난", winner: "저리가-r9b", prize: "5,000원", participants: ["머하노-i7g", "저리가-r9b", "bin224bin", "holydrop123", "D점멸-n2n", "원턴"] },
+  { round: 51, takenBy: "까만", winner: "테섭컷", prize: "5,000원", participants: ["머하노-i7g", "제이에스Js", "토모-j1y", "D점멸-n2n", "프다-i9j", "holydrop123", "본섭매출꼬쏘Hi 테섭컷", "하유민-p3z"] },
+  { round: 52, takenBy: "허락", winner: "머하노", prize: "5,000원", participants: ["머하노-i7g", "리저브1001", "holydrop123", "윤하-s1l", "희안시대", "본섭매출꼬쏘Hi 테섭컷", "드래곤볼Z", "로얍"] },
+  { round: 53, takenBy: "질팡이", winner: "부추", prize: "핀볼만 당첨된 운좋은 사람", participants: ["리저브1001", "머하노-i7g", "윤하-s1l", "D점멸-n2n", "눈빛-USW", "드래곤볼Z", "저리가-r9b", "토모-j1y", "holydrop123", "하유민-p3z", "부추", "안전재난문자"] },
+  { round: 54, takenBy: "말지", winner: "눈빛", prize: "5,000원", participants: ["머하노-i7g", "리저브1001", "holydrop123", "눈빛-USW", "저리가-r9b", "hyuk-y4h", "하유민-p3z", "토모-j1y", "방가-g9v"] },
+  { round: 55, takenBy: "허접", winner: "(핀볼만 당첨된 운좋은 사람)", prize: "핀볼만 당첨", participants: ["이걸뭐라해", "자아를가진바나나", "user-ghost456", "프다-i9j", "눈빛-US", "hyuk-y4h", "passover5578", "토모-j1y"] },
+  { round: 56, takenBy: "허락", winner: "프다", prize: "5,000원", participants: ["이걸뭐라해", "눈빛-USW", "자아를가진바나나", "user-ghost456", "coin6727", "프다-i9j", "토모-j1y", "hyuk-y4h"] },
+  { round: 57, takenBy: "포챠", winner: "윤하", prize: "운만 좋았다", participants: ["부추-dnf", "D점멸-n2n", "윤하-s1l", "프다-i9j", "맨두소년", "토모-j1y", "머하노-i7g", "holydrop123", "유솜의유령", "곱뚱이-r5q3q", "한상현-d8z"] },
+  { round: 58, takenBy: "프다의노2예", winner: "눈빛", prize: "운만 좋음", participants: ["눈빛", "수tv", "스나"] },
+  { round: 59, takenBy: "라무", winner: "수tv", prize: "5,000원 ★", participants: ["눈빛", "프다", "머하노", "토모", "하유민", "드래곤볼", "수tv"] },
+  { round: 60, takenBy: "노예 4호", winner: "hyuk-y4h", prize: "핀볼만 당첨", participants: ["머하노-i7g", "holydrop123", "드래곤볼Z", "프다-i9j", "토모-j1y", "bkk수tv", "저리가-r9b", "hyuk-y4h", "눈빛-USW"] },
+  { round: 61, takenBy: "기모을줄모름", winner: "바나나", prize: "운만 좋았음", participants: ["저리가-r9b", "머하노-i7g", "자아를가진바나나", "bkk수tv", "holydrop123", "드래곤볼Z", "하유민-p3z", "방가-g9v", "눈빛"] },
+  { round: 62, takenBy: "와플못구움", winner: "프다", prize: "5,000원 ★", participants: ["holydrop123", "프다-i9j", "자아를가진바나나", "머하노-i7g", "부추-dnf", "이브-r6z", "토모-j1y", "hyuk-y4h"] },
+];

@@ -528,20 +528,42 @@ button {
   position: relative;
   display: grid;
   place-items: center;
-  min-height: 240px;
-  border: 3px solid var(--ink);
+  min-height: 280px;
+  border: 4px solid var(--ink);
   border-radius: var(--radius-md);
   background:
-    repeating-linear-gradient(
-      45deg,
-      rgba(29, 26, 23, 0.06) 0,
-      rgba(29, 26, 23, 0.06) 8px,
-      transparent 8px,
-      transparent 16px
-    ),
+    radial-gradient(circle at 1px 1px, rgba(29, 26, 23, 0.22) 1px, transparent 1.5px) 0 0 / 14px 14px,
     var(--paper);
-  box-shadow: var(--shadow-1);
+  box-shadow: 6px 6px 0 var(--ink), 12px 12px 0 var(--accent);
   transform: rotate(1.5deg);
+  overflow: hidden;
+}
+
+/* 상단 빨강 띠 — 허락 프사 의 oni 빨강(#f04038)톤 액센트, 도장처럼 */
+.allow-hero-portrait::before {
+  content: "";
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 14px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      var(--danger) 0,
+      var(--danger) 14px,
+      var(--ink) 14px,
+      var(--ink) 18px
+    );
+  border-bottom: 3px solid var(--ink);
+}
+
+/* 하단 노랑 sticker 띠 */
+.allow-hero-portrait::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 8px;
+  background: var(--accent);
+  border-top: 2px dashed var(--ink);
 }
 
 .allow-hero-portrait-inner {
@@ -553,26 +575,40 @@ button {
 }
 
 .allow-hero-portrait-avatar {
+  position: relative;
   display: grid;
   place-items: center;
-  width: 120px;
-  height: 120px;
-  border: 3px solid var(--ink);
+  width: 168px;
+  height: 168px;
+  padding: 6px;
+  border: 4px solid var(--ink);
   border-radius: 50%;
-  background: linear-gradient(135deg, var(--primary), var(--accent));
-  box-shadow: var(--shadow-1);
-  overflow: hidden;
+  /* 빨강(danger) 외곽 ring + 노랑(accent) 내 ring — 허락 프사 oni 톤 */
+  background:
+    radial-gradient(closest-side, transparent 0, transparent calc(100% - 12px), var(--accent) calc(100% - 12px), var(--accent) calc(100% - 6px), var(--danger) calc(100% - 6px)),
+    var(--paper);
+  box-shadow:
+    0 0 0 3px var(--paper),
+    0 0 0 6px var(--ink),
+    6px 6px 0 var(--ink);
+  z-index: 1;
 }
 
 .allow-hero-portrait-avatar.has-image {
-  background: var(--paper);
+  background:
+    radial-gradient(closest-side, transparent 0, transparent calc(100% - 12px), var(--accent) calc(100% - 12px), var(--accent) calc(100% - 6px), var(--danger) calc(100% - 6px)),
+    var(--paper);
 }
 
+/* 내부 이미지: 더블 ring 안에 정원 + 흰 배경 트리밍 */
 .allow-hero-portrait-avatar.has-image img {
   width: 100%;
   height: 100%;
   object-fit: cover;
   display: block;
+  border-radius: 50%;
+  border: 2px solid var(--ink);
+  background: var(--paper);
 }
 
 .allow-hero-portrait strong {
@@ -1158,6 +1194,78 @@ button {
   background: var(--accent-2);
   font-size: 0.78rem;
   font-weight: 900;
+}
+
+/* ─────────────────────────────────────────────────────────── Postit (event history) */
+
+.history-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 18px;
+}
+
+.postit {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 14px 12px;
+  border: 2px solid var(--ink);
+  border-radius: 4px;
+  box-shadow: var(--shadow-1);
+  background: var(--accent);
+  transform: rotate(-1deg);
+  transition: transform 100ms;
+}
+
+.postit[data-tilt="r"] { transform: rotate(1deg); }
+.postit:hover { transform: rotate(0); }
+
+.postit-yellow { background: var(--accent); }
+.postit-pink   { background: #ffd0dc; }
+.postit-cyan   { background: #bce9ff; }
+.postit-lime   { background: #c8efb8; }
+
+.postit-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.postit-round {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--ink);
+}
+
+.postit-winner strong {
+  display: block;
+  font-size: 1.02rem;
+  font-weight: 900;
+  word-break: keep-all;
+}
+
+.postit-winner small {
+  color: var(--ink-soft);
+  font-weight: 800;
+}
+
+.postit-participants summary {
+  cursor: pointer;
+  font-weight: 800;
+  color: var(--ink-soft);
+  font-size: 0.84rem;
+}
+
+.postit-participants ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  line-height: 1.55;
+  font-size: 0.82rem;
+  color: var(--ink-soft);
+  word-break: keep-all;
 }
 
 /* ─────────────────────────────────────────────────────────── PhotoField (사진 + 표시 영역 조절) */
@@ -2014,13 +2122,9 @@ button {
 .btn-platform-icon {
   display: inline-grid;
   place-items: center;
-  width: 22px;
-  height: 22px;
-  margin-right: 2px;
-  border: 2px solid var(--ink);
-  border-radius: 50%;
-  background: var(--paper);
-  overflow: hidden;
+  width: 26px;
+  height: 26px;
+  margin-right: 4px;
   flex-shrink: 0;
 }
 
@@ -2029,6 +2133,7 @@ button {
   height: 100%;
   object-fit: contain;
   display: block;
+  filter: drop-shadow(1px 1px 0 var(--ink));
 }
 
 /* ─────────────────────────────────────────────────────────── Live card 썸 — 플랫폼 아이콘 */
@@ -2067,8 +2172,8 @@ button {
 .hero-slider__track {
   position: relative;
   width: 100%;
-  aspect-ratio: 6 / 1;
-  min-height: 120px;
+  aspect-ratio: 2320 / 464;
+  min-height: 110px;
 }
 
 .hero-slider__slide {
@@ -2094,36 +2199,32 @@ button {
   display: block;
 }
 
-.hero-slider__caption {
+.hero-slider__hint {
   position: absolute;
   left: 14px;
   bottom: 12px;
-  display: inline-flex;
-  flex-direction: column;
-  gap: 2px;
-  padding: 8px 12px;
+  padding: 4px 10px;
   border: 2px solid var(--ink);
-  border-radius: var(--radius-sm);
-  background: rgba(250, 246, 234, 0.86);
-  backdrop-filter: blur(4px);
-  box-shadow: 3px 3px 0 var(--ink);
-  transform: rotate(-1.5deg);
-  max-width: calc(100% - 120px);
-}
-
-.hero-slider__caption strong {
+  border-radius: 99px;
+  background: var(--paper);
+  color: var(--ink);
   font-family: var(--font-display);
-  font-size: 1rem;
+  font-size: 0.82rem;
   font-weight: 900;
-  letter-spacing: -0.02em;
+  letter-spacing: -0.01em;
+  box-shadow: 2px 2px 0 var(--ink);
+  transform: rotate(-2deg);
+  opacity: 0;
+  transition: opacity 180ms ease, transform 180ms ease;
+  pointer-events: none;
   word-break: keep-all;
+  max-width: calc(100% - 100px);
 }
 
-.hero-slider__caption small {
-  color: var(--ink-soft);
-  font-size: 0.78rem;
-  font-weight: 800;
-  word-break: keep-all;
+.hero-slider__slide:hover .hero-slider__hint,
+.hero-slider__slide:focus-visible .hero-slider__hint {
+  opacity: 1;
+  transform: rotate(-2deg) translateY(-2px);
 }
 
 .hero-slider__nav {
@@ -2187,25 +2288,36 @@ button {
 
 @media (max-width: 720px) {
   .hero-slider__track {
-    aspect-ratio: 4 / 1;
-    min-height: 110px;
+    aspect-ratio: 5 / 1;
+    min-height: 96px;
   }
-  .hero-slider__caption {
-    left: 10px;
-    bottom: 10px;
-    padding: 6px 10px;
-    max-width: calc(100% - 90px);
+  .hero-slider__img {
+    object-fit: cover;
+    object-position: center;
   }
-  .hero-slider__caption strong {
-    font-size: 0.92rem;
-  }
-  .hero-slider__caption small {
-    font-size: 0.72rem;
+  .hero-slider__hint {
+    left: 8px;
+    bottom: 8px;
+    padding: 3px 8px;
+    font-size: 0.74rem;
+    opacity: 1;
   }
   .hero-slider__nav {
-    width: 32px;
-    height: 32px;
-    font-size: 1.3rem;
+    width: 30px;
+    height: 30px;
+    font-size: 1.2rem;
+    box-shadow: 1px 1px 0 var(--ink);
+  }
+  .hero-slider__nav--prev { left: 6px; }
+  .hero-slider__nav--next { right: 6px; }
+  .hero-slider__dots {
+    bottom: 6px;
+    right: 8px;
+    padding: 3px 6px;
+  }
+  .hero-slider__dot {
+    width: 8px;
+    height: 8px;
   }
 }
 
