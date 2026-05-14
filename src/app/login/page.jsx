@@ -14,22 +14,41 @@ function safeReturnTo(to) {
   return to;
 }
 
+function oauthErrorMessage(code) {
+  if (!code) return null;
+  if (code === "oauth_state_mismatch") return "보안 검증에 실패했어요. 다시 시도해 주세요.";
+  if (code === "oauth_token_failed" || code === "oauth_token_missing")
+    return "소셜 로그인 토큰 교환에 실패했어요.";
+  if (code === "oauth_userinfo_failed") return "프로필 정보를 받아오지 못했어요.";
+  if (code === "account_inactive") return "계정이 비활성화 상태예요. 운영자에게 문의해 주세요.";
+  return "소셜 로그인이 실패했어요. 다시 시도해 주세요.";
+}
+
 function LoginInner() {
   const router = useRouter();
   const params = useSearchParams();
-  const returnTo = safeReturnTo(params.get("returnTo") || "/");
+  const returnTo = safeReturnTo(params.get("returnTo") || params.get("next") || "/");
+  const oauthErrorCode = params.get("oauth_error");
   const { user, loading: userLoading } = useCurrentUser();
 
   const [form, setForm] = useState({ username: "", password: "" });
   const [busy, setBusy] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState(
+    oauthErrorCode ? { message: oauthErrorMessage(oauthErrorCode) } : null,
+  );
 
   // 이미 로그인된 사용자가 /login 진입 시 returnTo 또는 / 로 보냄.
+  // oauth_error 가 있으면 메시지 표시를 위해 redirect 안 함.
+  // mustChangePassword=true 면 returnTo 무시하고 /profile/password 강제.
   useEffect(() => {
-    if (!userLoading && user) {
-      router.replace(returnTo);
+    if (!userLoading && user && !oauthErrorCode) {
+      if (user.mustChangePassword) {
+        router.replace("/profile/password?required=1");
+      } else {
+        router.replace(returnTo);
+      }
     }
-  }, [userLoading, user, returnTo, router]);
+  }, [userLoading, user, returnTo, router, oauthErrorCode]);
 
   // OAuth provider 사전 점검 — 미설정이면 disabled + 안내.
   // 운영 .env: GOOGLE_OAUTH_CLIENT_ID set, KAKAO_OAUTH_CLIENT_ID empty (2026-05-13 기준).
@@ -65,8 +84,9 @@ function LoginInner() {
     }
     setBusy(true);
     try {
-      await auth.loginLocal({ username: form.username, password: form.password });
-      router.push(returnTo);
+      const data = await auth.loginLocal({ username: form.username, password: form.password });
+      const must = data?.user?.mustChangePassword;
+      router.push(must ? "/profile/password?required=1" : returnTo);
       router.refresh();
     } catch (err) {
       if (err instanceof ApiError) setError(err);

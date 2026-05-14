@@ -92,9 +92,23 @@ export default function ProfilePage() {
           </h1>
           <p>회원 정보 · 던파 프로필 · 콘테스트 참가 이력.</p>
         </div>
-        <button type="button" className="btn btn-ghost" onClick={handleLogout}>
-          로그아웃
-        </button>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+          <Link href="/profile/edit" className="btn btn-ghost btn-sm">
+            프로필 편집
+          </Link>
+          <Link href="/profile/password" className="btn btn-ghost btn-sm">
+            비밀번호 변경
+          </Link>
+          <Link href="/profile/sessions" className="btn btn-ghost btn-sm">
+            로그인 디바이스
+          </Link>
+          <Link href="/profile/delete" className="btn btn-ghost btn-sm" style={{ color: "var(--pink, #ff4d8d)" }}>
+            회원 탈퇴
+          </Link>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={handleLogout}>
+            로그아웃
+          </button>
+        </div>
       </div>
 
       <section className="section" aria-labelledby="profile-account">

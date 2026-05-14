@@ -2,324 +2,261 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
-import DnfProfileForm from "@/components/DnfProfileForm";
-import { ApiError, auth } from "@/lib/api-client";
+import ViewerPlatformField from "@/components/ViewerPlatformField";
+import { ApiError, apiFetch, auth } from "@/lib/api-client";
 
-/**
- * 가입 페이지 — 2단계.
- *   Step 1: username/password/displayName + 중복 inline 검사
- *   Step 2: DnfProfileForm (캡처 3종 OCR)
- * 완료 시 / 로 redirect.
- */
+const USERNAME_PATTERN = /^[a-zA-Z0-9_]{3,32}$/;
+
+function validateUsername(v) {
+  if (!USERNAME_PATTERN.test(v)) return "영문/숫자/언더스코어 3~32자";
+  return null;
+}
+function validateDisplayName(v) {
+  const t = v.trim();
+  if (t.length < 1) return "닉네임을 입력해 주세요";
+  if (t.length > 32) return "32자 이하";
+  return null;
+}
+
+function useAvailability(value, paramName, validator) {
+  const [state, setState] = useState({ status: "idle" });
+  const timer = useRef(null);
+  const reqId = useRef(0);
+  useEffect(() => {
+    if (timer.current) clearTimeout(timer.current);
+    if (!value) { setState({ status: "idle" }); return; }
+    const err = validator(value);
+    if (err) { setState({ status: "invalid", message: err }); return; }
+    setState({ status: "checking" });
+    const me = ++reqId.current;
+    timer.current = setTimeout(async () => {
+      try {
+        const data = await apiFetch(`/auth/check-availability?${paramName}=${encodeURIComponent(value)}`);
+        if (reqId.current !== me) return;
+        setState({ status: data?.available === true ? "ok" : "taken" });
+      } catch (err) {
+        if (reqId.current !== me) return;
+        setState({ status: "error", message: err?.message || "확인 실패" });
+      }
+    }, 500);
+    return () => timer.current && clearTimeout(timer.current);
+  }, [value, paramName, validator]);
+  return state;
+}
+
+function hintLabel(state) {
+  if (state.status === "checking") return { tone: "muted", text: "확인 중…" };
+  if (state.status === "ok") return { tone: "ok", text: "사용 가능" };
+  if (state.status === "taken") return { tone: "bad", text: "이미 사용 중" };
+  if (state.status === "invalid") return { tone: "bad", text: state.message };
+  if (state.status === "error") return { tone: "bad", text: state.message || "확인 실패" };
+  return null;
+}
+
 export default function SignupPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
-  const [form, setForm] = useState({
-    username: "",
-    password: "",
-    password2: "",
-    displayName: "",
-  });
-  const [availability, setAvailability] = useState({}); // { username: true|false|"checking", displayName: ... }
-  const [signupError, setSignupError] = useState(null);
-  const [step1Busy, setStep1Busy] = useState(false);
-  const checkTimer = useRef(null);
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [password2, setPassword2] = useState("");
+  const [displayName, setDisplayName] = useState("");
+  const [viewer, setViewer] = useState({ platform: null, nickname: "" });
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState(null);
 
-  useEffect(() => () => {
-    if (checkTimer.current) clearTimeout(checkTimer.current);
-  }, []);
+  const passwordMatch = useMemo(() => {
+    if (!password || !password2) return null;
+    return password === password2 ? "ok" : "mismatch";
+  }, [password, password2]);
 
-  function update(field, value) {
-    setForm((f) => ({ ...f, [field]: value }));
-  }
+  const u = useAvailability(username, "username", validateUsername);
+  const d = useAvailability(displayName.trim(), "displayName", validateDisplayName);
 
-  function debounceCheck(username, displayName) {
-    if (checkTimer.current) clearTimeout(checkTimer.current);
-    checkTimer.current = setTimeout(async () => {
-      try {
-        const res = await auth.checkAvailability({ username, displayName });
-        setAvailability({
-          username: res?.username ?? null,
-          displayName: res?.displayName ?? null,
-        });
-      } catch {
-        // 백엔드 응답 없어도 가입 시도까지는 막지 않음
-        setAvailability({});
-      }
-    }, 320);
-  }
+  const canSubmit = useMemo(() => {
+    if (!username || !password || !password2 || !displayName.trim()) return false;
+    if (password.length < 4 || password !== password2) return false;
+    if (u.status !== "ok" || d.status !== "ok") return false;
+    if (!acceptedTerms) return false;
+    return true;
+  }, [username, password, password2, displayName, u.status, d.status, acceptedTerms]);
 
-  function onUsernameChange(v) {
-    update("username", v);
-    if (v.length >= 3) {
-      setAvailability((a) => ({ ...a, username: "checking" }));
-      debounceCheck(v, form.displayName);
-    } else {
-      setAvailability((a) => ({ ...a, username: null }));
-    }
-  }
-
-  function onDisplayNameChange(v) {
-    update("displayName", v);
-    if (v.length >= 2) {
-      setAvailability((a) => ({ ...a, displayName: "checking" }));
-      debounceCheck(form.username, v);
-    } else {
-      setAvailability((a) => ({ ...a, displayName: null }));
-    }
-  }
-
-  function validateStep1() {
-    if (!form.username || form.username.length < 3) return "아이디는 3자 이상.";
-    if (!form.password || form.password.length < 4) return "비밀번호는 4자 이상.";
-    if (form.password !== form.password2) return "비밀번호 확인이 다릅니다.";
-    if (!form.displayName || form.displayName.length < 2) return "닉네임은 2자 이상.";
-    if (availability.username === false) return "이미 사용 중인 아이디입니다.";
-    if (availability.displayName === false) return "이미 사용 중인 닉네임입니다.";
-    return null;
-  }
-
-  async function handleStep1Submit(e) {
+  async function handleSubmit(e) {
     e.preventDefault();
-    setSignupError(null);
-    const v = validateStep1();
-    if (v) {
-      setSignupError({ message: v });
+    if (submitting || !canSubmit) {
+      if (!canSubmit) setError({ message: "입력값을 확인해 주세요." });
       return;
     }
-    setStep1Busy(true);
-    // 최종 가용성 확인
+    setError(null);
+    setSubmitting(true);
     try {
-      const res = await auth.checkAvailability({
-        username: form.username,
-        displayName: form.displayName,
-      });
-      if (res?.username === false || res?.displayName === false) {
-        setAvailability({
-          username: res.username,
-          displayName: res.displayName,
-        });
-        setSignupError({ message: "중복된 값이 있습니다. 다시 확인해 주세요." });
-        setStep1Busy(false);
-        return;
-      }
-    } catch {
-      /* 무시 — 다음 단계에서 가입 시점에 다시 검증 */
-    }
-    setStep1Busy(false);
-    setStep(2);
-  }
-
-  async function handleStep2Confirm(dnfPayload) {
-    // DnfProfileForm 새 payload shape:
-    //   { adventurerName, mainCharacterName, characters?, characterListNames?,
-    //     characterSelectNames?, captureR2Keys? }
-    setSignupError(null);
-    try {
-      const dnfProfile = {
-        adventurerName: dnfPayload.adventurerName,
-        mainCharacterName: dnfPayload.mainCharacterName,
-        characters: dnfPayload.characters,
-        captureR2Keys: dnfPayload.captureR2Keys
-          ? {
-              basicInfo: dnfPayload.captureR2Keys.basicInfo,
-              characterList: dnfPayload.captureR2Keys.characterList,
-              characterSelect: dnfPayload.captureR2Keys.characterSelect,
-            }
-          : undefined,
-      };
       await auth.signupLocal({
-        username: form.username,
-        password: form.password,
-        displayName: form.displayName,
-        dnfProfile,
+        username,
+        password,
+        displayName: displayName.trim(),
+        acceptedTerms: true,
       });
-      // signup 응답이 자동 로그인 cookie 발급함. confirm endpoint 로 verifiedBySelectScreen 계산.
-      try {
-        await auth.confirmDnfProfile({
-          adventurerName: dnfPayload.adventurerName,
-          mainCharacterName: dnfPayload.mainCharacterName,
-          characters: dnfPayload.characters,
-          characterListNames: dnfPayload.characterListNames,
-          characterSelectNames: dnfPayload.characterSelectNames,
-          captureR2Keys: dnfPayload.captureR2Keys,
-        });
-      } catch (confirmErr) {
-        // confirm 실패해도 회원 자체는 가입됨 — 안내 후 진행
-        if (typeof console !== "undefined" && console.warn) {
-          console.warn("dnf-profile confirm failed:", confirmErr);
+      // viewer 정보가 있으면 별도 PATCH (signup payload에는 viewer 안 받음)
+      if (viewer.platform || viewer.nickname?.trim()) {
+        try {
+          await auth.updateMe({
+            viewerPlatform: viewer.platform || null,
+            viewerNickname: viewer.nickname?.trim() || null,
+          });
+        } catch (e2) {
+          // viewer 저장 실패해도 가입 자체는 완료
+          if (typeof console !== "undefined") console.warn("viewer save failed:", e2);
         }
       }
-      router.push("/");
+      router.push("/profile/verify?welcome=1");
       router.refresh();
     } catch (err) {
-      if (err instanceof ApiError) {
-        setSignupError(err);
-      } else {
-        setSignupError({ message: err?.message || "가입 실패" });
-      }
-      throw err;
+      setError({ message: err instanceof ApiError ? err.message : err?.message || "가입 실패" });
+      setSubmitting(false);
     }
   }
 
-  function availabilityHint(field) {
-    const v = availability[field];
-    if (v === "checking")
-      return (
-        <small className="avail-hint avail-hint--checking">
-          <span aria-hidden="true">⏳</span> 확인중…
-        </small>
-      );
-    if (v === true)
-      return (
-        <small className="avail-hint avail-hint--ok">
-          <span aria-hidden="true">✓</span> 사용 가능
-        </small>
-      );
-    if (v === false)
-      return (
-        <small className="avail-hint avail-hint--bad">
-          <span aria-hidden="true">✗</span> 이미 사용 중
-        </small>
-      );
-    return null;
-  }
-
-  // 비밀번호 일치 inline 표시.
-  const passwordMatch =
-    !form.password || !form.password2
-      ? null
-      : form.password === form.password2
-        ? "ok"
-        : "mismatch";
+  const uHint = hintLabel(u);
+  const dHint = hintLabel(d);
 
   return (
     <PageShell activePath="/signup">
       <div className="page-head">
         <div>
           <h1>허락방 가입</h1>
-          <p>
-            2단계. (1) 기본 정보 + (2) 던파 캡처 3종.
-            현재 단계: <strong>{step}/2</strong>
-          </p>
+          <p>아이디 · 비밀번호 · 닉네임 + 시청 플랫폼(선택). 던파 모험단 인증은 가입 후 진행.</p>
         </div>
-        <StickerBadge tone="lime" rotate="r">
-          {step === 1 ? "Step 1" : "Step 2"}
-        </StickerBadge>
+        <StickerBadge tone="lime" rotate="r">간단 가입</StickerBadge>
       </div>
 
-      {step === 1 && (
-        <form
-          className="form-block"
-          onSubmit={handleStep1Submit}
-          aria-label="가입 1단계 폼"
-        >
-          <div className="form-step">Step 1 — 기본 정보</div>
-          <div className="form-row">
-            <label htmlFor="signup-username">아이디 (영문/숫자)</label>
-            <input
-              id="signup-username"
-              className="form-input"
-              type="text"
-              autoComplete="username"
-              value={form.username}
-              onChange={(e) => onUsernameChange(e.target.value)}
-              placeholder="로그인용 ID (3자 이상)"
-              required
-            />
-            {availabilityHint("username")}
-          </div>
-          <div className="form-row">
-            <label htmlFor="signup-nick">닉네임 (한글 OK)</label>
-            <input
-              id="signup-nick"
-              className="form-input"
-              type="text"
-              value={form.displayName}
-              onChange={(e) => onDisplayNameChange(e.target.value)}
-              placeholder="허락방에서 쓸 이름"
-              required
-            />
-            {availabilityHint("displayName")}
-          </div>
-          <div className="form-row">
-            <label htmlFor="signup-pw">비밀번호</label>
-            <input
-              id="signup-pw"
-              className="form-input"
-              type="password"
-              autoComplete="new-password"
-              value={form.password}
-              onChange={(e) => update("password", e.target.value)}
-              placeholder="4자 이상"
-              required
-            />
-            <small>최소 4자만 넘으면 OK. 학생/시청자 친화 정책.</small>
-          </div>
-          <div className="form-row">
-            <label htmlFor="signup-pw2">비밀번호 확인</label>
-            <input
-              id="signup-pw2"
-              className="form-input"
-              type="password"
-              autoComplete="new-password"
-              value={form.password2}
-              onChange={(e) => update("password2", e.target.value)}
-              required
-            />
-            {passwordMatch === "ok" ? (
-              <small className="avail-hint avail-hint--ok">
-                <span aria-hidden="true">✓</span> 일치합니다
-              </small>
-            ) : passwordMatch === "mismatch" ? (
-              <small className="avail-hint avail-hint--bad">
-                <span aria-hidden="true">✗</span> 비밀번호가 다릅니다
-              </small>
-            ) : null}
-          </div>
+      <form className="form-block" onSubmit={handleSubmit} aria-label="가입 폼" noValidate>
+        <div className="form-step">기본 정보</div>
 
-          {signupError && (
-            <div className="callout-box is-pending">
-              <strong>확인 필요</strong>
-              {signupError.message || "다시 시도해 주세요."}
-            </div>
-          )}
-
-          <button
-            type="submit"
-            className="btn btn-primary"
-            disabled={step1Busy}
-          >
-            {step1Busy ? "확인중…" : "다음 (Step 2)"}
-          </button>
-        </form>
-      )}
-
-      {step === 2 && (
-        <>
-          <DnfProfileForm
-            onConfirm={handleStep2Confirm}
-            busyText="가입 처리중…"
+        <div className="form-row">
+          <label htmlFor="signup-username">아이디</label>
+          <input
+            id="signup-username"
+            className="form-input"
+            type="text"
+            autoComplete="username"
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="영문/숫자/언더스코어 3~32자"
+            required
           />
-          {signupError && step === 2 && (
-            <div className="callout-box is-pending" style={{ marginTop: 12 }}>
-              <strong>가입 실패</strong>
-              {signupError.message || "다시 시도해 주세요."}
-            </div>
-          )}
-          <button
-            type="button"
-            className="btn btn-ghost"
-            style={{ marginTop: 12 }}
-            onClick={() => setStep(1)}
+          {uHint ? (
+            <small className={`avail-hint avail-hint--${uHint.tone}`}>{uHint.text}</small>
+          ) : null}
+        </div>
+
+        <div className="form-row">
+          <label htmlFor="signup-nick">닉네임</label>
+          <input
+            id="signup-nick"
+            className="form-input"
+            type="text"
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="허락방에서 쓸 이름"
+            required
+          />
+          {dHint ? (
+            <small className={`avail-hint avail-hint--${dHint.tone}`}>{dHint.text}</small>
+          ) : null}
+        </div>
+
+        <div className="form-row">
+          <label htmlFor="signup-pw">비밀번호</label>
+          <input
+            id="signup-pw"
+            className="form-input"
+            type="password"
+            autoComplete="new-password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="4자 이상"
+            required
+          />
+          <small>최소 4자. 학생/시청자 친화 정책.</small>
+        </div>
+
+        <div className="form-row">
+          <label htmlFor="signup-pw2">비밀번호 확인</label>
+          <input
+            id="signup-pw2"
+            className="form-input"
+            type="password"
+            autoComplete="new-password"
+            value={password2}
+            onChange={(e) => setPassword2(e.target.value)}
+            required
+          />
+          {passwordMatch === "ok" ? (
+            <small className="avail-hint avail-hint--ok">✓ 일치합니다</small>
+          ) : passwordMatch === "mismatch" ? (
+            <small className="avail-hint avail-hint--bad">✗ 비밀번호가 다릅니다</small>
+          ) : null}
+        </div>
+
+        <ViewerPlatformField value={viewer} onChange={setViewer} idPrefix="signup-viewer" />
+
+        <div className="form-row">
+          <label
+            htmlFor="signup-terms"
+            style={{ display: "flex", alignItems: "flex-start", gap: 8, cursor: "pointer", lineHeight: 1.5 }}
           >
-            ← 이전 단계
-          </button>
-        </>
-      )}
+            <input
+              id="signup-terms"
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+              style={{ marginTop: 4 }}
+            />
+            <span>
+              <strong>(필수)</strong>{" "}
+              <Link
+                href="/terms"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ borderBottom: "2px solid var(--primary)", color: "var(--primary-ink)", fontWeight: 800 }}
+              >
+                이용약관
+              </Link>{" "}
+              ·{" "}
+              <Link
+                href="/privacy"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ borderBottom: "2px solid var(--primary)", color: "var(--primary-ink)", fontWeight: 800 }}
+              >
+                개인정보처리방침
+              </Link>
+              에 동의합니다
+            </span>
+          </label>
+        </div>
+
+        {error ? (
+          <div className="callout-box is-pending">
+            <strong>확인 필요</strong>
+            {error.message}
+          </div>
+        ) : null}
+
+        <button
+          type="submit"
+          className="btn btn-primary"
+          disabled={!canSubmit || submitting}
+        >
+          {submitting ? "가입 처리중…" : "가입 완료"}
+        </button>
+
+        <p style={{ marginTop: 12, fontSize: "0.86rem", color: "var(--ink-muted, #888)" }}>
+          가입 후 모험단 인증 페이지로 안내됩니다. 인증은 선택이며 언제든 진행 가능.
+        </p>
+      </form>
 
       <div style={{ marginTop: 18, fontSize: "0.86rem" }}>
         이미 계정이 있다면{" "}

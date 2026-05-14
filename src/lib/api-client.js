@@ -170,6 +170,7 @@ export const auth = {
     characterListNames,
     characterSelectNames,
     captureR2Keys,
+    acceptedTerms,
   }) =>
     apiFetch("/auth/signup/local", {
       method: "POST",
@@ -181,6 +182,7 @@ export const auth = {
         characterListNames,
         characterSelectNames,
         captureR2Keys,
+        acceptedTerms,
       },
     }),
   checkAvailability: ({ username, displayName }) =>
@@ -211,6 +213,23 @@ export const auth = {
     });
   },
   updateMe: (data) => apiFetch("/auth/me", { method: "PATCH", json: data }),
+  changePassword: ({ currentPassword, newPassword }) =>
+    apiFetch("/auth/change-password", {
+      method: "POST",
+      json: { currentPassword, newPassword },
+    }),
+  deleteAccount: ({ password }) =>
+    apiFetch("/auth/me", { method: "DELETE", json: { password } }),
+  sessions: () => apiFetch("/auth/sessions"),
+  revokeSession: (id) => apiFetch(`/auth/sessions/${id}`, { method: "DELETE" }),
+  revokeOtherSessions: () =>
+    apiFetch("/auth/sessions/revoke-others", { method: "POST" }),
+  // super 권한 — 자체 가입자 비번 reset. 응답: { tempPassword, userId, displayName }
+  adminResetPassword: ({ username }) =>
+    apiFetch("/auth/admin/reset-password", {
+      method: "POST",
+      json: { username },
+    }),
 };
 
 /* ---------- Posts (board) ---------- */
@@ -219,9 +238,9 @@ const sitePath = (path) => `/sites/${SITE}${path}`;
 
 export const posts = {
   categories: () => apiFetch(sitePath("/categories")),
-  list: ({ categoryId, flair, postType, bestOnly, q, page, pageSize, sort } = {}) =>
+  list: ({ categoryId, categorySlug, flair, postType, bestOnly, q, page, pageSize, sort } = {}) =>
     apiFetch(sitePath("/posts"), {
-      query: { categoryId, flair, postType, bestOnly, q, page, pageSize, sort },
+      query: { categoryId, categorySlug, flair, postType, bestOnly, q, page, pageSize, sort },
     }),
   detail: (id) => apiFetch(sitePath(`/posts/${id}`)),
   create: ({
