@@ -6,8 +6,8 @@ import { Suspense, useEffect, useMemo, useState } from "react";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
 import { ApiError, posts as postsApi } from "@/lib/api-client";
-import { uploadFile } from "@/lib/upload";
 import { useCurrentUser } from "@/lib/use-current-user";
+import ImageUploader from "@/components/ImageUploader";
 
 // hurock 사이트 카테고리 fallback (backend fetch 실패 시).
 // backend seed (api/src/shared/db/seed.ts HUROCK_CATEGORIES) 와 slug 일치 유지.
@@ -44,7 +44,7 @@ function BoardNewInner() {
     guestNickname: "",
     guestPassword: "",
   });
-  const [image, setImage] = useState({ uploading: false, r2Key: null, error: null });
+  const [attachmentR2Keys, setAttachmentR2Keys] = useState([]);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
@@ -89,17 +89,6 @@ function BoardNewInner() {
   const guestAllowedHere = Boolean(selected?.allowAnonymous);
   const mustLogin = !isAuthed && !guestAllowedHere;
 
-  async function handleFile(file) {
-    if (!file) return;
-    setImage({ uploading: true, r2Key: null, error: null });
-    try {
-      const result = await uploadFile(file, { purpose: "post_attachment" });
-      setImage({ uploading: false, r2Key: result.r2Key, error: null });
-    } catch (err) {
-      setImage({ uploading: false, r2Key: null, error: err });
-    }
-  }
-
   async function handleSubmit(e) {
     e.preventDefault();
     setError(null);
@@ -121,7 +110,7 @@ function BoardNewInner() {
         categorySlug: form.categorySlug,
         title: form.title.trim(),
         body: form.body.trim(),
-        attachmentR2Keys: image.r2Key ? [image.r2Key] : [],
+        attachmentR2Keys,
       };
       if (form.flair) payload.flair = form.flair;
       if (!isAuthed) {
@@ -261,23 +250,16 @@ function BoardNewInner() {
           />
         </div>
 
-        <div className="form-row">
-          <label htmlFor="post-image">첨부 이미지 (옵션)</label>
-          <input
-            id="post-image"
-            type="file"
-            accept="image/*"
-            className="form-input"
-            onChange={(e) => handleFile(e.target.files?.[0])}
-          />
-          {image.uploading && <small>업로드 중…</small>}
-          {image.r2Key && <small style={{ color: "var(--primary-ink)" }}>✓ 업로드 완료</small>}
-          {image.error && (
-            <small style={{ color: "var(--danger)" }}>
-              업로드 실패: {image.error.message || "재시도 해주세요"}
-            </small>
-          )}
-        </div>
+        {isAuthed ? (
+          <div className="form-row">
+            <label>첨부 이미지 (옵션)</label>
+            <ImageUploader
+              value={attachmentR2Keys}
+              onChange={setAttachmentR2Keys}
+              max={5}
+            />
+          </div>
+        ) : null}
 
         {error && (
           <div className="callout-box is-pending">

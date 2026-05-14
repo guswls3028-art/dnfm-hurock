@@ -8,6 +8,7 @@ import AdminPostMenu from "@/components/AdminPostMenu";
 import ReportButton from "@/components/ReportButton";
 import {
   ApiError,
+  buildApiUrl,
   comments as commentsApi,
   posts as postsApi,
 } from "@/lib/api-client";
@@ -349,18 +350,35 @@ export default function BoardDetailPage({ params }) {
       <article className="form-block" style={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
         {post.body}
         {Array.isArray(post.attachmentR2Keys) && post.attachmentR2Keys.length > 0 ? (
-          <div style={{ marginTop: 12, display: "grid", gap: 8 }}>
-            {post.attachmentR2Keys.map((k) => (
-              <img
-                key={k}
-                src={`/api/uploads/r2/${encodeURIComponent(k)}`}
-                alt=""
+          <div
+            style={{
+              marginTop: 14,
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: 10,
+            }}
+          >
+            {post.attachmentR2Keys.map((k, i) => (
+              <a
+                key={`${k}-${i}`}
+                href={buildApiUrl(`/uploads/r2/${encodeURIComponent(k)}`)}
+                target="_blank"
+                rel="noopener noreferrer"
                 style={{
-                  maxWidth: "100%",
-                  border: "2px solid var(--ink)",
-                  borderRadius: "var(--radius-md)",
+                  display: "block",
+                  border: "2px solid var(--ink, #1a1a1a)",
+                  borderRadius: 8,
+                  overflow: "hidden",
+                  background: "var(--paper, #fffef7)",
                 }}
-              />
+              >
+                <img
+                  src={buildApiUrl(`/uploads/r2/${encodeURIComponent(k)}`)}
+                  alt=""
+                  loading="lazy"
+                  style={{ width: "100%", height: "auto", display: "block" }}
+                />
+              </a>
             ))}
           </div>
         ) : null}

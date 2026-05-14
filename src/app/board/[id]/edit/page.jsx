@@ -7,6 +7,7 @@ import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
 import { ApiError, posts as postsApi } from "@/lib/api-client";
 import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
+import ImageUploader from "@/components/ImageUploader";
 
 /**
  * 글 수정 (hurock).
@@ -31,6 +32,7 @@ export default function PostEditPage({ params }) {
   const [pinned, setPinned] = useState(false);
   const [locked, setLocked] = useState(false);
   const [guestPassword, setGuestPassword] = useState("");
+  const [attachmentR2Keys, setAttachmentR2Keys] = useState([]);
 
   const [categoryFlairs, setCategoryFlairs] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -48,6 +50,7 @@ export default function PostEditPage({ params }) {
       setFlair(p.flair || "");
       setPinned(Boolean(p.pinned));
       setLocked(Boolean(p.locked));
+      setAttachmentR2Keys(Array.isArray(p.attachmentR2Keys) ? p.attachmentR2Keys : []);
       try {
         const cats = await postsApi.categories();
         const items = Array.isArray(cats) ? cats : cats?.items || [];
@@ -91,6 +94,7 @@ export default function PostEditPage({ params }) {
         title: title.trim(),
         body: body.trim(),
         flair: flair || null,
+        attachmentR2Keys,
       };
       if (userIsAdmin) {
         payload.pinned = pinned;
@@ -205,6 +209,17 @@ export default function PostEditPage({ params }) {
             onChange={(e) => setBody(e.target.value)}
           />
         </div>
+
+        {isOwnMember || userIsAdmin ? (
+          <div className="form-row">
+            <label>첨부 이미지</label>
+            <ImageUploader
+              value={attachmentR2Keys}
+              onChange={setAttachmentR2Keys}
+              max={5}
+            />
+          </div>
+        ) : null}
 
         {needsGuestPw ? (
           <div className="form-row">
