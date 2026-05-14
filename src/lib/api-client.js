@@ -21,6 +21,10 @@ function resolveBase() {
   if (typeof process !== "undefined" && process.env && process.env.NEXT_PUBLIC_API_BASE) {
     return process.env.NEXT_PUBLIC_API_BASE.replace(/\/+$/, "");
   }
+  if (typeof window !== "undefined") {
+    const host = window.location.hostname;
+    if (host === "localhost" || host === "127.0.0.1") return "/api";
+  }
   return DEFAULT_BASE;
 }
 
@@ -209,7 +213,7 @@ export const auth = {
     return apiFetch("/auth/dnf-profile/ocr/auto", {
       method: "POST",
       form: fd,
-      timeoutMs: 90000,
+      timeoutMs: 180000,
     });
   },
   updateMe: (data) => apiFetch("/auth/me", { method: "PATCH", json: data }),
