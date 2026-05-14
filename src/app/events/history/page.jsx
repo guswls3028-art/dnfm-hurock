@@ -9,12 +9,14 @@ import { eventRounds } from "@/lib/event-history";
  * /events/history — 지난 회차(룰렛/이벤트) 결과 기록. 포스트잇 풍 카드.
  * 정렬: 최신 회차 우선 (Round 62 → 1).
  * 검색: 회차 / 당첨자 / 부제(takenBy) 텍스트.
- * 편집: 1차 정적 mock. backend admin endpoint 도입 후 inline CRUD.
+ * 기본 노출 = 최근 12회차. "전체 보기" 토글로 전 회차 펼침.
  */
 const STICKY_TONES = ["yellow", "pink", "cyan", "lime"];
+const RECENT_LIMIT = 12;
 
 export default function EventHistoryPage() {
   const [q, setQ] = useState("");
+  const [showAll, setShowAll] = useState(false);
   const sorted = useMemo(() => [...eventRounds].sort((a, b) => b.round - a.round), []);
   const filtered = useMemo(() => {
     const term = q.trim().toLowerCase();
@@ -33,6 +35,11 @@ export default function EventHistoryPage() {
       return blob.includes(term);
     });
   }, [sorted, q]);
+
+  // 검색 중이면 결과 전체 노출. 빈 검색일 땐 최근 N회차 + 더 보기.
+  const isSearching = q.trim().length > 0;
+  const visible = isSearching || showAll ? filtered : filtered.slice(0, RECENT_LIMIT);
+  const hasMore = !isSearching && !showAll && filtered.length > RECENT_LIMIT;
 
   return (
     <PageShell activePath="/events">
@@ -55,13 +62,17 @@ export default function EventHistoryPage() {
           style={{ flex: 1, minWidth: 200 }}
         />
         <small style={{ color: "var(--ink-soft)", fontWeight: 800 }}>
-          {filtered.length} / {sorted.length} 회차
+          {isSearching
+            ? `${filtered.length} / ${sorted.length} 회차`
+            : showAll
+              ? `전체 ${sorted.length}회차`
+              : `최근 ${Math.min(RECENT_LIMIT, sorted.length)}회차 (전체 ${sorted.length})`}
         </small>
       </div>
 
       <section className="section" aria-label="회차 기록">
         <div className="history-grid">
-          {filtered.map((r, i) => {
+          {visible.map((r, i) => {
             const tone = STICKY_TONES[(r.round - 1) % STICKY_TONES.length];
             return (
               <article key={r.round} className={`postit postit-${tone}`} data-tilt={i % 2 === 0 ? "l" : "r"}>
@@ -89,15 +100,28 @@ export default function EventHistoryPage() {
         {filtered.length === 0 && (
           <div className="callout-box">검색 결과 없음.</div>
         )}
-      </section>
-
-      <section className="section" aria-label="편집 안내">
-        <article className="card card-tone-amber">
-          <h3>편집 기능 (수정 / 추가 / 제거)</h3>
-          <p style={{ margin: 0, color: "var(--ink-soft)" }}>
-            현재는 정적 표시. backend 어드민 endpoint 도입 후 인라인 편집 활성화. 진행 상황은 운영팀에 문의.
-          </p>
-        </article>
+        {hasMore && (
+          <div style={{ display: "flex", justifyContent: "center", marginTop: 18 }}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => setShowAll(true)}
+            >
+              전체 {filtered.length}회차 보기 ↓
+            </button>
+          </div>
+        )}
+        {!isSearching && showAll && filtered.length > RECENT_LIMIT && (
+          <div style={{ display: "flex", justifyContent: "center", marginTop: 18 }}>
+            <button
+              type="button"
+              className="btn btn-sm"
+              onClick={() => setShowAll(false)}
+            >
+              최근 {RECENT_LIMIT}회차만 보기 ↑
+            </button>
+          </div>
+        )}
       </section>
     </PageShell>
   );

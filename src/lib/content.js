@@ -75,7 +75,7 @@ export const quickNotices = [
 // 가운데 커뮤니티+ 게시판 탭 — 톡방 합의: 공지사항 / 이벤트 / 대회 / 자유
 export const communityTabs = [
   { key: "notice", label: "공지사항", tone: "cyan",  href: "/board?category=notice" },
-  { key: "event",  label: "이벤트",  tone: "pink",  href: "/events" },
+  { key: "event",  label: "이벤트",  tone: "pink",  href: "/contests" },
   { key: "match",  label: "대회",    tone: "amber", href: "/board?category=match" },
   { key: "free",   label: "자유",    tone: "lime",  href: "/board?category=free" },
 ];
@@ -101,7 +101,7 @@ export const sideMenu = [
     items: [
       { label: "공지사항", href: "/board?category=notice" },
       { label: "업데이트", href: "/board?category=notice&kind=update" },
-      { label: "이벤트", href: "/events" },
+      { label: "이벤트", href: "/contests" },
     ],
   },
   {
@@ -117,7 +117,7 @@ export const sideMenu = [
     items: [
       { label: "자유 게시판", href: "/board?category=free" },
       { label: "공지사항", href: "/board?category=notice" },
-      { label: "이벤트", href: "/events" },
+      { label: "이벤트", href: "/contests" },
       { label: "대회", href: "/board?category=match" },
     ],
   },
@@ -138,7 +138,7 @@ export const sideMenu = [
 
 // 기존 5종 진입 카드 — 호환 유지 (이미 다른 페이지에서 import 가능). 신규 홈은 communityTabs 사용.
 export const boardEntryCategories = [
-  { key: "event",  label: "이벤트",  emoji: "🎉", tone: "pink",  note: "콘테스트 / 추첨 / 미션", href: "/events" },
+  { key: "event",  label: "이벤트",  emoji: "🎉", tone: "pink",  note: "콘테스트 / 추첨 / 미션", href: "/contests" },
   { key: "match",  label: "대회",   emoji: "🏆", tone: "amber", note: "팟 / 경합 일정",        href: "/board?category=match" },
   { key: "chat",   label: "잡담",   emoji: "💬", tone: "cyan",  note: "자유 수다",            href: "/board?category=chat" },
   { key: "clip",   label: "클립",   emoji: "🎬", tone: "lime",  note: "방송 다시보기 / URL 연동", href: "/board?category=clip" },

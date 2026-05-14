@@ -19,8 +19,15 @@ export default function EventCarousel() {
   return (
     <section className="event-carousel" aria-labelledby="event-carousel-title">
       <header className="event-carousel__head">
-        <h2 id="event-carousel-title">이벤트</h2>
-        <Link href="/events" className="event-carousel__all">전체 보기 →</Link>
+        <h2 id="event-carousel-title">
+          <Link
+            href="/contests"
+            className="event-carousel__title-link"
+            aria-label="이벤트 전체 보기"
+          >
+            이벤트
+          </Link>
+        </h2>
       </header>
 
       <div className="event-carousel__viewport">

@@ -3,27 +3,27 @@
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import HeroSlider from "@/components/HeroSlider";
+import HostBanner from "@/components/HostBanner";
 import QuickNotice from "@/components/QuickNotice";
 import CommunityBoard from "@/components/CommunityBoard";
 import EventCarousel from "@/components/EventCarousel";
-import SiblingSiteCard from "@/components/SiblingSiteCard";
-import ContestPopup from "@/components/ContestPopup";
 
 /**
- * 홈 — 던파 공홈 레이어 차용 (B급 디자인 토큰은 유지).
+ * 홈 — 던파 공홈 레이어 차용 (B급 디자인 토큰 유지).
  *
- *   ┌─ Hero Slider — 회전 배너 (허락 portrait + 카카오 오픈톡 wide 배너들)
+ *   ┌─ Hero Slider — wide / wide-text 슬라이드 회전 배너 (5:1 규격)
+ *   ├─ Host Banner — 허락 portrait + 3채널 (SOOP/치지직/유튜브) 아이콘 항상 노출
  *   ├─ Quick Notice — 공지/업데이트 2줄 + 더 보기 ⌄
- *   ├─ Community+ — 4탭 게시판 (공지사항 / 이벤트 / 대회 / 자유)
- *   ├─ Event Carousel — 큰 이벤트 카드 슬라이딩 (열혈패스 류)
+ *   ├─ Community+ — 4탭 게시판 (제목 클릭 = 전체보기)
+ *   ├─ Event Carousel — 이벤트 카드 슬라이딩 (제목 클릭 = 전체보기)
  *   ├─ 부가 진입 (지난 회차 기록 / 방송 게임 포탈)
- *   └─ 친구들 — 뉴비 훈련소 (dnfm.kr) cross-link
+ *   └─ 뉴비 훈련소 compact pill — 최하단 작은 링크
  */
 export default function HomePage() {
   return (
     <PageShell activePath="/">
-      <ContestPopup />
       <HeroSlider />
+      <HostBanner />
       <QuickNotice />
       <CommunityBoard />
       <EventCarousel />
@@ -37,12 +37,18 @@ export default function HomePage() {
         </Link>
       </section>
 
-      <section className="section" aria-labelledby="home-sibling">
-        <div className="section-head">
-          <h2 id="home-sibling">친구들</h2>
-        </div>
-        <SiblingSiteCard />
-      </section>
+      <div className="home-newb-pill-wrap">
+        <a
+          className="home-newb-pill"
+          href="https://dnfm.kr"
+          target="_blank"
+          rel="noreferrer"
+          title="던파 모바일 입문 가이드"
+        >
+          <span aria-hidden="true">↗</span>
+          뉴비 훈련소 · dnfm.kr
+        </a>
+      </div>
     </PageShell>
   );
 }

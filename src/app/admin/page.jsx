@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
-import { adminMenu, contests as mockContests } from "@/lib/content";
+import { adminMenu } from "@/lib/content";
 import { contests as contestsApi } from "@/lib/api-client";
 import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
 
@@ -17,8 +17,8 @@ const STATUS_TONE = {
 
 export default function AdminPage() {
   const { user, loading: userLoading } = useCurrentUser();
-  const [contests, setContests] = useState(mockContests);
-  const [usingMock, setUsingMock] = useState(true);
+  const [contests, setContests] = useState([]);
+  const [contestsLoaded, setContestsLoaded] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -26,13 +26,12 @@ export default function AdminPage() {
       try {
         const data = await contestsApi.list();
         if (!alive) return;
-        const list = Array.isArray(data) ? data : data?.contests || [];
-        if (list.length) {
-          setContests(list);
-          setUsingMock(false);
-        }
+        const list = Array.isArray(data) ? data : data?.items || data?.contests || [];
+        setContests(list);
       } catch {
-        /* mock 유지 */
+        /* 빈 상태 유지 */
+      } finally {
+        if (alive) setContestsLoaded(true);
       }
     })();
     return () => {
@@ -123,10 +122,10 @@ export default function AdminPage() {
           <h2 id="admin-contests">콘테스트 목록</h2>
           <Link href="/admin/contests/new">+ 새로 만들기</Link>
         </div>
-        {usingMock && (
+        {contestsLoaded && contests.length === 0 && (
           <div className="callout-box" style={{ marginBottom: 12 }}>
-            <strong>안내</strong>
-            백엔드에 등록된 콘테스트가 없어 샘플 목록을 표시 중입니다.
+            <strong>콘테스트 없음</strong>
+            아직 만든 콘테스트가 없어요. 오른쪽 "+ 새로 만들기" 로 시작하세요.
           </div>
         )}
         <div className="board-list">

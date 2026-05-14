@@ -1,13 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import BoardRow from "@/components/BoardRow";
 import Pagination from "@/components/Pagination";
 import StickerBadge from "@/components/StickerBadge";
-import { boardPosts as mockPosts } from "@/lib/content";
 import { posts as postsApi } from "@/lib/api-client";
 
 const PAGE_SIZE = 20;
@@ -72,11 +71,12 @@ function BoardInner() {
 
   const [posts, setPosts] = useState(null);
   const [total, setTotal] = useState(0);
-  const [usingMock, setUsingMock] = useState(false);
+  const [loadError, setLoadError] = useState(null);
 
   useEffect(() => {
     let alive = true;
     setPosts(null);
+    setLoadError(null);
     (async () => {
       try {
         const data = await postsApi.list({
@@ -89,21 +89,13 @@ function BoardInner() {
         if (!alive) return;
         const list = Array.isArray(data) ? data : data?.items || data?.posts || [];
         const t = typeof data?.total === "number" ? data.total : list.length;
-        if (list.length === 0 && !qParam && activeCat === ALL) {
-          // 진짜 빈 상태 → mock 으로 시각 확인 (개발 환경)
-          setPosts(mockPosts);
-          setTotal(mockPosts.length);
-          setUsingMock(true);
-        } else {
-          setPosts(list);
-          setTotal(t);
-          setUsingMock(false);
-        }
-      } catch {
+        setPosts(list);
+        setTotal(t);
+      } catch (err) {
         if (!alive) return;
-        setPosts(mockPosts);
-        setTotal(mockPosts.length);
-        setUsingMock(true);
+        setPosts([]);
+        setTotal(0);
+        setLoadError(err?.message || "네트워크 오류");
       }
     })();
     return () => {
@@ -111,23 +103,7 @@ function BoardInner() {
     };
   }, [activeCat, pageParam, sortParam, qParam]);
 
-  const visiblePosts = useMemo(() => {
-    if (!posts) return null;
-    if (!usingMock) return posts;
-    let arr = posts;
-    if (activeCat !== ALL) {
-      // mock 는 category=string 이라 그대로 비교
-      const catLabel = categories.find((c) => c.slug === activeCat)?.name;
-      arr = arr.filter((p) => p.category === catLabel || p.category === activeCat);
-    }
-    if (qParam) {
-      const q = qParam.toLowerCase();
-      arr = arr.filter(
-        (p) => p.title?.toLowerCase().includes(q) || p.body?.toLowerCase().includes(q),
-      );
-    }
-    return arr;
-  }, [posts, usingMock, activeCat, qParam, categories]);
+  const visiblePosts = posts;
 
   function pushQuery(next) {
     const qs = new URLSearchParams();
@@ -236,10 +212,10 @@ function BoardInner() {
         </div>
       </div>
 
-      {usingMock ? (
+      {loadError ? (
         <div className="callout-box" style={{ marginTop: 12 }}>
-          <strong>안내</strong>
-          백엔드 미가용 또는 빈 상태 — 샘플 글 표시 중. 글쓰기는 백엔드 연결 후 동작.
+          <strong>잠시만요</strong>
+          글 목록을 못 가져왔어요. 잠시 후 다시 시도해 주세요. ({loadError})
         </div>
       ) : null}
 
@@ -257,25 +233,29 @@ function BoardInner() {
             </span>
           </div>
         ) : visiblePosts.length === 0 ? (
-          <div className="board-row">
-            <span style={{ gridColumn: "1 / -1", color: "var(--muted)", padding: "12px" }}>
-              {qParam ? "검색 결과가 없어요." : "이 카테고리에 글이 없어요."}{" "}
-              <Link href="/board/new">첫 글 쓰기 →</Link>
-            </span>
+          <div className="board-empty">
+            <p className="board-empty__msg">
+              {qParam
+                ? "검색 결과가 없어요."
+                : activeCat === ALL
+                  ? "허락방 첫 글의 주인공이 되어 주세요."
+                  : "이 카테고리에 글이 아직 없어요."}
+            </p>
+            <Link href="/board/new" className="btn btn-primary">
+              ✍️ 글쓰기
+            </Link>
           </div>
         ) : (
           visiblePosts.map((p) => <BoardRow key={p.id} post={p} />)
         )}
       </div>
 
-      {!usingMock ? (
-        <Pagination
-          current={pageParam}
-          total={total}
-          pageSize={PAGE_SIZE}
-          buildHref={buildPageHref}
-        />
-      ) : null}
+      <Pagination
+        current={pageParam}
+        total={total}
+        pageSize={PAGE_SIZE}
+        buildHref={buildPageHref}
+      />
     </PageShell>
   );
 }

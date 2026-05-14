@@ -4,7 +4,6 @@ import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
-import { adminContestDetail, contests as mockContests } from "@/lib/content";
 import { ApiError, contests as contestsApi } from "@/lib/api-client";
 import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
 
@@ -24,9 +23,9 @@ export default function AdminContestDetailPage({ params }) {
   const { id } = use(params);
   const { user, loading: userLoading } = useCurrentUser();
 
-  const [contest, setContest] = useState(() => mockContests.find((c) => c.id === id) || null);
-  const [entries, setEntries] = useState(() => adminContestDetail.entries || []);
-  const [usingMock, setUsingMock] = useState(true);
+  const [contest, setContest] = useState(null);
+  const [entries, setEntries] = useState([]);
+  const [entriesLoaded, setEntriesLoaded] = useState(false);
   const [statusBusy, setStatusBusy] = useState(false);
   const [resultBusy, setResultBusy] = useState(false);
   const [error, setError] = useState(null);
@@ -50,13 +49,12 @@ export default function AdminContestDetailPage({ params }) {
       try {
         const data = await contestsApi.entries.list(id);
         if (!alive) return;
-        const list = Array.isArray(data) ? data : data?.entries || [];
-        if (list.length) {
-          setEntries(list);
-          setUsingMock(false);
-        }
+        const list = Array.isArray(data) ? data : data?.items || data?.entries || [];
+        setEntries(list);
       } catch {
-        /* mock 유지 */
+        /* fetch 실패 — 빈 상태 유지 */
+      } finally {
+        if (alive) setEntriesLoaded(true);
       }
     })();
     return () => {
@@ -67,7 +65,7 @@ export default function AdminContestDetailPage({ params }) {
   async function toggleCandidate(entryId, currentlySelected) {
     setError(null);
     try {
-      await contestsApi.entries.selectForVote(id, entryId, { selected: !currentlySelected });
+      await contestsApi.entries.select(id, entryId, { selectedForVote: !currentlySelected });
       setEntries((es) =>
         es.map((e) =>
           e.id === entryId
@@ -242,10 +240,10 @@ export default function AdminContestDetailPage({ params }) {
             후보로 선정한 entry 만 시청자 투표에 노출됩니다
           </span>
         </div>
-        {usingMock && (
+        {entriesLoaded && entries.length === 0 && (
           <div className="callout-box" style={{ marginBottom: 12 }}>
-            <strong>안내</strong>
-            백엔드 미가용 — 샘플 데이터로 UI 만 표시 중. 실제 select/발표는 백엔드 연결 후 동작.
+            <strong>참가작 없음</strong>
+            아직 참가한 사람이 없어요. 참가 시작 후 entry 가 들어오면 여기에 표시됩니다.
           </div>
         )}
 
