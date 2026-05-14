@@ -2903,6 +2903,10 @@ button {
   pointer-events: auto;
 }
 
+:root {
+  --sidebar-width: 280px;
+}
+
 .side-menu {
   position: fixed;
   top: 0;
@@ -3001,6 +3005,28 @@ button {
 .side-menu__section li > a:hover {
   background: var(--accent-2);
   color: var(--ink);
+}
+
+/* PC (≥1024px): 사이드바 항상 열림 + 햄버거/백드롭/닫기 숨김 + main padding-left */
+@media (min-width: 1024px) {
+  .side-menu {
+    width: var(--sidebar-width);
+    transform: translateX(0);
+    box-shadow: none;
+  }
+  .side-menu__close {
+    display: none;
+  }
+  .side-menu__backdrop,
+  .side-menu__backdrop.is-open {
+    display: none;
+  }
+  .allow-hamburger {
+    display: none;
+  }
+  .allow-shell {
+    padding-left: var(--sidebar-width);
+  }
 }
 
 /* ─────────────────────────────────────────────────────────── HeroSlider portrait kind */
