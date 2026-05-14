@@ -67,7 +67,7 @@ export const heroBanners = [
 // 빠른 안내 — 던파 공홈의 [공지] 1줄 + [업데이트] 1줄 + 펼치기 ⌄
 export const quickNotices = [
   { id: "qn-1", tag: "공지", tagTone: "cyan", text: "허락방 이용 안내 — 욕설·차별·도배는 즉시 차단", href: "/board?category=notice" },
-  { id: "qn-2", tag: "업데이트", tagTone: "amber", text: "아바타 콘테스트 1회 마감 임박 — 일요일 23:59", href: "/events" },
+  { id: "qn-2", tag: "업데이트", tagTone: "amber", text: "아바타 콘테스트 1회 — 6월 13일(토) 19시 방송 시작 전 마감", href: "/contests" },
   // 펼치기 후 추가 노출
   { id: "qn-3", tag: "공지", tagTone: "cyan", text: "방송 URL 곧 공개 — 헤더 LIVE 버튼 색 변경 예정", href: "/board?category=notice", folded: true },
 ];
@@ -295,7 +295,7 @@ export const noticeBoard = [
     id: "n2",
     pinned: false,
     title: "아바타 콘테스트 1회 마감 임박",
-    body: "이번 주 일요일 23:59 마감입니다. 모험단명/캐릭터명/코디 제목/설명/사진 한 장이면 참가 끝.",
+    body: "6월 13일(토) 19시 방송 시작 전 마감입니다. 모험단명/캐릭터명/코디 제목/설명/사진 한 장이면 참가 끝.",
     posted: "준비"
   },
   {
