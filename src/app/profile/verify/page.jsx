@@ -17,6 +17,8 @@ const VERIFY_CAPTURES = [
   { id: "character_select", label: "캐릭터 선택창", hint: "본인 인증 신호 (사칭 방지)", imagePath: "/verify-examples/character_select.png" },
 ];
 
+const CLASS_GRID_IMAGES = ["/verify-examples/class_grid_1.png", "/verify-examples/class_grid_2.png"];
+
 function formatBytes(n) {
   if (!n) return "0 B";
   if (n < 1024) return `${n} B`;
@@ -222,6 +224,41 @@ function VerifyInner() {
             </li>
           ))}
         </ul>
+
+        <details
+          style={{
+            background: "rgba(0,0,0,0.04)",
+            borderRadius: 8,
+            padding: "10px 14px",
+            margin: "0 0 12px",
+            border: "1px solid var(--ink-line, #ccc)",
+          }}
+        >
+          <summary style={{ cursor: "pointer", fontWeight: 600, fontSize: "0.92rem" }}>
+            직업이 헷갈리면 — 직업 변경 화면 캡처에서 매칭
+          </summary>
+          <p style={{ fontSize: "0.82rem", color: "var(--ink-muted, #888)", margin: "8px 0 10px" }}>
+            OCR 직업명이 잘못 인식되면 (메카닉 남/여 등) 캐릭터 직업 select 에서 바꿔주세요. 아이콘 매칭 참고용.
+          </p>
+          <div style={{ display: "grid", gap: 10 }}>
+            {CLASS_GRID_IMAGES.map((src) => (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                key={src}
+                src={src}
+                alt="직업 변경 화면"
+                loading="lazy"
+                style={{
+                  width: "100%",
+                  height: "auto",
+                  borderRadius: 6,
+                  border: "1px solid var(--ink-line, #ccc)",
+                  display: "block",
+                }}
+              />
+            ))}
+          </div>
+        </details>
 
         <label
           onDragOver={handleDragOver}
