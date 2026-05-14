@@ -79,7 +79,13 @@ export default function ContestResultsPage({ params }) {
             ← {contest.title}
           </Link>
           <h1>
-            🏆 결과 발표 <StickerBadge tone="amber" rotate="r">발표완료</StickerBadge>
+            🏆 결과 발표{" "}
+            <StickerBadge
+              tone={podium.length ? "amber" : "ink"}
+              rotate="r"
+            >
+              {podium.length ? "발표완료" : "발표 전"}
+            </StickerBadge>
           </h1>
           <p>{contest.resultsAt || ""}</p>
         </div>

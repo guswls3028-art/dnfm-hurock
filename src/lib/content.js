@@ -28,6 +28,10 @@ export const siblingSite = {
 
 // 최상단 슬라이딩 배너 — 5초 자동 회전. 던파 공홈 메인 슬라이더 레이어.
 // 허락 본인 portrait 는 슬라이더에서 분리 → HostBanner 컴포넌트로 이동.
+//
+// 콘테스트 진입은 콘테스트 목록(`/contests`) 으로 일원화 — backend 에 등록된
+// 콘테스트(UUID) 와 mock fallback(c-avatar-1) 양쪽 진입을 카드 detailHref 에
+// 일임. heroBanners 가 특정 id 를 hard-link 하면 backend 미등록 시 404 위험.
 export const heroBanners = [
   {
     id: "avatar-look-contest",
@@ -36,7 +40,7 @@ export const heroBanners = [
     subtitle: "5개 부문 코디 자랑 — 6월 13일(토) 마감",
     emoji: "👗",
     accentTone: "pink",
-    href: "/contests/c-avatar-1",
+    href: "/contests",
     alt: "아바타 룩 콘테스트 배너",
     cta: "참가 / 자세히 보기",
   },
@@ -77,6 +81,8 @@ export const communityTabs = [
 ];
 
 // 이벤트 슬라이딩 카드 — 큰 비주얼 카드 (열혈패스 류)
+// 진입은 콘테스트 목록(`/contests`) 으로 일원화. 가짜 카드(스크린샷/이름짓기)
+// 는 backend 에 콘테스트 row 가 없어서 404 가 나기 때문에 cleanup (2026-05-14).
 export const eventBanners = [
   {
     id: "evt-avatar-1",
@@ -84,23 +90,7 @@ export const eventBanners = [
     subtitle: "5개 부문 코디 자랑 — 사용자 투표 + 허락 심사",
     accentTone: "pink",
     emoji: "👗",
-    href: "/contests/c-avatar-1",
-  },
-  {
-    id: "evt-screenshot-1",
-    title: "스크린샷 한 컷",
-    subtitle: "방송 중 인상깊었던 장면 투표",
-    accentTone: "cyan",
-    emoji: "📸",
-    href: "/contests/c-screenshot-1",
-  },
-  {
-    id: "evt-name-0",
-    title: "허락방 이름 짓기",
-    subtitle: "결과 발표 — 1등 굿즈 / 닉네임 색",
-    accentTone: "amber",
-    emoji: "🏷️",
-    href: "/contests/c-name-0",
+    href: "/contests",
   },
 ];
 
