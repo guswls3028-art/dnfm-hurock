@@ -14,6 +14,7 @@ export default function ContestNewPage({ params }) {
   const router = useRouter();
   const { user, loading: userLoading } = useCurrentUser();
   const [contest, setContest] = useState(null);
+  const [fetchError, setFetchError] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -22,14 +23,35 @@ export default function ContestNewPage({ params }) {
         const detail = await contestsApi.detail(id);
         if (!alive) return;
         if (detail) setContest(detail.contest || detail);
-      } catch {
-        /* mock 유지 */
+      } catch (err) {
+        if (!alive) return;
+        setFetchError(err);
       }
     })();
     return () => {
       alive = false;
     };
   }, [id]);
+
+  if (fetchError) {
+    return (
+      <PageShell activePath="/contests">
+        <div className="page-head">
+          <div>
+            <Link
+              href="/contests"
+              style={{ display: "inline-block", marginBottom: 8, borderBottom: "2px solid var(--ink)", fontSize: "0.84rem", fontWeight: 800 }}
+            >
+              ← 콘테스트 목록
+            </Link>
+            <h1>콘테스트를 못 찾았어요</h1>
+            <p>지금은 진행 중인 콘테스트가 없거나, 이미 마감/종료됐을 수 있어요. ({fetchError.message || "요청 실패"})</p>
+          </div>
+          <StickerBadge tone="amber" rotate="r">404</StickerBadge>
+        </div>
+      </PageShell>
+    );
+  }
 
   if (!contest) {
     return (

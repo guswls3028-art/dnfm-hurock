@@ -7,7 +7,7 @@ import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
 import { ApiError, auth } from "@/lib/api-client";
 import { useCurrentUser } from "@/lib/use-current-user";
-import { DNF_CLASSES_GROUPED, findFirstClassIcon } from "@/lib/dnf-classes";
+import { DNF_CLASSES_GROUPED } from "@/lib/dnf-classes";
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
@@ -414,68 +414,50 @@ function VerifyInner() {
           <div className="form-row">
             <label>캐릭터 목록 ({editedCharacters.length}) · 잘못 인식된 이름·직업은 직접 고쳐주세요</label>
             <div style={{ display: "grid", gap: 6 }}>
-              {editedCharacters.map((c, i) => {
-                const iconSrc = findFirstClassIcon(c.klass);
-                return (
-                  <div
-                    key={i}
-                    style={{
-                      display: "grid",
-                      gridTemplateColumns: "36px minmax(0,1fr) minmax(0,1.4fr) auto",
-                      gap: 6,
-                      alignItems: "center",
-                    }}
+              {editedCharacters.map((c, i) => (
+                <div
+                  key={i}
+                  style={{
+                    display: "grid",
+                    gridTemplateColumns: "minmax(0,1fr) minmax(0,1.4fr) auto",
+                    gap: 6,
+                    alignItems: "center",
+                  }}
+                >
+                  <input
+                    className="form-input"
+                    value={c.name}
+                    onChange={(e) => updateCharacter(i, { name: e.target.value })}
+                    placeholder="캐릭명"
+                    aria-label={`캐릭터 ${i + 1} 이름`}
+                  />
+                  <select
+                    className="form-input"
+                    value={c.klass || ""}
+                    onChange={(e) => updateCharacter(i, { klass: e.target.value })}
+                    aria-label={`캐릭터 ${i + 1} 직업`}
                   >
-                    {iconSrc ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={iconSrc}
-                        alt={c.klass}
-                        width={36}
-                        height={36}
-                        style={{ borderRadius: "50%", objectFit: "cover", border: "1px solid var(--ink-line, #ccc)" }}
-                      />
-                    ) : (
-                      <div
-                        aria-hidden="true"
-                        style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(0,0,0,0.08)" }}
-                      />
-                    )}
-                    <input
-                      className="form-input"
-                      value={c.name}
-                      onChange={(e) => updateCharacter(i, { name: e.target.value })}
-                      placeholder="캐릭명"
-                      aria-label={`캐릭터 ${i + 1} 이름`}
-                    />
-                    <select
-                      className="form-input"
-                      value={c.klass || ""}
-                      onChange={(e) => updateCharacter(i, { klass: e.target.value })}
-                      aria-label={`캐릭터 ${i + 1} 직업`}
-                    >
-                      <option value="">직업 선택</option>
-                      {DNF_CLASSES_GROUPED.map((g) => (
-                        <optgroup key={g.group} label={g.group}>
-                          {g.classes.map((kls) => (
-                            <option key={`${g.group}::${kls.baseClass}`} value={kls.baseClass}>
-                              {g.group} · {kls.baseClass}
-                            </option>
-                          ))}
-                        </optgroup>
-                      ))}
-                    </select>
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm"
-                      onClick={() => removeCharacter(i)}
-                      aria-label="제거"
-                    >
-                      ✕
-                    </button>
-                  </div>
-                );
-              })}
+                    <option value="">직업 선택</option>
+                    {DNF_CLASSES_GROUPED.map((g) => (
+                      <optgroup key={g.group} label={g.group}>
+                        {g.classes.map((kls) => (
+                          <option key={`${g.group}::${kls}`} value={kls}>
+                            {g.group} · {kls}
+                          </option>
+                        ))}
+                      </optgroup>
+                    ))}
+                  </select>
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => removeCharacter(i)}
+                    aria-label="제거"
+                  >
+                    ✕
+                  </button>
+                </div>
+              ))}
               <button
                 type="button"
                 className="btn btn-ghost btn-sm"
