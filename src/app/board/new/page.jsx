@@ -248,6 +248,9 @@ function BoardNewInner() {
             placeholder="자유롭게. 매너만 지켜주세요."
             required
           />
+          <small style={{ color: "var(--muted)" }}>
+            마크다운 지원 — <code>**굵게**</code> <code>*기울임*</code> <code>- 목록</code> <code>[링크](url)</code> <code>`코드`</code>
+          </small>
         </div>
 
         {isAuthed ? (

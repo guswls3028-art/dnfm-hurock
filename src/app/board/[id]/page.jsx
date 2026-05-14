@@ -5,7 +5,10 @@ import { use, useEffect, useMemo, useState } from "react";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
 import AdminPostMenu from "@/components/AdminPostMenu";
+import AuthorCard from "@/components/AuthorCard";
+import BoardFab from "@/components/BoardFab";
 import ReportButton from "@/components/ReportButton";
+import MarkdownBody from "@/components/MarkdownBody";
 import {
   ApiError,
   buildApiUrl,
@@ -37,6 +40,7 @@ export default function BoardDetailPage({ params }) {
 
   const [post, setPost] = useState(null);
   const [comments, setComments] = useState([]);
+  const [nextPosts, setNextPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [voteBusy, setVoteBusy] = useState(false);
@@ -70,6 +74,24 @@ export default function BoardDetailPage({ params }) {
         setPost(p);
         const list = cData?.items || cData?.comments || [];
         setComments(list);
+        // 같은 카테고리 다음 글 stream — 현재 글 제외 10건.
+        const slug = p?.categorySlug;
+        if (slug) {
+          try {
+            const nx = await postsApi.list({
+              categorySlug: slug,
+              sort: "recent",
+              pageSize: 11,
+              page: 1,
+            });
+            const arr = Array.isArray(nx?.items) ? nx.items : [];
+            if (alive) setNextPosts(arr.filter((x) => x.id !== p.id).slice(0, 10));
+          } catch {
+            if (alive) setNextPosts([]);
+          }
+        } else if (alive) {
+          setNextPosts([]);
+        }
       } catch (err) {
         if (!alive) return;
         setError(err instanceof ApiError ? err : { message: err?.message || "글 불러오기 실패" });
@@ -348,8 +370,8 @@ export default function BoardDetailPage({ params }) {
         </div>
       </div>
 
-      <article className="form-block" style={{ whiteSpace: "pre-wrap", lineHeight: 1.7 }}>
-        {post.body}
+      <article className="form-block" style={{ lineHeight: 1.7 }}>
+        <MarkdownBody source={post.body} format={post.bodyFormat} />
         {Array.isArray(post.attachmentR2Keys) && post.attachmentR2Keys.length > 0 ? (
           <div
             style={{
@@ -408,6 +430,15 @@ export default function BoardDetailPage({ params }) {
           </span>
         ) : null}
       </div>
+
+      {post.author ? (
+        <AuthorCard
+          author={{
+            displayName: post.author.displayName || post.authorDisplayName,
+            dnfProfile: post.author.dnfProfile,
+          }}
+        />
+      ) : null}
 
       <section className="section" aria-labelledby="comments">
         <div className="section-head">
@@ -504,6 +535,15 @@ export default function BoardDetailPage({ params }) {
           </div>
         ) : (
           <form className="form-block" onSubmit={handleComment} style={{ marginTop: 14 }}>
+            <p
+              style={{
+                color: "var(--muted)",
+                fontSize: "0.78rem",
+                margin: "0 0 8px",
+              }}
+            >
+              정책 위반 댓글은 삭제될 수 있어요.
+            </p>
             {!isAuthed ? (
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
                 <input
@@ -551,6 +591,87 @@ export default function BoardDetailPage({ params }) {
           </form>
         )}
       </section>
+
+      {nextPosts.length > 0 ? (
+        <section
+          className="section"
+          aria-labelledby="next-posts"
+          style={{ marginTop: 22 }}
+        >
+          <div className="section-head">
+            <h2 id="next-posts">
+              <StickerBadge tone="cyan" rotate="l">
+                {categoryName}
+              </StickerBadge>{" "}
+              다음 글 이어보기
+            </h2>
+            <Link
+              href={`/board?category=${encodeURIComponent(post.categorySlug || "")}`}
+              className="btn btn-sm"
+            >
+              {categoryName} 전체 →
+            </Link>
+          </div>
+          <ul
+            style={{
+              display: "grid",
+              gap: 6,
+              marginTop: 10,
+              listStyle: "none",
+              padding: 0,
+            }}
+          >
+            {nextPosts.map((np) => (
+              <li key={np.id}>
+                <Link
+                  href={`/board/${encodeURIComponent(np.id)}`}
+                  style={{
+                    display: "flex",
+                    gap: 8,
+                    alignItems: "baseline",
+                    padding: "10px 12px",
+                    border: "2px dashed var(--ink, #1a1a1a)",
+                    background: "var(--paper, #fffef7)",
+                    borderRadius: 6,
+                    textDecoration: "none",
+                    color: "inherit",
+                  }}
+                >
+                  <span
+                    style={{
+                      flexShrink: 0,
+                      fontSize: "0.72rem",
+                      fontWeight: 800,
+                      color: "var(--hot-pink, #ff3ea5)",
+                    }}
+                  >
+                    [{np.categoryName || categoryName}]
+                  </span>
+                  <span
+                    style={{
+                      flex: 1,
+                      fontWeight: 700,
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                    }}
+                  >
+                    {np.title || "(제목 없음)"}
+                  </span>
+                  <span style={{ color: "var(--muted)", fontSize: "0.78rem", flexShrink: 0 }}>
+                    💬 {np.commentCount ?? 0}
+                  </span>
+                  <span style={{ color: "var(--muted)", fontSize: "0.78rem", flexShrink: 0 }}>
+                    👁 {np.viewCount ?? 0}
+                  </span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      ) : null}
+
+      <BoardFab />
     </PageShell>
   );
 
