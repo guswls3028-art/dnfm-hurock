@@ -5,15 +5,31 @@ import { use, useEffect, useState } from "react";
 import PageShell from "@/components/PageShell";
 import ContestEntryCard from "@/components/ContestEntryCard";
 import StickerBadge from "@/components/StickerBadge";
-import { contestEntries as mockEntries, contests as mockContests } from "@/lib/content";
 import { contests as contestsApi } from "@/lib/api-client";
 import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
 
+// backend lifecycle (draft/open/judging/voting/completed) + 이전 mock (submission/
+// voting/ended/announced) 양쪽 톤. open=참가 모집중 / completed=결과 발표.
 const STATUS_TONE = {
   submission: "pink",
+  open: "pink",
   voting: "cyan",
+  judging: "amber",
   ended: "ink",
   announced: "amber",
+  completed: "amber",
+  draft: "ink",
+};
+
+const STATUS_LABEL = {
+  submission: "참가 모집중",
+  open: "참가 모집중",
+  voting: "투표중",
+  judging: "심사중",
+  ended: "종료",
+  announced: "결과 발표",
+  completed: "결과 발표",
+  draft: "준비중",
 };
 
 const CATEGORY_TONE_CLASS = [
@@ -27,11 +43,10 @@ export default function ContestDetailPage({ params }) {
   const { id } = use(params);
   const { user } = useCurrentUser();
   const userIsAdmin = isAdmin(user, "hurock");
-  const [contest, setContest] = useState(() => mockContests.find((c) => c.id === id) || null);
-  const [entries, setEntries] = useState(() => mockEntries[id] || []);
+  const [contest, setContest] = useState(null);
+  const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [usingMock, setUsingMock] = useState(true);
 
   useEffect(() => {
     let alive = true;
@@ -43,27 +58,23 @@ export default function ContestDetailPage({ params }) {
         if (!alive) return;
         if (detail) {
           setContest(detail.contest || detail);
-          setUsingMock(false);
         }
       } catch (err) {
-        if (!contest) setError(err);
+        setError(err);
       }
       try {
         const data = await contestsApi.entries.list(id);
         if (!alive) return;
-        const list = Array.isArray(data) ? data : data?.entries || [];
-        if (list.length) {
-          setEntries(list);
-        }
+        const list = Array.isArray(data) ? data : data?.items || data?.entries || [];
+        setEntries(list);
       } catch {
-        /* mock 유지 */
+        if (alive) setEntries([]);
       }
       if (alive) setLoading(false);
     })();
     return () => {
       alive = false;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   if (!contest && !loading) {
@@ -91,9 +102,10 @@ export default function ContestDetailPage({ params }) {
     );
   }
 
-  const submissionOpen = contest.status === "submission";
+  // backend(open) + 이전 mock(submission) 양쪽 호환.
+  const submissionOpen = contest.status === "submission" || contest.status === "open";
   const voteOpen = contest.status === "voting";
-  const announced = contest.status === "announced";
+  const announced = contest.status === "announced" || contest.status === "completed";
 
   return (
     <PageShell activePath="/contests">
@@ -118,7 +130,7 @@ export default function ContestDetailPage({ params }) {
           <p>{contest.subtitle}</p>
         </div>
         <StickerBadge tone={STATUS_TONE[contest.status] || "amber"} rotate="r">
-          {contest.statusLabel || contest.status}
+          {contest.statusLabel || STATUS_LABEL[contest.status] || contest.status}
         </StickerBadge>
       </div>
 
@@ -152,7 +164,7 @@ export default function ContestDetailPage({ params }) {
               결과 보기
             </Link>
           )}
-          {userIsAdmin && !usingMock ? (
+          {userIsAdmin ? (
             <Link
               className="btn btn-sm btn-admin"
               href={`/admin/contests/${contest.id}`}
@@ -294,11 +306,6 @@ export default function ContestDetailPage({ params }) {
               <ContestEntryCard key={entry.id} entry={entry} />
             ))}
           </div>
-        )}
-        {usingMock && (
-          <small style={{ color: "var(--muted)", marginTop: 6, display: "inline-block" }}>
-            * 백엔드 미가용 — 샘플 데이터 표시 중
-          </small>
         )}
       </section>
     </PageShell>

@@ -4,18 +4,22 @@ import { useEffect, useState } from "react";
 import PageShell from "@/components/PageShell";
 import ContestCard from "@/components/ContestCard";
 import StickerBadge from "@/components/StickerBadge";
-import { contests as mockContests } from "@/lib/content";
 import { contests as contestsApi } from "@/lib/api-client";
 
+// backend(open/voting/judging/completed) + 이전 mock(submission/voting/ended/announced)
+// 둘 다 한 탭으로 묶어 표시.
 const TAB_DEFS = [
-  { id: "submission", label: "참가중", matches: (s) => s === "submission" },
-  { id: "voting", label: "투표중", matches: (s) => s === "voting" },
-  { id: "announced", label: "결과 발표", matches: (s) => s === "announced" || s === "ended" },
+  { id: "submission", label: "참가중", matches: (s) => s === "submission" || s === "open" },
+  { id: "voting", label: "투표중", matches: (s) => s === "voting" || s === "judging" },
+  {
+    id: "announced",
+    label: "결과 발표",
+    matches: (s) => s === "announced" || s === "ended" || s === "completed",
+  },
 ];
 
 export default function ContestsPage() {
-  const [contests, setContests] = useState(mockContests);
-  const [usingMock, setUsingMock] = useState(true);
+  const [contests, setContests] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,13 +28,10 @@ export default function ContestsPage() {
       try {
         const data = await contestsApi.list();
         if (!alive) return;
-        const list = Array.isArray(data) ? data : data?.contests || [];
-        if (list.length) {
-          setContests(list);
-          setUsingMock(false);
-        }
+        const list = Array.isArray(data) ? data : data?.items || data?.contests || [];
+        setContests(list);
       } catch {
-        /* mock 유지 */
+        if (alive) setContests([]);
       } finally {
         if (alive) setLoading(false);
       }
@@ -58,10 +59,10 @@ export default function ContestsPage() {
         </div>
       </div>
 
-      {usingMock && !loading && (
+      {!loading && contests.length === 0 && (
         <div className="callout-box" style={{ marginBottom: 12 }}>
           <strong>안내</strong>
-          백엔드에 등록된 콘테스트가 없어 샘플 콘테스트를 표시 중입니다.
+          진행중인 콘테스트가 없습니다. 곧 새 콘테스트가 열려요.
         </div>
       )}
 

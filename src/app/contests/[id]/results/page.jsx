@@ -4,13 +4,12 @@ import Link from "next/link";
 import { use, useEffect, useState } from "react";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
-import { contestResults as mockResults, contests as mockContests } from "@/lib/content";
 import { contests as contestsApi } from "@/lib/api-client";
 
 export default function ContestResultsPage({ params }) {
   const { id } = use(params);
-  const [contest, setContest] = useState(() => mockContests.find((c) => c.id === id) || null);
-  const [result, setResult] = useState(() => mockResults[id] || null);
+  const [contest, setContest] = useState(null);
+  const [result, setResult] = useState(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {

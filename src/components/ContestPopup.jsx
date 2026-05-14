@@ -3,13 +3,12 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import StickerBadge from "@/components/StickerBadge";
-import { contests as mockContests } from "@/lib/content";
 import { contests as contestsApi } from "@/lib/api-client";
 
 const HIDE_KEY = "hurock_contest_popup_hide_until";
 const HIDE_DAYS = 7;
 
-// backend lifecycle (draft/open/judging/voting/completed) ↔ mock 라이프사이클
+// backend lifecycle (draft/open/judging/voting/completed) ↔ 이전 mock
 // (submission/voting/ended/announced) 둘 중 어느 것이든 "참가 모집중" 으로
 // 간주하는 상태들.
 const OPEN_STATUSES = new Set(["submission", "open"]);
@@ -37,12 +36,9 @@ export default function ContestPopup() {
       let target = null;
       try {
         const data = await contestsApi.list();
-        const list = Array.isArray(data) ? data : data?.contests || data?.items || [];
+        const list = Array.isArray(data) ? data : data?.items || data?.contests || [];
         target = list.find((c) => OPEN_STATUSES.has(c.status)) || null;
-      } catch { /* backend 미가용 — mock fallback */ }
-      if (!target) {
-        target = mockContests.find((c) => OPEN_STATUSES.has(c.status)) || null;
-      }
+      } catch { /* backend 미가용 — popup 안 뜸 */ }
       if (!alive || !target) return;
       setContest(target);
       setOpen(true);

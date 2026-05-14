@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import VoteCard from "@/components/VoteCard";
 import StickerBadge from "@/components/StickerBadge";
-import { contestEntries as mockEntries, contests as mockContests } from "@/lib/content";
 import { ApiError, contests as contestsApi } from "@/lib/api-client";
 import { useCurrentUser } from "@/lib/use-current-user";
 
@@ -15,8 +14,8 @@ export default function ContestVotePage({ params }) {
   const router = useRouter();
   const { user, loading: userLoading } = useCurrentUser();
 
-  const [contest, setContest] = useState(() => mockContests.find((c) => c.id === id) || null);
-  const [entries, setEntries] = useState(() => (mockEntries[id] || []));
+  const [contest, setContest] = useState(null);
+  const [entries, setEntries] = useState([]);
   const [selected, setSelected] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -35,14 +34,12 @@ export default function ContestVotePage({ params }) {
       try {
         const data = await contestsApi.entries.list(id);
         if (!alive) return;
-        const list = Array.isArray(data) ? data : data?.entries || [];
-        if (list.length) {
-          // 투표 단계에서는 selectedForVote=true 만 노출
-          const filtered = list.filter((e) => e.selectedForVote || e.state === "candidate" || e.selected_for_vote);
-          setEntries(filtered.length ? filtered : list);
-        }
+        const list = Array.isArray(data) ? data : data?.items || data?.entries || [];
+        // 투표 단계에서는 selectedForVote=true 만 노출. 그 외엔 전체.
+        const filtered = list.filter((e) => e.selectedForVote || e.state === "candidate" || e.selected_for_vote);
+        setEntries(filtered.length ? filtered : list);
       } catch {
-        /* mock 유지 */
+        if (alive) setEntries([]);
       }
     })();
     return () => {

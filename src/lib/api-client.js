@@ -200,6 +200,17 @@ export const auth = {
   },
   confirmDnfProfile: (data) =>
     apiFetch("/auth/dnf-profile/confirm", { method: "POST", json: data }),
+  /** 통합 OCR — 여러 파일을 한 번에 올리면 backend 가 자동 분류·머지. */
+  ocrAuto: (files) => {
+    const fd = new FormData();
+    files.forEach((f, i) => fd.append(`image${i + 1}`, f));
+    return apiFetch("/auth/dnf-profile/ocr/auto", {
+      method: "POST",
+      form: fd,
+      timeoutMs: 90000,
+    });
+  },
+  updateMe: (data) => apiFetch("/auth/me", { method: "PATCH", json: data }),
 };
 
 /* ---------- Posts (board) ---------- */
@@ -297,10 +308,35 @@ export const reports = {
 
 /* ---------- Contests ---------- */
 
+/**
+ * backend contest row 에는 표시용 부가 정보 (categories/rules/rewards/judging/
+ * prizePool/posterEmoji/eventAt/submissionCloses/voteWindow/resultsAt/subtitle/tone)
+ * 가 모두 `metadata` jsonb 안에 들어있다. frontend 페이지는 contest.categories
+ * 같이 최상위로 접근하므로 여기서 spread 펼침.
+ *
+ * 우선순위: 최상위 컬럼(c) > metadata. 같은 키가 있으면 컬럼이 우선.
+ */
+function normalizeContest(c) {
+  if (!c || typeof c !== "object") return c;
+  const meta = c.metadata && typeof c.metadata === "object" ? c.metadata : {};
+  return { ...meta, ...c };
+}
+
+async function listContestsNormalized(query) {
+  const data = await apiFetch(sitePath("/contests"), { query });
+  const items = Array.isArray(data?.items) ? data.items : Array.isArray(data) ? data : [];
+  return { ...data, items: items.map(normalizeContest), contests: items.map(normalizeContest) };
+}
+
+async function detailContestNormalized(id) {
+  const data = await apiFetch(sitePath(`/contests/${id}`));
+  if (data?.contest) return { ...data, contest: normalizeContest(data.contest) };
+  return normalizeContest(data);
+}
+
 export const contests = {
-  list: ({ status, page, pageSize } = {}) =>
-    apiFetch(sitePath("/contests"), { query: { status, page, pageSize } }),
-  detail: (id) => apiFetch(sitePath(`/contests/${id}`)),
+  list: ({ status, page, pageSize } = {}) => listContestsNormalized({ status, page, pageSize }),
+  detail: (id) => detailContestNormalized(id),
   create: (data) => apiFetch(sitePath("/contests"), { method: "POST", json: data }),
   update: (id, input) =>
     apiFetch(sitePath(`/contests/${id}`), { method: "PATCH", json: input }),

@@ -15,9 +15,13 @@ const toneToCardClass = {
 
 const statusToSticker = {
   submission: { tone: "pink", label: "참가중" },
+  open: { tone: "pink", label: "참가중" },
   voting: { tone: "cyan", label: "투표중" },
+  judging: { tone: "amber", label: "심사중" },
   ended: { tone: "ink", label: "종료" },
-  announced: { tone: "amber", label: "결과" }
+  announced: { tone: "amber", label: "결과" },
+  completed: { tone: "amber", label: "결과" },
+  draft: { tone: "ink", label: "준비중" },
 };
 
 export default function ContestCard({ contest, tilt }) {
@@ -25,7 +29,7 @@ export default function ContestCard({ contest, tilt }) {
   const sticker = statusToSticker[contest.status] || statusToSticker.submission;
 
   const detailHref =
-    contest.status === "announced"
+    contest.status === "announced" || contest.status === "completed"
       ? `/contests/${contest.id}/results`
       : contest.status === "voting"
       ? `/contests/${contest.id}/vote`
@@ -44,17 +48,17 @@ export default function ContestCard({ contest, tilt }) {
       <h3>{contest.title}</h3>
       <p>{contest.subtitle}</p>
       <div className="card-meta">
-        <span>마감: {contest.submissionCloses}</span>
-        <span>· 투표: {contest.voteWindow}</span>
-        <span>· 참가 {contest.entries}명</span>
+        {contest.submissionCloses && <span>마감: {contest.submissionCloses}</span>}
+        {contest.voteWindow && <span>· 투표: {contest.voteWindow}</span>}
+        {typeof contest.entries === "number" && <span>· 참가 {contest.entries}명</span>}
       </div>
       <div className="card-actions">
         <Link className="btn btn-sm btn-primary" href={detailHref}>
-          {contest.status === "submission"
+          {contest.status === "submission" || contest.status === "open"
             ? "참가하기"
             : contest.status === "voting"
             ? "투표하기"
-            : contest.status === "announced"
+            : contest.status === "announced" || contest.status === "completed"
             ? "결과 보기"
             : "자세히"}
         </Link>

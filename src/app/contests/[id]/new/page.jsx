@@ -6,7 +6,6 @@ import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import ContestForm from "@/components/ContestForm";
 import StickerBadge from "@/components/StickerBadge";
-import { contests as mockContests } from "@/lib/content";
 import { contests as contestsApi } from "@/lib/api-client";
 import { useCurrentUser } from "@/lib/use-current-user";
 
@@ -14,7 +13,7 @@ export default function ContestNewPage({ params }) {
   const { id } = use(params);
   const router = useRouter();
   const { user, loading: userLoading } = useCurrentUser();
-  const [contest, setContest] = useState(() => mockContests.find((c) => c.id === id) || null);
+  const [contest, setContest] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -79,7 +78,12 @@ export default function ContestNewPage({ params }) {
   // 콘테스트 참가 = 비회원 가능. 회원이면 dnfProfile 자동 채움 편의.
   // userLoading 동안엔 isGuest 결정 보류 — form 깜빡임 방지.
   const isGuest = !userLoading && !user;
-  const schema = Array.isArray(contest.formSchema) ? contest.formSchema : [];
+  // backend formSchema = { fields: [...] }, 이전 mock = array. 둘 다 지원.
+  const schema = Array.isArray(contest.formSchema)
+    ? contest.formSchema
+    : Array.isArray(contest.formSchema?.fields)
+    ? contest.formSchema.fields
+    : [];
 
   return (
     <PageShell activePath="/contests">

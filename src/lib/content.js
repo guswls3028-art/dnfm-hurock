@@ -308,17 +308,12 @@ export const noticeBoard = [
 ];
 
 /**
- * 콘테스트 mock — 3종 (진행중 / 종료 / 결과 발표)
- *
- * status:
- *   - "submission" : 참가 글쓰기 받는 중
- *   - "voting"     : 어드민이 후보 추리고 시청자 투표
- *   - "ended"      : 종료 (결과 미발표)
- *   - "announced"  : 결과 발표 끝
- *
- * formSchema: 참가 폼 필드. 현재는 아바타 콘테스트 고정 5필드.
+ * 콘테스트 mock — 폐기됨 (2026-05-14). backend (`api.dnfm.kr/sites/hurock/contests`)
+ * 의 실 데이터만 사용. 본 array 는 빈 채로 유지 — frontend import 가 그대로
+ * 살아있어도 안전. 신규 콘테스트는 어드민 self-service (/admin/contests/new) 또는
+ * `_artifacts/seed-hurock-look-contest.mjs` 류 운영 스크립트로 backend 에 박을 것.
  */
-export const contests = [
+const __DEPRECATED_CONTESTS = [
   {
     id: "c-avatar-1",
     title: "허락 아바타 콘테스트 1회",
@@ -481,22 +476,17 @@ export const contests = [
   }
 ];
 
-/**
- * 콘테스트 entries mock — c-avatar-1 의 참가작 표본.
- * 마감 후/투표 페이지에서 grid 로 노출.
- */
-export const contestEntries = {
-  "c-avatar-1": [
-    { id: "e1", adventureName: "허락팬1단", characterName: "라피헌터", title: "여름 골목 산책", description: "라이트한 셔츠+밀짚모자 조합. 컨셉은 슈퍼 가는 길.", tone: "pink" },
-    { id: "e2", adventureName: "허락팬1단", characterName: "달의도사", title: "심야 작업실", description: "어두운 톤 풀세트, 안경 포인트. 코드 짜는 컨셉.", tone: "cyan" },
-    { id: "e3", adventureName: "방송러", characterName: "노을검사", title: "이세계 카페", description: "파스텔 + 베레모. 분위기 카페 알바.", tone: "amber" },
-    { id: "e4", adventureName: "허락팬2단", characterName: "은하술사", title: "별 보러 가는 옷", description: "은하 패턴 망토 + 별 액세서리. 야경 어울림.", tone: "lime" },
-    { id: "e5", adventureName: "허락팬2단", characterName: "비오는날", title: "장마 일기", description: "노란 우비 + 장화. 비 오는 날만 입음.", tone: "pink" },
-    { id: "e6", adventureName: "도전자모임", characterName: "철권왕", title: "도장깨기", description: "도복 + 머리띠. 진지하게 보이려고 노력함.", tone: "cyan" }
-  ],
-};
+// 폐기 alias — 외부 import 안전 (빈 array 로 export). 신규 import 금지.
+export const contests = [];
 
-// 결과 발표 mock — 아직 발표 콘테스트 없음.
+/**
+ * 콘테스트 entries mock — 폐기 (2026-05-14, "가짜 데이터 빼자" 요청). backend
+ * `GET /sites/hurock/contests/:id/entries` 의 실 응답만 사용. 빈 object 로 유지해
+ * 기존 import 가 깨지지 않게.
+ */
+export const contestEntries = {};
+
+// 결과 발표 — 폐기 (2026-05-14). backend `GET /sites/hurock/contests/:id/results`.
 export const contestResults = {};
 
 /**
