@@ -16,7 +16,7 @@ import { apiFetch, ApiError } from "@/lib/api-client";
  *   PATCH /sites/hurock/posts/:id  { pinned: true|false }   (admin only)
  *   DELETE /sites/hurock/posts/:id                           (admin only, soft delete)
  */
-export default function AdminPostMenu({ postId, pinned, onChange }) {
+export default function AdminPostMenu({ postId, pinned, locked, onChange }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -50,6 +50,27 @@ export default function AdminPostMenu({ postId, pinned, onChange }) {
         json: { pinned: !pinned },
       });
       setMsg(pinned ? "고정 해제됨" : "상단에 고정됨");
+      setOpen(false);
+      if (typeof onChange === "function") await onChange();
+    } catch (err) {
+      const m =
+        err instanceof ApiError ? `${err.message} (${err.status})` : err?.message;
+      setMsg(m || "처리 실패");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function toggleLocked() {
+    if (busy) return;
+    setBusy(true);
+    setMsg(null);
+    try {
+      await apiFetch(`/sites/hurock/posts/${encodeURIComponent(postId)}`, {
+        method: "PATCH",
+        json: { locked: !locked },
+      });
+      setMsg(locked ? "잠금 해제됨" : "잠금 됨 (댓글 차단)");
       setOpen(false);
       if (typeof onChange === "function") await onChange();
     } catch (err) {
@@ -108,6 +129,15 @@ export default function AdminPostMenu({ postId, pinned, onChange }) {
             disabled={busy}
           >
             {pinned ? "📌 고정 해제" : "📌 상단 고정"}
+          </button>
+          <button
+            type="button"
+            role="menuitem"
+            className="admin-menu__item"
+            onClick={toggleLocked}
+            disabled={busy}
+          >
+            {locked ? "🔓 잠금 해제" : "🔒 잠금 (댓글 차단)"}
           </button>
           <button
             type="button"

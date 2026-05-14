@@ -341,6 +341,7 @@ export default function BoardDetailPage({ params }) {
             <AdminPostMenu
               postId={post.id || id}
               pinned={Boolean(post.pinned)}
+              locked={Boolean(post.locked)}
               onChange={reloadAll}
             />
           ) : null}
