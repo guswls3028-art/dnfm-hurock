@@ -162,10 +162,26 @@ export const auth = {
   logout: () => apiFetch("/auth/logout", { method: "POST" }),
   loginLocal: ({ username, password }) =>
     apiFetch("/auth/login/local", { method: "POST", json: { username, password } }),
-  signupLocal: ({ username, password, displayName, dnfProfile }) =>
+  signupLocal: ({
+    username,
+    password,
+    displayName,
+    dnfProfile,
+    characterListNames,
+    characterSelectNames,
+    captureR2Keys,
+  }) =>
     apiFetch("/auth/signup/local", {
       method: "POST",
-      json: { username, password, displayName, dnfProfile },
+      json: {
+        username,
+        password,
+        displayName,
+        dnfProfile,
+        characterListNames,
+        characterSelectNames,
+        captureR2Keys,
+      },
     }),
   checkAvailability: ({ username, displayName }) =>
     apiFetch("/auth/check-availability", { query: { username, displayName } }),
@@ -197,14 +213,40 @@ export const posts = {
       query: { categoryId, flair, postType, bestOnly, q, page, pageSize, sort },
     }),
   detail: (id) => apiFetch(sitePath(`/posts/${id}`)),
-  create: ({ categoryId, categorySlug, title, body, bodyFormat, flair, postType, attachmentR2Keys }) =>
+  create: ({
+    categoryId,
+    categorySlug,
+    title,
+    body,
+    bodyFormat,
+    flair,
+    postType,
+    attachmentR2Keys,
+    guestNickname,
+    guestPassword,
+  }) =>
     apiFetch(sitePath("/posts"), {
       method: "POST",
-      json: { categoryId, categorySlug, title, body, bodyFormat, flair, postType, attachmentR2Keys },
+      json: {
+        categoryId,
+        categorySlug,
+        title,
+        body,
+        bodyFormat,
+        flair,
+        postType,
+        attachmentR2Keys,
+        guestNickname,
+        guestPassword,
+      },
     }),
   update: (id, input) =>
     apiFetch(sitePath(`/posts/${id}`), { method: "PATCH", json: input }),
-  remove: (id) => apiFetch(sitePath(`/posts/${id}`), { method: "DELETE" }),
+  remove: (id, { guestPassword } = {}) =>
+    apiFetch(sitePath(`/posts/${id}`), {
+      method: "DELETE",
+      json: { guestPassword },
+    }),
   // voteType: "recommend" | "downvote" (backend postVoteTypes enum)
   vote: (id, voteType) =>
     apiFetch(sitePath(`/posts/${id}/vote`), { method: "POST", json: { voteType } }),
@@ -215,14 +257,42 @@ export const posts = {
 export const comments = {
   list: (postId, { page, pageSize } = {}) =>
     apiFetch(sitePath(`/posts/${postId}/comments`), { query: { page, pageSize } }),
-  create: (postId, { body, parentId }) =>
+  mine: ({ page, pageSize } = {}) =>
+    apiFetch(sitePath("/me/comments"), { query: { page, pageSize } }),
+  create: (postId, { body, parentId, guestNickname, guestPassword }) =>
     apiFetch(sitePath(`/posts/${postId}/comments`), {
       method: "POST",
-      json: { body, parentId },
+      json: { body, parentId, guestNickname, guestPassword },
     }),
-  update: (id, { body }) =>
-    apiFetch(sitePath(`/comments/${id}`), { method: "PATCH", json: { body } }),
-  remove: (id) => apiFetch(sitePath(`/comments/${id}`), { method: "DELETE" }),
+  update: (id, { body, guestPassword } = {}) =>
+    apiFetch(sitePath(`/comments/${id}`), {
+      method: "PATCH",
+      json: { body, guestPassword },
+    }),
+  remove: (id, { guestPassword } = {}) =>
+    apiFetch(sitePath(`/comments/${id}`), {
+      method: "DELETE",
+      json: { guestPassword },
+    }),
+};
+
+/* ---------- Reports (신고) ---------- */
+
+export const reports = {
+  create: ({ targetType, targetId, reason, detail }) =>
+    apiFetch(sitePath("/reports"), {
+      method: "POST",
+      json: { targetType, targetId, reason, detail },
+    }),
+  list: ({ status, targetType, page, pageSize } = {}) =>
+    apiFetch(sitePath("/reports"), {
+      query: { status, targetType, page, pageSize },
+    }),
+  update: (id, { status, resolution, resolutionNote, moderatorMemo }) =>
+    apiFetch(sitePath(`/reports/${id}`), {
+      method: "PATCH",
+      json: { status, resolution, resolutionNote, moderatorMemo },
+    }),
 };
 
 /* ---------- Contests ---------- */

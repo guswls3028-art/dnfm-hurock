@@ -27,17 +27,18 @@ export const siblingSite = {
 };
 
 // 최상단 슬라이딩 배너 — 5초 자동 회전. 던파 공홈 메인 슬라이더 레이어.
-// 허락 본인 portrait("왕대가리") 도 한 슬라이드로 흡수.
+// 허락 본인 portrait 는 슬라이더에서 분리 → HostBanner 컴포넌트로 이동.
 export const heroBanners = [
   {
-    id: "hurock-portrait",
-    kind: "portrait",
-    title: "허락공대 — 던파 모바일 방송",
-    subtitle: "평일 19시 이후 / 주말 일찍 ON",
-    src: "/hurock-avatar.png",
-    alt: "허락 프로필 — 오니 마스크",
-    href: "https://ch.sooplive.co.kr/hurock0101",
-    cta: "방송 보러가기",
+    id: "avatar-look-contest",
+    kind: "wide-text",
+    title: "아바타 룩 콘테스트",
+    subtitle: "5개 부문 코디 자랑 — 6월 13일(토) 마감",
+    emoji: "👗",
+    accentTone: "pink",
+    href: "/contests/c-avatar-1",
+    alt: "아바타 룩 콘테스트 배너",
+    cta: "참가 / 자세히 보기",
   },
   {
     id: "newbie",
@@ -592,7 +593,8 @@ export const adminContestDetail = {
 
 export const adminMenu = [
   { id: "contests", label: "콘테스트 관리", href: "/admin", note: "생성/심사/투표/발표" },
-  { id: "board", label: "게시판 관리", href: null, reason: "어드민 UI 준비중" },
-  { id: "members", label: "회원 관리", href: null, reason: "어드민 UI 준비중" },
-  { id: "settings", label: "사이트 설정", href: null, reason: "어드민 UI 준비중" }
+  { id: "board", label: "게시판 관리", href: "/admin/board", note: "최근 글 목록 + 즉시 삭제" },
+  { id: "reports", label: "신고함", href: "/admin/reports", note: "신고 검토 + 조치 + 운영 메모" },
+  { id: "members", label: "회원 관리", href: "/admin/members", note: "권한/차단 — 백엔드 작업중" },
+  { id: "settings", label: "사이트 설정", href: "/admin/settings", note: "배너·채널·후원·풋터" }
 ];
