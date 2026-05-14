@@ -82,7 +82,9 @@ export default function EditProfilePage() {
       return;
     }
     if (user) {
-      setDisplayName(user.displayName || "");
+      const raw = user.displayName || "";
+      const isPlaceholder = /^(google|kakao)_[a-f0-9]{4,}/i.test(raw);
+      setDisplayName(isPlaceholder ? "" : raw);
       setViewer({
         platform: user.viewerPlatform || null,
         nickname: user.viewerNickname || "",
@@ -92,12 +94,16 @@ export default function EditProfilePage() {
   }, [loading, user, router]);
 
   const original = useMemo(
-    () => ({
-      displayName: user?.displayName || "",
-      viewerPlatform: user?.viewerPlatform || null,
-      viewerNickname: user?.viewerNickname || "",
-      avatarR2Key: user?.avatarR2Key || null,
-    }),
+    () => {
+      const raw = user?.displayName || "";
+      const isPlaceholder = /^(google|kakao)_[a-f0-9]{4,}/i.test(raw);
+      return {
+        displayName: isPlaceholder ? "" : raw,
+        viewerPlatform: user?.viewerPlatform || null,
+        viewerNickname: user?.viewerNickname || "",
+        avatarR2Key: user?.avatarR2Key || null,
+      };
+    },
     [user],
   );
 

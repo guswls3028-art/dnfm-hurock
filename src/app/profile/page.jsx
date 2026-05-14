@@ -111,6 +111,18 @@ export default function ProfilePage() {
         </div>
       </div>
 
+      {/^(google|kakao)_[a-f0-9]{4,}/i.test(user.displayName || "") ? (
+        <section className="callout-box" style={{ marginBottom: 16, borderColor: "var(--primary)", borderWidth: 2 }}>
+          <strong>닉네임을 설정해 주세요</strong>
+          <p style={{ margin: "8px 0 12px", lineHeight: 1.7 }}>
+            소셜 로그인 후 임시 닉네임이 부여됐습니다. 본인의 닉네임으로 변경해 주세요.
+          </p>
+          <Link href="/profile/edit" className="btn btn-primary btn-sm">
+            프로필 편집으로 가기 →
+          </Link>
+        </section>
+      ) : null}
+
       <section className="section" aria-labelledby="profile-account">
         <div className="section-head">
           <h2 id="profile-account">회원 정보</h2>
