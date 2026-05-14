@@ -76,9 +76,8 @@ export default function ContestNewPage({ params }) {
 
   // 비회원 정책 SSOT (project_anonymous_posting_policy 2026-05-14):
   // 콘테스트 참가 = 비회원 가능. 회원이면 dnfProfile 자동 채움 편의.
-  // userLoading 동안 보수적 default = isGuest=true → 비회원 닉/비번 입력 첫 render 부터 노출.
-  // 회원으로 판명되면 input 사라지는 게 안전 (사용자가 비회원 input 못 보고 submit → 400 패턴 차단).
-  const isGuest = userLoading ? true : !user;
+  // userLoading 동안엔 isGuest 결정 보류 — form 깜빡임 방지.
+  const isGuest = !userLoading && !user;
   // backend formSchema = { fields: [...] }, 이전 mock = array. 둘 다 지원.
   const schema = Array.isArray(contest.formSchema)
     ? contest.formSchema
