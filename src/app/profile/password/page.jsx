@@ -29,11 +29,13 @@ function ChangePasswordInner() {
   const [error, setError] = useState(null);
   const [done, setDone] = useState(false);
 
+  // submit 후 backend tokenVersion bump → user null. done 화면 위해 redirect 차단.
   useEffect(() => {
+    if (done || submitting) return;
     if (!loading && !user) {
       router.replace(`/login?returnTo=${encodeURIComponent("/profile/password")}`);
     }
-  }, [loading, user, router]);
+  }, [loading, user, router, done, submitting]);
 
   const match = useMemo(() => {
     if (!newPassword || !newPassword2) return null;

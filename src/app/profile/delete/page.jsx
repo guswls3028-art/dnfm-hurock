@@ -18,11 +18,13 @@ export default function DeleteAccountPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
+  // 탈퇴 진행 중/완료 시 redirect 차단 — handler 가 직접 router.push 처리.
   useEffect(() => {
+    if (submitting) return;
     if (!loading && !user) {
       router.replace(`/login?returnTo=${encodeURIComponent("/profile/delete")}`);
     }
-  }, [loading, user, router]);
+  }, [loading, user, router, submitting]);
 
   // 자체 가입자 = username 존재. OAuth-only = username null.
   const isLocal = Boolean(user?.username);
@@ -40,7 +42,7 @@ export default function DeleteAccountPage() {
     setSubmitting(true);
     try {
       await auth.deleteAccount({ password: isLocal ? password : undefined });
-      await refresh();
+      // refresh() 호출 시 user null → useEffect redirect 발동. handler 가 직접 / 로 이동.
       router.push("/?bye=1");
       router.refresh();
     } catch (err) {
