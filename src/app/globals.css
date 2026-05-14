@@ -4276,3 +4276,54 @@ button {
 .md-body hr { border: 0; border-top: 2px dashed var(--ink); margin: 18px 0; }
 .md-body img { max-width: 100%; height: auto; border: 2px solid var(--ink); border-radius: var(--radius-sm); box-shadow: var(--shadow-1); }
 .md-empty { color: var(--ink-soft); font-style: italic; }
+
+/* === 게시판 우측 하단 floating action (B급 톤) === */
+.board-fab-hurock {
+  position: fixed;
+  right: clamp(12px, 4vw, 26px);
+  bottom: clamp(16px, 5vw, 30px);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 60;
+  pointer-events: none;
+}
+.board-fab-hurock__btn {
+  pointer-events: auto;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 3px solid var(--ink, #1a1a1a);
+  background: var(--paper, #fffef7);
+  color: var(--ink, #1a1a1a);
+  font-size: 24px;
+  font-weight: 900;
+  line-height: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 4px 4px 0 var(--ink, #1a1a1a);
+  transition: transform 0.1s ease, box-shadow 0.1s ease;
+  text-decoration: none;
+  transform: rotate(-3deg);
+}
+.board-fab-hurock__btn:hover {
+  transform: rotate(0deg) translateY(-1px);
+  box-shadow: 5px 5px 0 var(--ink, #1a1a1a);
+}
+.board-fab-hurock__btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 var(--ink, #1a1a1a);
+}
+.board-fab-hurock__btn--write {
+  background: var(--hot-pink, #ff3ea5);
+  color: #fff;
+}
+.board-fab-hurock__btn--top {
+  background: var(--accent-yellow, #ffe24a);
+  transform: rotate(3deg);
+}
+.board-fab-hurock__btn--top:hover {
+  transform: rotate(0deg) translateY(-1px);
+}
