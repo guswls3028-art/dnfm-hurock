@@ -136,6 +136,7 @@ function BoardInner() {
 
   return (
     <PageShell activePath="/board">
+      <div className="board-page board-page--hurock">
       <div className="page-head">
         <div>
           <h1>
@@ -164,17 +165,10 @@ function BoardInner() {
 
       <div
         className="board-toolbar"
-        style={{
-          display: "flex",
-          gap: 8,
-          alignItems: "center",
-          marginTop: 12,
-          flexWrap: "wrap",
-        }}
       >
         <form
           onSubmit={handleSearchSubmit}
-          style={{ display: "flex", gap: 8, flex: 1, minWidth: 240 }}
+          className="board-toolbar__search"
         >
           <input
             type="search"
@@ -182,7 +176,6 @@ function BoardInner() {
             placeholder="제목·본문 검색"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            style={{ flex: 1 }}
           />
           <button type="submit" className="btn btn-sm">
             검색
@@ -197,7 +190,7 @@ function BoardInner() {
             </button>
           ) : null}
         </form>
-        <div style={{ display: "flex", gap: 4 }} aria-label="정렬">
+        <div className="board-toolbar__sort" aria-label="정렬">
           {SORTS.map((s) => (
             <button
               key={s.value}
@@ -223,8 +216,14 @@ function BoardInner() {
         className="board-list"
         role="table"
         aria-label="허락방 글 목록"
-        style={{ marginTop: 12 }}
       >
+        <div className="board-list__summary" aria-live="polite">
+          {visiblePosts
+            ? total > 0
+              ? `총 ${total}개 글${total > PAGE_SIZE ? ` · ${pageParam}페이지` : ""}`
+              : "아직 글이 없어요"
+            : "불러오는 중…"}
+        </div>
         <BoardRow head />
         {visiblePosts === null ? (
           <div className="board-row">
@@ -256,6 +255,7 @@ function BoardInner() {
         pageSize={PAGE_SIZE}
         buildHref={buildPageHref}
       />
+      </div>
     </PageShell>
   );
 }
