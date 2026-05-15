@@ -55,6 +55,11 @@ export default function BoardRow({ post, head }) {
       </span>
       <span className="board-row-meta">{date}</span>
       <span className="board-row-meta">{views}</span>
+      <span className="board-row-mobile-meta" aria-hidden="true">
+        <span>{author}</span>
+        {date ? <span>{date}</span> : null}
+        <span>조회 {views}</span>
+      </span>
     </Link>
   );
 }

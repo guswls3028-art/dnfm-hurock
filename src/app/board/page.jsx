@@ -104,6 +104,8 @@ function BoardInner() {
   }, [activeCat, pageParam, sortParam, qParam]);
 
   const visiblePosts = posts;
+  const activeCategoryLabel =
+    categories.find((cat) => cat.slug === activeCat)?.name || "전체";
 
   function pushQuery(next) {
     const qs = new URLSearchParams();
@@ -211,6 +213,19 @@ function BoardInner() {
           글 목록을 못 가져왔어요. 잠시 후 다시 시도해 주세요. ({loadError})
         </div>
       ) : null}
+
+      <div className="board-status-strip" aria-live="polite">
+        <strong>{activeCategoryLabel}</strong>
+        <span>
+          {visiblePosts
+            ? total > 0
+              ? `총 ${total}개 글${qParam ? ` · "${qParam}" 검색` : ""}`
+              : qParam
+                ? "검색 결과 없음"
+                : "첫 글 대기 중"
+            : "목록 불러오는 중"}
+        </span>
+      </div>
 
       <div
         className="board-list"

@@ -314,7 +314,7 @@ export default function BoardDetailPage({ params }) {
 
   return (
     <PageShell activePath="/board">
-      <div className="page-head">
+      <div className="page-head board-detail-head">
         <div>
           <Link
             href="/board"
@@ -344,7 +344,7 @@ export default function BoardDetailPage({ params }) {
             {authorLabel} · {formatTime(post.createdAt)} · 조회 {post.viewCount ?? "-"}
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+        <div className="board-detail-actions">
           <ReportButton targetType="post" targetId={post.id || id} />
           {canDeletePostAsAuthor ? (
             <Link
@@ -370,7 +370,7 @@ export default function BoardDetailPage({ params }) {
         </div>
       </div>
 
-      <article className="form-block" style={{ lineHeight: 1.7 }}>
+      <article className="form-block board-detail-article">
         <MarkdownBody source={post.body} format={post.bodyFormat} />
         {Array.isArray(post.attachmentR2Keys) && post.attachmentR2Keys.length > 0 ? (
           <div
@@ -441,7 +441,7 @@ export default function BoardDetailPage({ params }) {
         />
       ) : null}
 
-      <section className="section" aria-labelledby="comments">
+      <section className="section board-comments-section" aria-labelledby="comments">
         <div className="section-head">
           <h2 id="comments">댓글 ({comments.length})</h2>
         </div>
@@ -535,7 +535,7 @@ export default function BoardDetailPage({ params }) {
             댓글을 달 수 없어요.
           </div>
         ) : (
-          <form className="form-block" onSubmit={handleComment} style={{ marginTop: 14 }}>
+          <form className="form-block board-comment-form" onSubmit={handleComment}>
             <p
               style={{
                 color: "var(--muted)",
@@ -546,7 +546,7 @@ export default function BoardDetailPage({ params }) {
               정책 위반 댓글은 삭제될 수 있어요.
             </p>
             {!isAuthed ? (
-              <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+              <div className="board-comment-guest-fields">
                 <input
                   className="form-input"
                   placeholder="닉네임 (선택, 기본 ㅇㅇ)"
@@ -595,7 +595,7 @@ export default function BoardDetailPage({ params }) {
 
       {nextPosts.length > 0 ? (
         <section
-          className="section"
+          className="section board-next-posts"
           aria-labelledby="next-posts"
           style={{ marginTop: 22 }}
         >

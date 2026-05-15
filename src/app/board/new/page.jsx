@@ -147,7 +147,11 @@ function BoardNewInner() {
         </Link>
       </div>
 
-      <form className="form-block" onSubmit={handleSubmit} aria-label="글쓰기 폼">
+      <form
+        className="form-block board-compose board-compose--hurock"
+        onSubmit={handleSubmit}
+        aria-label="글쓰기 폼"
+      >
         <div className="form-row">
           <label htmlFor="post-cat">카테고리</label>
           <select
@@ -272,7 +276,7 @@ function BoardNewInner() {
         )}
 
         <div className="form-divider" />
-        <div style={{ display: "flex", gap: 10 }}>
+        <div className="board-compose__actions">
           <button
             type="submit"
             className="btn btn-primary"
