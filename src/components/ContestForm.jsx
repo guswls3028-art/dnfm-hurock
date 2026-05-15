@@ -340,7 +340,7 @@ export default function ContestForm({ contestId, schema = [], dnfProfile, isGues
       {success && (
         <div className="callout-box">
           <strong>제출 완료</strong>
-          참가가 정상 등록되었습니다. 콘테스트 페이지로 이동합니다.
+          참가작이 검수 대기로 등록되었습니다. 운영자 승인 후 공개됩니다.
         </div>
       )}
 

@@ -35,12 +35,10 @@ export default function ContestVotePage({ params }) {
         if (alive) setDetailLoaded(true);
       }
       try {
-        const data = await contestsApi.entries.list(id);
+        const data = await contestsApi.entries.list(id, { selectedForVote: true });
         if (!alive) return;
         const list = Array.isArray(data) ? data : data?.items || data?.entries || [];
-        // 투표 단계에서는 selectedForVote=true 만 노출. 그 외엔 전체.
-        const filtered = list.filter((e) => e.selectedForVote || e.state === "candidate" || e.selected_for_vote);
-        setEntries(filtered.length ? filtered : list);
+        setEntries(list.filter((e) => e.selectedForVote || e.selected_for_vote));
       } catch {
         if (alive) setEntries([]);
       }

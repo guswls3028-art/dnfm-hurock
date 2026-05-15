@@ -11,17 +11,23 @@ import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
 const STATUS_TONE = {
   draft: "ink",
   open: "pink",
+  closed: "amber",
   judging: "amber",
   voting: "cyan",
-  completed: "amber",
+  results: "amber",
+  archived: "ink",
+  cancelled: "ink",
 };
 
 const STATUS_LABEL = {
   draft: "임시저장",
   open: "참가 모집",
+  closed: "접수 마감",
   judging: "후보 심사",
   voting: "투표중",
-  completed: "결과 발표",
+  results: "결과 발표",
+  archived: "보관됨",
+  cancelled: "취소됨",
 };
 
 export default function AdminPage() {

@@ -3,7 +3,7 @@ import StickerBadge from "@/components/StickerBadge";
 
 /**
  * ContestCard — 콘테스트 목록 카드.
- *  - status: draft | open | judging | voting | completed
+ *  - status: draft | open | closed | judging | voting | results | archived | cancelled
  *  - tone: pink | cyan | amber | lime — 카드 상단 띠 색
  */
 const toneToCardClass = {
@@ -16,9 +16,12 @@ const toneToCardClass = {
 const statusToSticker = {
   draft: { tone: "ink", label: "임시저장" },
   open: { tone: "pink", label: "참가중" },
+  closed: { tone: "amber", label: "마감" },
   judging: { tone: "amber", label: "심사중" },
   voting: { tone: "cyan", label: "투표중" },
-  completed: { tone: "amber", label: "결과" },
+  results: { tone: "amber", label: "결과" },
+  archived: { tone: "ink", label: "보관" },
+  cancelled: { tone: "ink", label: "취소" },
 };
 
 export default function ContestCard({ contest, tilt }) {
@@ -29,7 +32,7 @@ export default function ContestCard({ contest, tilt }) {
   };
 
   const detailHref =
-    contest.status === "completed"
+    contest.status === "results"
       ? `/contests/${contest.id}/results`
       : contest.status === "voting"
       ? `/contests/${contest.id}/vote`
@@ -58,7 +61,7 @@ export default function ContestCard({ contest, tilt }) {
             ? "참가하기"
             : contest.status === "voting"
             ? "투표하기"
-            : contest.status === "completed"
+            : contest.status === "results"
             ? "결과 보기"
             : "자세히"}
         </Link>

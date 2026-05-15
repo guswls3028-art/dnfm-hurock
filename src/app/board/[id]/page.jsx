@@ -314,138 +314,145 @@ export default function BoardDetailPage({ params }) {
 
   return (
     <PageShell activePath="/board">
-      <div className="page-head board-detail-head">
-        <div>
-          <Link
-            href="/board"
-            style={{
-              display: "inline-block",
-              marginBottom: 8,
-              borderBottom: "2px solid var(--ink)",
-              fontSize: "0.84rem",
-              fontWeight: 800,
-            }}
-          >
-            ← 허락방 목록
-          </Link>
-          <h1>
-            {post.pinned ? "📌 " : ""}
-            {post.title}
-          </h1>
-          <p>
-            <StickerBadge tone="cyan" rotate="l">
-              {categoryName}
-            </StickerBadge>{" "}
-            {post.flair ? (
-              <StickerBadge tone="yellow" rotate="r">
-                [{post.flair}]
-              </StickerBadge>
-            ) : null}{" "}
-            {authorLabel} · {formatTime(post.createdAt)} · 조회 {post.viewCount ?? "-"}
-          </p>
-        </div>
-        <div className="board-detail-actions">
-          <ReportButton targetType="post" targetId={post.id || id} />
-          {canDeletePostAsAuthor ? (
+      <div className="board-thread board-thread--hurock">
+        <div className="page-head board-detail-head">
+          <div>
             <Link
-              href={`/board/${encodeURIComponent(post.id || id)}/edit`}
-              className="btn btn-sm"
+              href="/board"
+              style={{
+                display: "inline-block",
+                marginBottom: 8,
+                borderBottom: "2px solid var(--ink)",
+                fontSize: "0.84rem",
+                fontWeight: 800,
+              }}
             >
-              ✏ 수정
+              ← 허락방 목록
             </Link>
+            <h1>
+              {post.pinned ? "📌 " : ""}
+              {post.title}
+            </h1>
+            <p>
+              <StickerBadge tone="cyan" rotate="l">
+                {categoryName}
+              </StickerBadge>{" "}
+              {post.flair ? (
+                <StickerBadge tone="yellow" rotate="r">
+                  [{post.flair}]
+                </StickerBadge>
+              ) : null}{" "}
+              {authorLabel} · {formatTime(post.createdAt)} · 조회 {post.viewCount ?? "-"}
+            </p>
+          </div>
+          <div className="board-detail-actions">
+            <ReportButton targetType="post" targetId={post.id || id} />
+            {canDeletePostAsAuthor ? (
+              <Link
+                href={`/board/${encodeURIComponent(post.id || id)}/edit`}
+                className="btn btn-sm"
+              >
+                ✏ 수정
+              </Link>
+            ) : null}
+            {canDeletePostAsAuthor ? (
+              <button type="button" className="btn btn-sm" onClick={handleDeletePost}>
+                🗑 삭제
+              </button>
+            ) : null}
+            {userIsAdmin ? (
+              <AdminPostMenu
+                postId={post.id || id}
+                pinned={Boolean(post.pinned)}
+                locked={Boolean(post.locked)}
+                onChange={reloadAll}
+              />
+            ) : null}
+          </div>
+        </div>
+
+        <div className="board-thread-label">게시물</div>
+        <article className="form-block board-detail-article">
+          <MarkdownBody source={post.body} format={post.bodyFormat} />
+          {Array.isArray(post.attachmentR2Keys) && post.attachmentR2Keys.length > 0 ? (
+            <div
+              className="board-detail-attachments"
+              style={{
+                marginTop: 14,
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+                gap: 10,
+              }}
+            >
+              {post.attachmentR2Keys.map((k, i) => (
+                <a
+                  key={`${k}-${i}`}
+                  href={buildApiUrl(`/uploads/r2/${encodeURIComponent(k)}`)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: "block",
+                    border: "2px solid var(--ink, #1a1a1a)",
+                    borderRadius: 8,
+                    overflow: "hidden",
+                    background: "var(--paper, #fffef7)",
+                  }}
+                >
+                  <img
+                    src={buildApiUrl(`/uploads/r2/${encodeURIComponent(k)}`)}
+                    alt=""
+                    loading="lazy"
+                    style={{ width: "100%", height: "auto", display: "block" }}
+                  />
+                </a>
+              ))}
+            </div>
           ) : null}
-          {canDeletePostAsAuthor ? (
-            <button type="button" className="btn btn-sm" onClick={handleDeletePost}>
-              🗑 삭제
-            </button>
-          ) : null}
-          {userIsAdmin ? (
-            <AdminPostMenu
-              postId={post.id || id}
-              pinned={Boolean(post.pinned)}
-              locked={Boolean(post.locked)}
-              onChange={reloadAll}
-            />
+        </article>
+
+        <div className="board-detail-footer">
+          <button
+            type="button"
+            className="btn btn-sm btn-primary"
+            onClick={() => handleVote("recommend")}
+            disabled={voteBusy}
+          >
+            ▲ 추천 {post.recommendCount ?? post.likes ?? 0}
+          </button>
+          <button
+            type="button"
+            className="btn btn-sm"
+            onClick={() => handleVote("downvote")}
+            disabled={voteBusy}
+          >
+            ▼ 비추 {post.downvoteCount ?? post.dislikes ?? 0}
+          </button>
+          {actionMsg ? (
+            <span className={actionMsg.ok ? "board-action-msg" : "board-action-msg is-error"}>
+              {actionMsg.text}
+            </span>
           ) : null}
         </div>
-      </div>
 
-      <article className="form-block board-detail-article">
-        <MarkdownBody source={post.body} format={post.bodyFormat} />
-        {Array.isArray(post.attachmentR2Keys) && post.attachmentR2Keys.length > 0 ? (
-          <div
-            style={{
-              marginTop: 14,
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: 10,
-            }}
-          >
-            {post.attachmentR2Keys.map((k, i) => (
-              <a
-                key={`${k}-${i}`}
-                href={buildApiUrl(`/uploads/r2/${encodeURIComponent(k)}`)}
-                target="_blank"
-                rel="noopener noreferrer"
-                style={{
-                  display: "block",
-                  border: "2px solid var(--ink, #1a1a1a)",
-                  borderRadius: 8,
-                  overflow: "hidden",
-                  background: "var(--paper, #fffef7)",
-                }}
-              >
-                <img
-                  src={buildApiUrl(`/uploads/r2/${encodeURIComponent(k)}`)}
-                  alt=""
-                  loading="lazy"
-                  style={{ width: "100%", height: "auto", display: "block" }}
-                />
-              </a>
-            ))}
+        {post.author ? (
+          <div className="board-detail-author">
+            <div className="board-thread-sub-label">작성자</div>
+            <AuthorCard
+              author={{
+                displayName: post.author.displayName || post.authorDisplayName,
+                avatarR2Key: post.author.avatarR2Key,
+                dnfProfile: post.author.dnfProfile,
+              }}
+            />
           </div>
         ) : null}
-      </article>
 
-      <div style={{ display: "flex", gap: 8, marginTop: 12, flexWrap: "wrap" }}>
-        <button
-          type="button"
-          className="btn btn-sm btn-primary"
-          onClick={() => handleVote("recommend")}
-          disabled={voteBusy}
-        >
-          ▲ 추천 {post.recommendCount ?? post.likes ?? 0}
-        </button>
-        <button
-          type="button"
-          className="btn btn-sm"
-          onClick={() => handleVote("downvote")}
-          disabled={voteBusy}
-        >
-          ▼ 비추 {post.downvoteCount ?? post.dislikes ?? 0}
-        </button>
-        {actionMsg ? (
-          <span style={{ alignSelf: "center", color: actionMsg.ok ? "var(--primary-ink)" : "var(--hot-pink, #ff3ea5)" }}>
-            {actionMsg.text}
-          </span>
-        ) : null}
-      </div>
-
-      {post.author ? (
-        <AuthorCard
-          author={{
-            displayName: post.author.displayName || post.authorDisplayName,
-            avatarR2Key: post.author.avatarR2Key,
-            dnfProfile: post.author.dnfProfile,
-          }}
-        />
-      ) : null}
-
-      <section className="section board-comments-section" aria-labelledby="comments">
-        <div className="section-head">
-          <h2 id="comments">댓글 ({comments.length})</h2>
-        </div>
-        <div className="grid" style={{ gap: 8 }}>
+        <section className="section board-comments-section" aria-labelledby="comments">
+          <div className="board-thread-label board-thread-label--comments">댓글</div>
+          <div className="section-head">
+            <h2 id="comments">댓글 ({comments.length})</h2>
+          </div>
+          <div className="grid board-comment-list">
           {commentsTree.length === 0 ? (
             <article className="card" style={{ padding: 14 }}>
               <p>아직 댓글이 없어요. 첫 댓글 남기기 ↓</p>
@@ -460,7 +467,7 @@ export default function BoardDetailPage({ params }) {
                 rows.push(
                   <article
                     key={`reply-form-${top.id}`}
-                    className="card"
+                    className="card board-reply-form"
                     style={{
                       flexDirection: "column",
                       gap: 6,
@@ -471,11 +478,12 @@ export default function BoardDetailPage({ params }) {
                   >
                     <strong style={{ fontSize: "0.85rem" }}>
                       ↳ {formatAuthor(top, top.authorDisplayName)} 에게 답글
-                    </strong>
-                    {!isAuthed ? (
-                      <div
-                        style={{
-                          display: "grid",
+                        </strong>
+                        {!isAuthed ? (
+                          <div
+                            className="board-comment-guest-fields"
+                            style={{
+                              display: "grid",
                           gridTemplateColumns: "1fr 1fr",
                           gap: 6,
                         }}
@@ -592,6 +600,7 @@ export default function BoardDetailPage({ params }) {
           </form>
         )}
       </section>
+      </div>
 
       {nextPosts.length > 0 ? (
         <section
@@ -683,7 +692,7 @@ export default function BoardDetailPage({ params }) {
     return (
       <article
         key={c.id || `${c.authorNickname}-${c.createdAt}`}
-        className="card"
+        className={`card board-comment-card${isReply ? " is-reply" : ""}`}
         style={{
           flexDirection: "row",
           gap: 14,
@@ -695,6 +704,7 @@ export default function BoardDetailPage({ params }) {
       >
         <div style={{ flex: 1 }}>
           <div
+            className="board-comment-meta"
             style={{
               display: "flex",
               gap: 8,
@@ -709,7 +719,7 @@ export default function BoardDetailPage({ params }) {
             <span style={{ color: "var(--muted)", fontSize: "0.78rem" }}>
               {formatTime(c.createdAt)}
             </span>
-            <span style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
+            <span className="board-comment-actions" style={{ marginLeft: "auto", display: "flex", gap: 6 }}>
               <ReportButton targetType="comment" targetId={c.id} small />
               {!isReply && !isEditing ? (
                 <button
@@ -751,7 +761,7 @@ export default function BoardDetailPage({ params }) {
                 value={editingBody}
                 onChange={(e) => setEditingBody(e.target.value)}
               />
-              <div style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
+              <div className="board-comment-edit-actions" style={{ display: "flex", gap: 6, justifyContent: "flex-end" }}>
                 <button type="button" className="btn btn-xs" onClick={cancelEditComment}>
                   취소
                 </button>
@@ -766,7 +776,7 @@ export default function BoardDetailPage({ params }) {
               </div>
             </div>
           ) : (
-            <p style={{ whiteSpace: "pre-wrap" }}>{c.body}</p>
+            <p className="board-comment-body" style={{ whiteSpace: "pre-wrap" }}>{c.body}</p>
           )}
         </div>
       </article>

@@ -12,15 +12,21 @@ const STATUS_TONE = {
   open: "pink",
   voting: "cyan",
   judging: "amber",
-  completed: "amber",
+  closed: "amber",
+  results: "amber",
+  archived: "ink",
+  cancelled: "ink",
   draft: "ink",
 };
 
 const STATUS_LABEL = {
   open: "참가 모집중",
+  closed: "접수 마감",
   voting: "투표중",
   judging: "심사중",
-  completed: "결과 발표",
+  results: "결과 발표",
+  archived: "보관됨",
+  cancelled: "취소됨",
   draft: "임시저장",
 };
 
@@ -96,7 +102,7 @@ export default function ContestDetailPage({ params }) {
 
   const submissionOpen = contest.status === "open";
   const voteOpen = contest.status === "voting";
-  const announced = contest.status === "completed";
+  const announced = contest.status === "results";
 
   return (
     <PageShell activePath="/contests">

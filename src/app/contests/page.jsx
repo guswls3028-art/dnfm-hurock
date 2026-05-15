@@ -8,11 +8,11 @@ import { contests as contestsApi } from "@/lib/api-client";
 
 const TAB_DEFS = [
   { id: "open", label: "참가중", matches: (s) => s === "open" },
-  { id: "voting", label: "투표중", matches: (s) => s === "voting" || s === "judging" },
+  { id: "voting", label: "심사/투표", matches: (s) => s === "closed" || s === "voting" || s === "judging" },
   {
     id: "completed",
     label: "결과 발표",
-    matches: (s) => s === "completed",
+    matches: (s) => s === "results" || s === "archived",
   },
 ];
 

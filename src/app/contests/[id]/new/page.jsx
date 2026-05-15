@@ -153,7 +153,7 @@ export default function ContestNewPage({ params }) {
             <ul style={{ paddingLeft: 18, margin: 0, lineHeight: 1.7, color: "var(--ink-soft)" }}>
               <li>참가 부문을 하나 골라주세요.</li>
               <li>코디 사진은 1장. 식별 가능한 화질이면 충분.</li>
-              <li>마감 후 후보 전원이 시청자 투표에 올라가고, 허락이 방송 중 뽑기로 추가 1팀을 더 골라요.</li>
+              <li>제출 후 운영자 검수에서 승인된 참가작만 공개/투표 후보로 올라갑니다.</li>
               <li>
                 <strong>회원</strong>이면 모험단명/캐릭터명을 던파 프로필에서 자동 채워줘요.
               </li>

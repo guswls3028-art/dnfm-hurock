@@ -8,15 +8,25 @@ import { ApiError, contests as contestsApi } from "@/lib/api-client";
 import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
 
 const STATE_TONE = {
-  pending: "amber",
-  candidate: "lime",
+  draft: "ink",
+  submitted: "amber",
+  approved: "lime",
+  hidden: "ink",
   rejected: "pink",
+  winner: "amber",
+  disqualified: "pink",
+  candidate: "cyan",
 };
 
 const STATE_LABEL = {
-  pending: "검수 대기",
+  draft: "작성중",
+  submitted: "검수 대기",
+  approved: "공개 승인",
+  hidden: "숨김",
   candidate: "후보 선정",
   rejected: "반려",
+  winner: "수상",
+  disqualified: "실격",
 };
 
 export default function AdminContestDetailPage({ params }) {
@@ -28,6 +38,7 @@ export default function AdminContestDetailPage({ params }) {
   const [entriesLoaded, setEntriesLoaded] = useState(false);
   const [statusBusy, setStatusBusy] = useState(false);
   const [resultBusy, setResultBusy] = useState(false);
+  const [auditLogs, setAuditLogs] = useState([]);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
   const [detailLoaded, setDetailLoaded] = useState(false);
@@ -36,6 +47,7 @@ export default function AdminContestDetailPage({ params }) {
     { rank: 2, entryId: "", comment: "" },
     { rank: 3, entryId: "", comment: "" },
   ]);
+  const [resultReason, setResultReason] = useState("방송 결과 발표");
 
   useEffect(() => {
     let alive = true;
@@ -50,7 +62,7 @@ export default function AdminContestDetailPage({ params }) {
         if (alive) setDetailLoaded(true);
       }
       try {
-        const data = await contestsApi.entries.list(id);
+        const data = await contestsApi.entries.list(id, { includeHidden: true });
         if (!alive) return;
         const list = Array.isArray(data) ? data : data?.items || data?.entries || [];
         setEntries(list);
@@ -59,27 +71,63 @@ export default function AdminContestDetailPage({ params }) {
       } finally {
         if (alive) setEntriesLoaded(true);
       }
+      try {
+        const data = await contestsApi.auditLogs(id, { includeEntries: true, limit: 30 });
+        if (!alive) return;
+        setAuditLogs(Array.isArray(data?.logs) ? data.logs : []);
+      } catch {
+        if (alive) setAuditLogs([]);
+      }
     })();
     return () => {
       alive = false;
     };
   }, [id]);
 
+  async function refreshAuditLogs() {
+    try {
+      const data = await contestsApi.auditLogs(id, { includeEntries: true, limit: 30 });
+      setAuditLogs(Array.isArray(data?.logs) ? data.logs : []);
+    } catch {
+      /* audit 는 보조 정보라 실패해도 운영 동작은 유지 */
+    }
+  }
+
+  async function moderateEntry(entryId, status, reason = "") {
+    setError(null);
+    setSuccess(null);
+    try {
+      const res = await contestsApi.entries.moderate(id, entryId, { status, reason });
+      const updated = res?.entry || res;
+      setEntries((es) => es.map((e) => (e.id === entryId ? { ...e, ...updated } : e)));
+      setSuccess(`참가작 상태가 "${STATE_LABEL[status] || status}" 로 변경되었습니다.`);
+      refreshAuditLogs();
+    } catch (err) {
+      setError(err instanceof ApiError ? err : { message: err?.message || "실패" });
+    }
+  }
+
   async function toggleCandidate(entryId, currentlySelected) {
     setError(null);
+    setSuccess(null);
     try {
-      await contestsApi.entries.select(id, entryId, { selectedForVote: !currentlySelected });
+      const reason = currentlySelected ? "후보 선정 취소" : "투표 후보 선정";
+      await contestsApi.entries.select(id, entryId, {
+        selectedForVote: !currentlySelected,
+        reason,
+      });
       setEntries((es) =>
         es.map((e) =>
           e.id === entryId
             ? {
                 ...e,
                 selectedForVote: !currentlySelected,
-                state: !currentlySelected ? "candidate" : "pending",
+                state: !currentlySelected ? "candidate" : e.status,
               }
             : e,
         ),
       );
+      refreshAuditLogs();
     } catch (err) {
       setError(err instanceof ApiError ? err : { message: err?.message || "실패" });
     }
@@ -115,8 +163,12 @@ export default function AdminContestDetailPage({ params }) {
         .filter((r) => r.entryId)
         .map((r) => ({ rank: r.rank, entryId: r.entryId, note: r.comment || undefined }));
       if (!rankings.length) throw new Error("최소 1등 entry 는 선택해야 합니다.");
-      await contestsApi.announceResults(id, { rankings });
+      const reason = resultReason.trim();
+      if (!reason) throw new Error("결과 발표 사유를 입력해 주세요.");
+      await contestsApi.announceResults(id, { rankings, reason });
       setSuccess("결과를 발표했습니다. 결과 페이지에 노출됩니다.");
+      setContest((c) => (c ? { ...c, status: "results", statusLabel: labelFor("results") } : c));
+      refreshAuditLogs();
     } catch (err) {
       setError(err instanceof ApiError ? err : { message: err?.message || "발표 실패" });
     } finally {
@@ -216,6 +268,14 @@ export default function AdminContestDetailPage({ params }) {
         <button
           type="button"
           className="btn btn-sm"
+          onClick={() => changeStatus("closed")}
+          disabled={statusBusy || contest.status === "closed"}
+        >
+          → 접수 마감
+        </button>
+        <button
+          type="button"
+          className="btn btn-sm"
           onClick={() => changeStatus("judging")}
           disabled={statusBusy || contest.status === "judging"}
         >
@@ -232,8 +292,8 @@ export default function AdminContestDetailPage({ params }) {
         <button
           type="button"
           className="btn btn-sm btn-accent"
-          onClick={() => changeStatus("completed")}
-          disabled={statusBusy || contest.status === "completed"}
+          onClick={() => changeStatus("results")}
+          disabled={statusBusy || contest.status === "results"}
         >
           → 결과 발표
         </button>
@@ -244,6 +304,14 @@ export default function AdminContestDetailPage({ params }) {
           disabled={statusBusy || contest.status === "draft"}
         >
           임시저장
+        </button>
+        <button
+          type="button"
+          className="btn btn-sm btn-ghost"
+          onClick={() => changeStatus("archived")}
+          disabled={statusBusy || contest.status === "archived"}
+        >
+          보관
         </button>
       </section>
 
@@ -286,8 +354,9 @@ export default function AdminContestDetailPage({ params }) {
             <span>비고</span>
           </div>
           {entries.map((e) => {
+            const fields = e.fields || e;
             const isCandidate = e.selectedForVote || e.state === "candidate";
-            const state = isCandidate ? "candidate" : (e.state || "pending");
+            const state = isCandidate ? "candidate" : (e.status || e.state || "submitted");
             return (
               <div
                 key={e.id}
@@ -300,22 +369,52 @@ export default function AdminContestDetailPage({ params }) {
                   </StickerBadge>
                 </span>
                 <span className="board-row-title">
-                  {e.title}{" "}
+                  {fields.title || "제목 없음"}{" "}
                   <span style={{ color: "var(--muted)", fontWeight: 700 }}>
-                    · {e.characterName || "(N/A)"}
+                    · {fields.characterName || "(N/A)"}
                   </span>
                 </span>
-                <span className="board-row-meta">{e.adventureName || "-"}</span>
-                <span style={{ display: "flex", gap: 4 }}>
+                <span className="board-row-meta">{fields.adventureName || "-"}</span>
+                <span style={{ display: "flex", gap: 4, flexWrap: "wrap" }}>
+                  {e.status !== "approved" && e.status !== "winner" ? (
+                    <button
+                      type="button"
+                      className="btn btn-sm btn-cyan"
+                      onClick={() => moderateEntry(e.id, "approved", "관리자 공개 승인")}
+                    >
+                      승인
+                    </button>
+                  ) : null}
                   <button
                     type="button"
                     className={`btn btn-sm ${isCandidate ? "btn-cyan" : ""}`}
                     onClick={() => toggleCandidate(e.id, isCandidate)}
+                    disabled={!["approved", "winner"].includes(e.status)}
                   >
                     {isCandidate ? "후보 취소" : "후보 선정"}
                   </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm"
+                    onClick={() => {
+                      const reason = window.prompt("숨김 사유를 입력해 주세요.");
+                      if (reason) moderateEntry(e.id, "hidden", reason);
+                    }}
+                  >
+                    숨김
+                  </button>
+                  <button
+                    type="button"
+                    className="btn btn-sm"
+                    onClick={() => {
+                      const reason = window.prompt("실격 사유를 입력해 주세요.");
+                      if (reason) moderateEntry(e.id, "disqualified", reason);
+                    }}
+                  >
+                    실격
+                  </button>
                 </span>
-                <span className="board-row-meta">{e.reason || "-"}</span>
+                <span className="board-row-meta">{e.statusReason || e.reason || "-"}</span>
               </div>
             );
           })}
@@ -352,7 +451,7 @@ export default function AdminContestDetailPage({ params }) {
                   <option value="">-- 후보 중 선택 --</option>
                   {candidateEntries.map((e) => (
                     <option key={e.id} value={e.id}>
-                      {e.title} ({e.characterName || "?"})
+                      {(e.fields || e).title || "제목 없음"} ({(e.fields || e).characterName || "?"})
                     </option>
                   ))}
                 </select>
@@ -366,10 +465,49 @@ export default function AdminContestDetailPage({ params }) {
               </div>
             );
           })}
+          <div className="form-row">
+            <label htmlFor="result-reason">결과 발표/변경 사유 *</label>
+            <input
+              id="result-reason"
+              className="form-input"
+              type="text"
+              value={resultReason}
+              onChange={(e) => setResultReason(e.target.value)}
+              placeholder="예: 방송 중 투표 마감 후 허락 최종 확인"
+            />
+          </div>
           <button type="submit" className="btn btn-primary" disabled={resultBusy}>
             {resultBusy ? "발표 처리중…" : "결과 발표"}
           </button>
         </form>
+      </section>
+
+      <section className="section" aria-labelledby="admin-audit">
+        <div className="section-head">
+          <h2 id="admin-audit">최근 운영 기록</h2>
+          <span style={{ color: "var(--muted)", fontSize: "0.84rem", fontWeight: 800 }}>
+            상태/승인/결과 변경 로그
+          </span>
+        </div>
+        {auditLogs.length === 0 ? (
+          <div className="callout-box">아직 기록된 운영 로그가 없습니다.</div>
+        ) : (
+          <div className="board-list">
+            {auditLogs.map((log) => (
+              <div
+                key={log.id}
+                className="board-row"
+                style={{ gridTemplateColumns: "160px minmax(0,1fr) 220px" }}
+              >
+                <span className="board-row-meta">
+                  {new Date(log.createdAt).toLocaleString("ko-KR")}
+                </span>
+                <span className="board-row-title">{log.action}</span>
+                <span className="board-row-meta">{log.reason || "-"}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
     </PageShell>
   );
@@ -379,9 +517,12 @@ function labelFor(status) {
   switch (status) {
     case "draft": return "임시저장";
     case "open": return "참가 모집중";
+    case "closed": return "접수 마감";
     case "judging": return "후보 심사중";
     case "voting": return "투표중";
-    case "completed": return "결과 발표";
+    case "results": return "결과 발표";
+    case "archived": return "보관됨";
+    case "cancelled": return "취소됨";
     default: return status;
   }
 }

@@ -61,9 +61,8 @@ export default function AdminContestNewPage() {
         voteStartAt: toIso(form.voteStartAt),
         voteEndAt: toIso(form.voteEndAt),
         coverR2Key: form.coverR2Key || undefined,
-        // backend 의 contestStatuses enum: draft / open / judging / voting / completed.
-        // 어드민이 막 생성한 콘테스트는 참가 모집 가능 = "open".
-        status: "open",
+        // 생성 직후에는 draft 로 두고 운영자가 상세 화면에서 참가 모집을 직접 연다.
+        status: "draft",
         formSchema: { fields: DEFAULT_FORM_SCHEMA },
       };
       const res = await contestsApi.create(payload);
@@ -119,7 +118,7 @@ export default function AdminContestNewPage() {
             ← 어드민
           </Link>
           <h1>새 콘테스트 만들기</h1>
-          <p>제목/설명/마감/투표 기간/경품. 참가 양식은 기본 5필드(아바타 콘테스트) 로 자동 세팅됩니다.</p>
+          <p>제목/설명/마감/투표 기간/경품. 생성 직후에는 준비중 상태로 저장됩니다.</p>
         </div>
         <StickerBadge tone="lime" rotate="r">
           생성 마법사

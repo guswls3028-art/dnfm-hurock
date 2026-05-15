@@ -391,7 +391,9 @@ export const reports = {
 function normalizeContest(c) {
   if (!c || typeof c !== "object") return c;
   const meta = c.metadata && typeof c.metadata === "object" ? c.metadata : {};
-  return { ...meta, ...c };
+  const normalized = { ...meta, ...c };
+  if (normalized.status === "completed") normalized.status = "results";
+  return normalized;
 }
 
 async function listContestsNormalized(query) {
@@ -414,17 +416,28 @@ export const contests = {
     apiFetch(sitePath(`/contests/${id}`), { method: "PATCH", json: input }),
   remove: (id) => apiFetch(sitePath(`/contests/${id}`), { method: "DELETE" }),
   entries: {
-    list: (contestId, { selectedOnly } = {}) =>
-      apiFetch(sitePath(`/contests/${contestId}/entries`), { query: { selectedOnly } }),
+    list: (contestId, { selectedOnly, selectedForVote, status, includeHidden } = {}) =>
+      apiFetch(sitePath(`/contests/${contestId}/entries`), {
+        query: {
+          selectedForVote: selectedForVote ?? selectedOnly,
+          status,
+          includeHidden: includeHidden ? "1" : undefined,
+        },
+      }),
     create: (contestId, data) =>
       apiFetch(sitePath(`/contests/${contestId}/entries`), {
         method: "POST",
         json: data,
       }),
-    select: (contestId, entryId, { selectedForVote }) =>
+    select: (contestId, entryId, { selectedForVote, reason } = {}) =>
       apiFetch(sitePath(`/contests/${contestId}/entries/${entryId}/select`), {
         method: "POST",
-        json: { selectedForVote },
+        json: { selectedForVote, reason },
+      }),
+    moderate: (contestId, entryId, input) =>
+      apiFetch(sitePath(`/contests/${contestId}/entries/${entryId}`), {
+        method: "PATCH",
+        json: input,
       }),
   },
   vote: (contestId, { entryId }) =>
@@ -436,6 +449,10 @@ export const contests = {
   results: (contestId) => apiFetch(sitePath(`/contests/${contestId}/results`)),
   announceResults: (contestId, data) =>
     apiFetch(sitePath(`/contests/${contestId}/results`), { method: "POST", json: data }),
+  auditLogs: (contestId, { includeEntries = true, limit = 100 } = {}) =>
+    apiFetch(sitePath(`/contests/${contestId}/audit-logs`), {
+      query: { includeEntries: includeEntries ? "1" : undefined, limit },
+    }),
 };
 
 /* ---------- Uploads (R2 presigned PUT + multipart direct) ----------
