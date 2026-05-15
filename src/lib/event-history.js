@@ -1,6 +1,5 @@
 /**
- * 허락 방송 이벤트 룰렛 기록 — 1~62회차 (2026-05-13 기준 mock).
- * 향후 backend 운영 시 /events/rounds API 로 교체 예정.
+ * 허락 방송 이벤트 룰렛 기록 — 1~62회차 (2026-05-13 기준 수기 이관 기록).
  *
  * 회차 한 entry:
  *   round       : 회차 번호
@@ -9,7 +8,7 @@
  *   prize       : 상품 / 결과 ("5,000원 당첨", "핀볼만 당첨된 운좋은 사람" 등)
  *   participants: 참가자 목록 (raw)
  *
- * 편집 (수정/추가/제거) 은 frontend 정적 데이터로 시작 — admin backend endpoint 도입 후 wire.
+ * 편집 (수정/추가/제거) 은 기록 파일을 직접 갱신한다.
  */
 export const eventRounds = [
   { round: 1,  type: "이벤트", winner: "Lynn-kr5ky", prize: "1만 기프트카드", participants: ["외계가재(치)", "던모뉴비(치)", "테섭컷(치)", "Lynn-kr5ky(유)", "리저브(유)", "T라미숙헤이(치)", "남거너고수(유)", "수야(유)", "D점멸(유)", "로즈(유)", "다솜(유)", "encantar3057(유)", "amazingshot6623(유)", "던모사부(치)"] },

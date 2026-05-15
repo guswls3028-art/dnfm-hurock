@@ -16,7 +16,7 @@ import { ApiError, auth } from "@/lib/api-client";
  *   }
  *
  * 미로그인 시 user=null, error=null.
- * 네트워크/서버 에러는 error 에 담아서 — 페이지가 mock fallback 결정.
+ * 네트워크/서버 에러는 error 에 담아서 각 페이지가 빈 상태/안내를 결정.
  */
 export function useCurrentUser() {
   const [user, setUser] = useState(null);

@@ -45,8 +45,7 @@ export default function AdminContestNewPage() {
     }
     setSubmitting(true);
     try {
-      // backend createContestDto 와 정합한 payload (subtitle/voteWindow/rewards/posterEmoji 같은
-      // mock-only field 는 보내지 않음. 운영용 schema 는 title/description/maxEntries/
+      // backend createContestDto 와 정합한 payload. 운영용 schema 는 title/description/maxEntries/
       // entryDeadlineAt/voteStartAt/voteEndAt/coverR2Key/status/formSchema).
       // datetime-local 값 → ISO 변환. 빈 값은 omit.
       const toIso = (v) => {

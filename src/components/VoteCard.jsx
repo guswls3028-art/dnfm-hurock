@@ -1,27 +1,38 @@
 import StickerBadge from "@/components/StickerBadge";
+import { entryPhotoValue, uploadPublicUrl } from "@/lib/upload-url";
 
 /**
- * VoteCard — 투표 entry 카드 (선택 라디오).
- *  - 1인 1표 mock (라디오 그룹)
- *  - submit 은 backend 미연동 — disabled
+ * VoteCard — backend 콘테스트 투표 entry 카드.
  */
 export default function VoteCard({ entry, groupName, selected, onSelect, disabled }) {
   const id = `vote-${entry.id}`;
+  const fields = entry.fields || entry;
+  const title = entry.title || fields.title || "제목 없음";
+  const description = entry.description || fields.description || "";
+  const photoUrl = uploadPublicUrl(entryPhotoValue(entry));
   return (
     <label htmlFor={id} className="entry-card" style={{ cursor: disabled ? "not-allowed" : "pointer", opacity: disabled ? 0.7 : 1 }}>
-      <div className="entry-photo">
+      <div className={`entry-photo${photoUrl ? " has-image" : ""}`}>
+        {photoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={photoUrl}
+            alt={`${fields.characterName || title} 참가 사진`}
+            loading="lazy"
+          />
+        ) : null}
         {entry.tone && (
           <StickerBadge tone={entry.tone} rotate="r">
-            {entry.title.slice(0, 4)}
+            {title.slice(0, 4)}
           </StickerBadge>
         )}
       </div>
       <div className="entry-meta">
-        <strong>{entry.title}</strong>
+        <strong>{title}</strong>
         <span>
-          {entry.adventureName} · {entry.characterName}
+          {fields.adventureName || "-"} · {fields.characterName || "-"}
         </span>
-        <p>{entry.description}</p>
+        <p>{description}</p>
         <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 6 }}>
           <input
             id={id}

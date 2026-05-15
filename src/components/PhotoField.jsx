@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { uploadFile } from "@/lib/upload";
+import { uploadPublicUrl } from "@/lib/upload-url";
 
 /**
  * PhotoField — 사진 업로드 + 표시 영역(crop) 조절.
@@ -22,6 +23,7 @@ export default function PhotoField({ field, value, onChange, purpose = "contest_
 
   const r2Key = value?.r2Key || null;
   const crop = value?.crop || DEFAULT_CROP;
+  const remoteUrl = !previewUrl && r2Key ? uploadPublicUrl(r2Key) : null;
 
   useEffect(() => {
     // 컴포넌트 언마운트 시 ObjectURL 회수
@@ -114,9 +116,9 @@ export default function PhotoField({ field, value, onChange, purpose = "contest_
             onPointerMove={onPointerMove}
             onPointerUp={onPointerUp}
           >
-            {previewUrl ? (
+            {previewUrl || remoteUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={previewUrl} alt="" className="photo-field-img" draggable={false} />
+              <img src={previewUrl || remoteUrl} alt="" className="photo-field-img" draggable={false} />
             ) : (
               <div className="photo-field-placeholder">업로드된 사진 ({r2Key})</div>
             )}

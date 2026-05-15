@@ -5,7 +5,7 @@ import { formatAuthor, isAnonymousEntry } from "@/lib/anonymous";
  * BoardRow — 자유 게시판 row.
  *
  * head=true 면 헤더 스타일.
- * post: backend shape (authorId / authorNickname / anonymousMarker) 또는 mock (author).
+ * post: backend shape (authorId / authorNickname / anonymousMarker).
  */
 export default function BoardRow({ post, head }) {
   if (head) {
@@ -20,7 +20,7 @@ export default function BoardRow({ post, head }) {
     );
   }
 
-  // backend shape (authorId 등) 가 있으면 fmt util, 없으면 mock 의 post.author 그대로.
+  // 이전 포맷으로 들어온 author 필드도 운영 데이터 호환 차원에서 표시.
   const hasAuthorShape = "authorId" in post || "authorNickname" in post || "anonymousMarker" in post;
   const author = hasAuthorShape ? formatAuthor(post, post.authorDisplayName) : post.author;
   const guest = hasAuthorShape && isAnonymousEntry(post);

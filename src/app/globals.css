@@ -824,6 +824,7 @@ button {
 .card {
   position: relative;
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 10px;
   padding: 18px;
@@ -874,6 +875,11 @@ button {
   font-size: 0.94rem;
   line-height: 1.6;
   word-break: keep-all;
+  overflow-wrap: anywhere;
+}
+
+.card li {
+  overflow-wrap: anywhere;
 }
 
 .card-meta {
@@ -1538,6 +1544,7 @@ button {
   gap: 16px;
   align-items: center;
   padding: 18px 22px;
+  max-width: 100%;
   border: 3px solid var(--ink);
   border-radius: var(--radius-md);
   background:
@@ -1553,6 +1560,7 @@ button {
 
 .contest-banner-body {
   display: flex;
+  min-width: 0;
   flex-direction: column;
   gap: 4px;
   padding: 10px 14px;
@@ -1572,6 +1580,7 @@ button {
   color: var(--ink-soft);
   font-size: 0.85rem;
   font-weight: 700;
+  overflow-wrap: anywhere;
 }
 
 /* ─────────────────────────────────────────────────────────── 콘테스트 entry */
@@ -1617,10 +1626,27 @@ button {
   letter-spacing: 0.04em;
 }
 
+.entry-photo.has-image {
+  background: var(--paper);
+  overflow: hidden;
+}
+
+.entry-photo.has-image::after {
+  content: none;
+}
+
+.entry-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
 .entry-photo .sticker {
   position: absolute;
   top: 8px;
   left: 8px;
+  z-index: 2;
 }
 
 .entry-meta {
@@ -1849,6 +1875,7 @@ button {
 @media (max-width: 720px) {
   .allow-main {
     width: 100%;
+    overflow-x: hidden;
     padding: 14px 12px 40px;
   }
 
@@ -1918,6 +1945,11 @@ button {
     font-size: 0.86rem;
   }
 
+  .section-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
   /* 콘테스트 배너 — 액션이 본문 아래로 */
   .contest-banner {
     grid-template-columns: minmax(0, 1fr);
@@ -1929,8 +1961,17 @@ button {
     font-size: 1.05rem;
   }
 
+  .contest-banner small,
+  .card p,
+  .card li {
+    word-break: normal;
+    overflow-wrap: anywhere;
+  }
+
   .contest-banner-actions {
     width: 100%;
+    align-items: stretch;
+    flex-direction: column;
     flex-wrap: wrap;
     gap: 6px;
   }
@@ -1938,6 +1979,8 @@ button {
   .contest-banner-actions .btn {
     flex: 1 1 auto;
     min-width: 0;
+    width: 100%;
+    white-space: normal;
   }
 
   /* Vote / entry 카드 모바일에서 wrap 풀기 */
@@ -1978,7 +2021,16 @@ button {
 
 @media (max-width: 480px) {
   .allow-main {
-    padding: 12px 10px 32px;
+    width: calc(100% - 20px);
+    padding: 12px 0 32px;
+  }
+
+  .allow-header-inner {
+    flex-wrap: nowrap;
+  }
+
+  .allow-header-right {
+    display: none;
   }
 
   .allow-hero {
@@ -1996,6 +2048,7 @@ button {
   .btn {
     padding: 10px 14px;
     font-size: 0.88rem;
+    white-space: normal;
   }
 
   .btn-sm {
@@ -2007,6 +2060,16 @@ button {
   .page-head .btn {
     width: 100%;
     justify-content: center;
+  }
+
+  .allow-footer-links {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .allow-footer-links a {
+    flex: 1 1 100%;
+    text-align: center;
   }
 
   /* admin 메뉴 trigger 도 한 줄에 깔끔히 */
