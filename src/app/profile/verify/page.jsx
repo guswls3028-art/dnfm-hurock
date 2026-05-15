@@ -11,8 +11,8 @@ import {
   DNF_CLASSES_GROUPED,
   classOptionValue,
   findClassIcon,
-  findFirstClassGroup,
-  findFirstClassIcon,
+  findUniqueClassGroup,
+  findUniqueClassIcon,
   parseClassOptionValue,
 } from "@/lib/dnf-classes";
 
@@ -167,13 +167,15 @@ function VerifyInner() {
           classGroup: (c.classGroup || "").trim() || undefined,
         }))
         .filter((c) => c.name);
+      const mainCharacter = cleanedCharacters.find((c) => c.name === mainCharacterName);
       const mainCharacterClassGroup =
         edited.mainCharacterClassGroup?.trim() ||
-        cleanedCharacters.find((c) => c.name === mainCharacterName)?.classGroup;
+        mainCharacter?.classGroup;
+      const mainCharacterClass = edited.mainCharacterClass?.trim() || mainCharacter?.klass;
       await auth.confirmDnfProfile({
         adventurerName,
         mainCharacterName,
-        mainCharacterClass: edited.mainCharacterClass?.trim() || undefined,
+        mainCharacterClass: mainCharacterClass || undefined,
         mainCharacterClassGroup: mainCharacterClassGroup || undefined,
         characters: cleanedCharacters.length ? cleanedCharacters : undefined,
         characterSelectNames: characterSelectNames.length ? characterSelectNames : undefined,
@@ -195,6 +197,43 @@ function VerifyInner() {
   }
   function addEmptyCharacter() {
     setEditedCharacters((prev) => [...prev, { name: "", klass: "", classGroup: "" }]);
+  }
+  function selectedClassValue(classGroup, baseClass) {
+    if (!baseClass) return "";
+    return classOptionValue(classGroup || findUniqueClassGroup(baseClass), baseClass);
+  }
+  function handleMainClassChange(value) {
+    const parsed = parseClassOptionValue(value);
+    setEdited((prev) => ({
+      ...prev,
+      mainCharacterClass: parsed.baseClass,
+      mainCharacterClassGroup: parsed.classGroup,
+    }));
+    const mainName = edited.mainCharacterName?.trim();
+    if (mainName) {
+      setEditedCharacters((prev) =>
+        prev.map((c) =>
+          c.name === mainName
+            ? { ...c, klass: parsed.baseClass, classGroup: parsed.classGroup }
+            : c,
+        ),
+      );
+    }
+  }
+  function handleCharacterClassChange(idx, value) {
+    const parsed = parseClassOptionValue(value);
+    const current = editedCharacters[idx];
+    updateCharacter(idx, {
+      klass: parsed.baseClass,
+      classGroup: parsed.classGroup,
+    });
+    if (current?.name && current.name === edited.mainCharacterName?.trim()) {
+      setEdited((prev) => ({
+        ...prev,
+        mainCharacterClass: parsed.baseClass,
+        mainCharacterClassGroup: parsed.classGroup,
+      }));
+    }
   }
 
   if (loading) {
@@ -428,20 +467,34 @@ function VerifyInner() {
           </div>
           <div className="form-row">
             <label htmlFor="vf-cls">대표 캐릭터 직업</label>
-            <input
+            <select
               id="vf-cls"
               className="form-input"
-              value={edited.mainCharacterClass ?? ""}
-              onChange={(e) => setEdited((p) => ({ ...p, mainCharacterClass: e.target.value }))}
-              placeholder="예: 엘레멘탈마스터"
-            />
+              value={selectedClassValue(edited.mainCharacterClassGroup, edited.mainCharacterClass)}
+              onChange={(e) => handleMainClassChange(e.target.value)}
+            >
+              <option value="">
+                {edited.mainCharacterClass
+                  ? `${edited.mainCharacterClass} — 성별/직업군 선택 필요`
+                  : "직업 선택"}
+              </option>
+              {DNF_CLASSES_GROUPED.map((g) => (
+                <optgroup key={g.group} label={g.group}>
+                  {g.classes.map((kls) => (
+                    <option key={`${g.group}::${kls}`} value={classOptionValue(g.group, kls)}>
+                      {g.group} · {kls}
+                    </option>
+                  ))}
+                </optgroup>
+              ))}
+            </select>
           </div>
 
           <div className="form-row">
             <label>캐릭터 목록 ({editedCharacters.length}) · 잘못 인식된 이름·직업은 직접 고쳐주세요</label>
             <div style={{ display: "grid", gap: 6 }}>
               {editedCharacters.map((c, i) => {
-                const iconSrc = findClassIcon(c.classGroup, c.klass) || findFirstClassIcon(c.klass);
+                const iconSrc = findClassIcon(c.classGroup, c.klass) || findUniqueClassIcon(c.klass);
                 return (
                 <div
                   key={i}
@@ -477,23 +530,14 @@ function VerifyInner() {
                   <select
                     className="form-input"
                     value={
-                      c.klass
-                        ? classOptionValue(
-                            c.classGroup || findFirstClassGroup(c.klass),
-                            c.klass,
-                          )
-                        : ""
+                      selectedClassValue(c.classGroup, c.klass)
                     }
-                    onChange={(e) => {
-                      const parsed = parseClassOptionValue(e.target.value);
-                      updateCharacter(i, {
-                        klass: parsed.baseClass,
-                        classGroup: parsed.classGroup,
-                      });
-                    }}
+                    onChange={(e) => handleCharacterClassChange(i, e.target.value)}
                     aria-label={`캐릭터 ${i + 1} 직업`}
                   >
-                    <option value="">직업 선택</option>
+                    <option value="">
+                      {c.klass ? `${c.klass} — 성별/직업군 선택 필요` : "직업 선택"}
+                    </option>
                     {DNF_CLASSES_GROUPED.map((g) => (
                       <optgroup key={g.group} label={g.group}>
                         {g.classes.map((kls) => (

@@ -61,10 +61,21 @@ export function findFirstClassGroup(baseClass) {
   return "";
 }
 
+export function findUniqueClassGroup(baseClass) {
+  if (!baseClass) return "";
+  const groups = DNF_CLASSES_GROUPED.filter((g) => g.classes.includes(baseClass));
+  return groups.length === 1 ? groups[0].group : "";
+}
+
 export function findClassIcon(group, baseClass) {
   if (!group || !baseClass) return null;
   const row = DNF_CLASSES_GROUPED.find((x) => x.group === group);
   return row?.classes.includes(baseClass) ? iconFile(group, baseClass) : null;
+}
+
+export function findUniqueClassIcon(baseClass) {
+  const group = findUniqueClassGroup(baseClass);
+  return group ? findClassIcon(group, baseClass) : null;
 }
 
 export function classOptionValue(group, baseClass) {

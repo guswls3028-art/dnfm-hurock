@@ -1,7 +1,7 @@
 "use client";
 
 import StickerBadge from "./StickerBadge";
-import { findClassIcon, findFirstClassIcon, formatClassText } from "@/lib/dnf-classes";
+import { findClassIcon, findUniqueClassIcon, formatClassText } from "@/lib/dnf-classes";
 
 function avatarPublicUrl(r2Key) {
   if (!r2Key) return null;
@@ -27,7 +27,7 @@ export default function AuthorCard({ author }) {
   const mainClassGroup = dnf.mainCharacterClassGroup;
   const adv = dnf.adventurerName;
   const avatarUrl = avatarPublicUrl(author.avatarR2Key);
-  const mainIcon = findClassIcon(mainClassGroup, klass) || findFirstClassIcon(klass);
+  const mainIcon = findClassIcon(mainClassGroup, klass) || findUniqueClassIcon(klass);
   const characters = Array.isArray(dnf.characters) ? dnf.characters : [];
   const subCharacters = characters.filter((c) => c?.name && c.name !== main);
 
@@ -142,7 +142,7 @@ export default function AuthorCard({ author }) {
               <span style={{ color: "var(--muted)", fontWeight: 700 }}>부캐</span>
               <span style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {subCharacters.slice(0, 12).map((c, i) => {
-                  const icon = findClassIcon(c.classGroup, c.klass) || findFirstClassIcon(c.klass);
+                  const icon = findClassIcon(c.classGroup, c.klass) || findUniqueClassIcon(c.klass);
                   return (
                     <span
                       key={i}
