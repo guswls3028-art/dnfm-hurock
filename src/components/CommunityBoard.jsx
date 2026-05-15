@@ -20,9 +20,12 @@ const CATEGORY_SLUG_BY_TAB = {
 const STATUS_LABEL = {
   draft: "임시저장",
   open: "참가중",
+  closed: "마감",
   judging: "심사중",
   voting: "투표중",
-  completed: "결과",
+  results: "결과",
+  archived: "보관",
+  cancelled: "취소",
 };
 
 function formatDate(value) {

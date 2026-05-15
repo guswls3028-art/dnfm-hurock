@@ -227,7 +227,9 @@ export default function AdminContestDetailPage({ params }) {
     );
   }
 
-  const candidateEntries = entries.filter((e) => e.selectedForVote || e.state === "candidate");
+  const candidateEntries = entries.filter(
+    (e) => (e.selectedForVote || e.state === "candidate") && ["approved", "winner"].includes(e.status),
+  );
 
   return (
     <PageShell activePath="/admin">

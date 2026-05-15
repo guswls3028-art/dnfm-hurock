@@ -23,17 +23,23 @@ const CAPTURE_LABEL = {
 const HISTORY_TONE = {
   draft: "ink",
   open: "pink",
+  closed: "amber",
   judging: "amber",
   voting: "cyan",
-  completed: "amber",
+  results: "amber",
+  archived: "ink",
+  cancelled: "ink",
 };
 
 const HISTORY_LABEL = {
   draft: "임시저장",
   open: "참가중",
+  closed: "마감",
   judging: "심사중",
   voting: "투표중",
-  completed: "결과발표",
+  results: "결과발표",
+  archived: "보관됨",
+  cancelled: "취소됨",
 };
 
 function oauthLinkErrorMessage(code) {
