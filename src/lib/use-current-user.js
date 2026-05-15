@@ -3,6 +3,14 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiError, auth } from "@/lib/api-client";
 
+function unwrapAuthUser(data) {
+  if (!data) return null;
+  if (Object.prototype.hasOwnProperty.call(data, "user")) {
+    return data.user || null;
+  }
+  return data;
+}
+
 /**
  * useCurrentUser — 로그인 상태 + dnfProfile.
  *
@@ -25,7 +33,7 @@ export function useCurrentUser() {
 
   const readCurrentUser = useCallback(async () => {
     const data = await auth.me();
-    const current = data?.user || data || null;
+    const current = unwrapAuthUser(data);
     if (current) return current;
     const refreshed = await auth.refresh();
     return refreshed?.user || null;
