@@ -8,28 +8,20 @@ import StickerBadge from "@/components/StickerBadge";
 import { contests as contestsApi } from "@/lib/api-client";
 import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
 
-// backend lifecycle (draft/open/judging/voting/completed) + 이전 mock (submission/
-// voting/ended/announced) 양쪽 톤. open=참가 모집중 / completed=결과 발표.
 const STATUS_TONE = {
-  submission: "pink",
   open: "pink",
   voting: "cyan",
   judging: "amber",
-  ended: "ink",
-  announced: "amber",
   completed: "amber",
   draft: "ink",
 };
 
 const STATUS_LABEL = {
-  submission: "참가 모집중",
   open: "참가 모집중",
   voting: "투표중",
   judging: "심사중",
-  ended: "종료",
-  announced: "결과 발표",
   completed: "결과 발표",
-  draft: "준비중",
+  draft: "임시저장",
 };
 
 const CATEGORY_TONE_CLASS = [
@@ -102,10 +94,9 @@ export default function ContestDetailPage({ params }) {
     );
   }
 
-  // backend(open) + 이전 mock(submission) 양쪽 호환.
-  const submissionOpen = contest.status === "submission" || contest.status === "open";
+  const submissionOpen = contest.status === "open";
   const voteOpen = contest.status === "voting";
-  const announced = contest.status === "announced" || contest.status === "completed";
+  const announced = contest.status === "completed";
 
   return (
     <PageShell activePath="/contests">

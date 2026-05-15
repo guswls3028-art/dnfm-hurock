@@ -3,7 +3,7 @@ import StickerBadge from "@/components/StickerBadge";
 
 /**
  * ContestCard — 콘테스트 목록 카드.
- *  - status: submission | voting | ended | announced
+ *  - status: draft | open | judging | voting | completed
  *  - tone: pink | cyan | amber | lime — 카드 상단 띠 색
  */
 const toneToCardClass = {
@@ -14,22 +14,22 @@ const toneToCardClass = {
 };
 
 const statusToSticker = {
-  submission: { tone: "pink", label: "참가중" },
+  draft: { tone: "ink", label: "임시저장" },
   open: { tone: "pink", label: "참가중" },
-  voting: { tone: "cyan", label: "투표중" },
   judging: { tone: "amber", label: "심사중" },
-  ended: { tone: "ink", label: "종료" },
-  announced: { tone: "amber", label: "결과" },
+  voting: { tone: "cyan", label: "투표중" },
   completed: { tone: "amber", label: "결과" },
-  draft: { tone: "ink", label: "준비중" },
 };
 
 export default function ContestCard({ contest, tilt }) {
   const toneClass = toneToCardClass[contest.tone] || "";
-  const sticker = statusToSticker[contest.status] || statusToSticker.submission;
+  const sticker = statusToSticker[contest.status] || {
+    tone: "ink",
+    label: contest.statusLabel || "상태 확인",
+  };
 
   const detailHref =
-    contest.status === "announced" || contest.status === "completed"
+    contest.status === "completed"
       ? `/contests/${contest.id}/results`
       : contest.status === "voting"
       ? `/contests/${contest.id}/vote`
@@ -54,11 +54,11 @@ export default function ContestCard({ contest, tilt }) {
       </div>
       <div className="card-actions">
         <Link className="btn btn-sm btn-primary" href={detailHref}>
-          {contest.status === "submission" || contest.status === "open"
+          {contest.status === "open"
             ? "참가하기"
             : contest.status === "voting"
             ? "투표하기"
-            : contest.status === "announced" || contest.status === "completed"
+            : contest.status === "completed"
             ? "결과 보기"
             : "자세히"}
         </Link>

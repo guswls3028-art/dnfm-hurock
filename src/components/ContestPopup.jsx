@@ -8,14 +8,11 @@ import { contests as contestsApi } from "@/lib/api-client";
 const HIDE_KEY = "hurock_contest_popup_hide_until";
 const HIDE_DAYS = 7;
 
-// backend lifecycle (draft/open/judging/voting/completed) ↔ 이전 mock
-// (submission/voting/ended/announced) 둘 중 어느 것이든 "참가 모집중" 으로
-// 간주하는 상태들.
-const OPEN_STATUSES = new Set(["submission", "open"]);
+const OPEN_STATUSES = new Set(["open"]);
 
 /**
  * ContestPopup — 첫 진입 시 메인 콘테스트 풀스크린(모바일) 모달.
- *  - backend list 우선 (참가 모집중 첫 콘테스트), 없으면 mock fallback
+ *  - 참가 모집중인 콘테스트가 있을 때만 노출
  *  - X 닫기 → 세션만 보지 않음
  *  - "7일 동안 다시 보지 않기" → localStorage HIDE_KEY 에 +7일 timestamp 저장
  */

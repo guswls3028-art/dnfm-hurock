@@ -9,16 +9,26 @@ import { contests as contestsApi } from "@/lib/api-client";
 import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
 
 const STATUS_TONE = {
-  submission: "pink",
+  draft: "ink",
+  open: "pink",
+  judging: "amber",
   voting: "cyan",
-  ended: "ink",
-  announced: "amber",
+  completed: "amber",
+};
+
+const STATUS_LABEL = {
+  draft: "임시저장",
+  open: "참가 모집",
+  judging: "후보 심사",
+  voting: "투표중",
+  completed: "결과 발표",
 };
 
 export default function AdminPage() {
   const { user, loading: userLoading } = useCurrentUser();
   const [contests, setContests] = useState([]);
   const [contestsLoaded, setContestsLoaded] = useState(false);
+  const [contestError, setContestError] = useState(null);
 
   useEffect(() => {
     let alive = true;
@@ -28,8 +38,8 @@ export default function AdminPage() {
         if (!alive) return;
         const list = Array.isArray(data) ? data : data?.items || data?.contests || [];
         setContests(list);
-      } catch {
-        /* 빈 상태 유지 */
+      } catch (err) {
+        if (alive) setContestError(err?.message || "콘테스트 목록을 불러오지 못했습니다.");
       } finally {
         if (alive) setContestsLoaded(true);
       }
@@ -71,7 +81,7 @@ export default function AdminPage() {
         </div>
         <div className="callout-box is-pending">
           <strong>안내</strong>
-          어드민 권한이 필요하시면 허락님에게 직접 문의해 주세요. 자동 승인 path 는 없습니다.
+          어드민 권한이 필요하시면 허락님에게 직접 문의해 주세요. 자동 승인 절차는 제공하지 않습니다.
         </div>
         <Link href="/" className="btn">홈으로</Link>
       </PageShell>
@@ -85,7 +95,7 @@ export default function AdminPage() {
           <h1>
             허락 어드민 <StickerBadge tone="pink" rotate="r">운영자 전용</StickerBadge>
           </h1>
-          <p>콘테스트 생성/심사/투표/발표 — 모두 이 페이지에서. 비개발자 self-service 가 목표.</p>
+          <p>콘테스트 생성, 참가작 심사, 투표 전환, 결과 발표를 한곳에서 관리합니다.</p>
         </div>
         <Link href="/admin/contests/new" className="btn btn-primary">
           + 콘테스트 만들기
@@ -128,6 +138,12 @@ export default function AdminPage() {
             아직 만든 콘테스트가 없어요. 오른쪽 "+ 새로 만들기" 로 시작하세요.
           </div>
         )}
+        {contestError ? (
+          <div className="callout-box is-pending" style={{ marginBottom: 12 }}>
+            <strong>불러오기 실패</strong>
+            {contestError}
+          </div>
+        ) : null}
         <div className="board-list">
           <div className="board-row is-head">
             <span>상태</span>
@@ -140,7 +156,7 @@ export default function AdminPage() {
             <Link href={`/admin/contests/${c.id}`} key={c.id} className="board-row">
               <span>
                 <StickerBadge tone={STATUS_TONE[c.status] || "amber"} rotate="0">
-                  {c.statusLabel || c.status}
+                  {c.statusLabel || STATUS_LABEL[c.status] || c.status}
                 </StickerBadge>
               </span>
               <span className="board-row-title">{c.title}</span>

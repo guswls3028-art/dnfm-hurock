@@ -66,18 +66,18 @@ export const heroBanners = [
 
 // 빠른 안내 — 던파 공홈의 [공지] 1줄 + [업데이트] 1줄 + 펼치기 ⌄
 export const quickNotices = [
-  { id: "qn-1", tag: "공지", tagTone: "cyan", text: "허락방 이용 안내 — 욕설·차별·도배는 즉시 차단", href: "/board?category=notice" },
+  { id: "qn-1", tag: "공지", tagTone: "cyan", text: "허락방 이용 안내 — 욕설·차별·도배는 즉시 차단", href: "/board?category=broadcast" },
   { id: "qn-2", tag: "업데이트", tagTone: "amber", text: "아바타 콘테스트 1회 — 6월 13일(토) 19시 방송 시작 전 마감", href: "/contests" },
   // 펼치기 후 추가 노출
-  { id: "qn-3", tag: "공지", tagTone: "cyan", text: "방송 URL 곧 공개 — 헤더 LIVE 버튼 색 변경 예정", href: "/board?category=notice", folded: true },
+  { id: "qn-3", tag: "방송", tagTone: "cyan", text: "SOOP·치지직·유튜브 채널은 상단 방송 버튼에서 바로 이동", href: "/", folded: true },
 ];
 
 // 가운데 커뮤니티+ 게시판 탭 — 톡방 합의: 공지사항 / 이벤트 / 대회 / 자유
 export const communityTabs = [
-  { key: "notice", label: "공지사항", tone: "cyan",  href: "/board?category=notice" },
+  { key: "notice", label: "공지사항", tone: "cyan",  href: "/board?category=broadcast" },
   { key: "event",  label: "이벤트",  tone: "pink",  href: "/contests" },
-  { key: "match",  label: "대회",    tone: "amber", href: "/board?category=match" },
-  { key: "free",   label: "자유",    tone: "lime",  href: "/board?category=free" },
+  { key: "match",  label: "대회",    tone: "amber", href: "/board?category=contest_qa" },
+  { key: "free",   label: "자유",    tone: "lime",  href: "/board?category=talk" },
 ];
 
 // 이벤트 슬라이딩 카드 — 큰 비주얼 카드 (열혈패스 류)
@@ -99,8 +99,8 @@ export const sideMenu = [
   {
     section: "새소식",
     items: [
-      { label: "공지사항", href: "/board?category=notice" },
-      { label: "업데이트", href: "/board?category=notice&kind=update" },
+      { label: "공지사항", href: "/board?category=broadcast" },
+      { label: "업데이트", href: "/board?category=broadcast&kind=update" },
       { label: "이벤트", href: "/contests" },
     ],
   },
@@ -115,10 +115,10 @@ export const sideMenu = [
   {
     section: "커뮤니티",
     items: [
-      { label: "자유 게시판", href: "/board?category=free" },
-      { label: "공지사항", href: "/board?category=notice" },
+      { label: "자유 게시판", href: "/board?category=talk" },
+      { label: "공지사항", href: "/board?category=broadcast" },
       { label: "이벤트", href: "/contests" },
-      { label: "대회", href: "/board?category=match" },
+      { label: "대회", href: "/board?category=contest_qa" },
     ],
   },
   {
@@ -139,16 +139,16 @@ export const sideMenu = [
 // 기존 5종 진입 카드 — 호환 유지 (이미 다른 페이지에서 import 가능). 신규 홈은 communityTabs 사용.
 export const boardEntryCategories = [
   { key: "event",  label: "이벤트",  emoji: "🎉", tone: "pink",  note: "콘테스트 / 추첨 / 미션", href: "/contests" },
-  { key: "match",  label: "대회",   emoji: "🏆", tone: "amber", note: "팟 / 경합 일정",        href: "/board?category=match" },
-  { key: "chat",   label: "잡담",   emoji: "💬", tone: "cyan",  note: "자유 수다",            href: "/board?category=chat" },
-  { key: "clip",   label: "클립",   emoji: "🎬", tone: "lime",  note: "방송 다시보기 / URL 연동", href: "/board?category=clip" },
+  { key: "match",  label: "대회",   emoji: "🏆", tone: "amber", note: "콘테스트 질문 / 일정",  href: "/board?category=contest_qa" },
+  { key: "chat",   label: "잡담",   emoji: "💬", tone: "cyan",  note: "자유 수다",            href: "/board?category=talk" },
+  { key: "clip",   label: "방송",   emoji: "🎬", tone: "lime",  note: "방송 공지 / 일정",      href: "/board?category=broadcast" },
   { key: "report", label: "신고건의", emoji: "🛠️", tone: "ink", note: "버그 / 운영 건의",     href: "/board?category=report" },
 ];
 
 export const loginProviders = [
-  { id: "self", label: "허락 계정으로 로그인", note: "아이디/비번 (준비중)" },
-  { id: "google", label: "Google 로그인", note: "OAuth 연결 예정" },
-  { id: "kakao", label: "카카오 로그인", note: "카카오 디벨로퍼스 연결 예정" }
+  { id: "self", label: "허락 계정으로 로그인", note: "아이디·비밀번호" },
+  { id: "google", label: "Google 로그인", note: "소셜 계정으로 계속하기" },
+  { id: "kakao", label: "카카오 로그인", note: "소셜 계정으로 계속하기" }
 ];
 
 /**
@@ -301,9 +301,9 @@ export const noticeBoard = [
   {
     id: "n3",
     pinned: false,
-    title: "방송 URL 곧 공개",
-    body: "확정되면 헤더 'LIVE' 버튼이 색을 바꿉니다.",
-    posted: "준비"
+    title: "방송 채널 바로가기",
+    body: "SOOP·치지직·유튜브 채널은 상단 방송 버튼과 사이트 설정에서 확인할 수 있습니다.",
+    posted: "상시"
   }
 ];
 
@@ -575,6 +575,6 @@ export const adminMenu = [
   { id: "contests", label: "콘테스트 관리", href: "/admin", note: "생성/심사/투표/발표" },
   { id: "board", label: "게시판 관리", href: "/admin/board", note: "최근 글 목록 + 즉시 삭제" },
   { id: "reports", label: "신고함", href: "/admin/reports", note: "신고 검토 + 조치 + 운영 메모" },
-  { id: "members", label: "회원 관리", href: "/admin/members", note: "권한/차단 — 백엔드 작업중" },
+  { id: "members", label: "회원 관리", href: "/admin/members", note: "자체 가입자 비밀번호 복구" },
   { id: "settings", label: "사이트 설정", href: "/admin/settings", note: "배너·채널·후원·풋터" }
 ];

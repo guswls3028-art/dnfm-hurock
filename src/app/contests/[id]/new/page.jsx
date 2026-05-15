@@ -64,10 +64,7 @@ export default function ContestNewPage({ params }) {
   }
 
   // contest.status 가드 — 마감/심사/투표/종료 단계는 새 참가 불가. backend 도 거부하지만 UX 측면.
-  const acceptingEntries =
-    contest.status === "open" ||
-    contest.status === "submission" || // mock 데이터 호환
-    !contest.status; // status 없는 mock 도 허용
+  const acceptingEntries = contest.status === "open";
   if (!acceptingEntries) {
     return (
       <PageShell activePath="/contests">
@@ -100,7 +97,7 @@ export default function ContestNewPage({ params }) {
   // 콘테스트 참가 = 비회원 가능. 회원이면 dnfProfile 자동 채움 편의.
   // userLoading 동안엔 isGuest 결정 보류 — form 깜빡임 방지.
   const isGuest = !userLoading && !user;
-  // backend formSchema = { fields: [...] }, 이전 mock = array. 둘 다 지원.
+  // backend formSchema = { fields: [...] }.
   const schema = Array.isArray(contest.formSchema)
     ? contest.formSchema
     : Array.isArray(contest.formSchema?.fields)

@@ -3,14 +3,11 @@
 import Image from "next/image";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { heroBanners as fallbackHeroBanners } from "@/lib/content";
-import { API_BASE, ApiError, heroBanners as bannersApi } from "@/lib/api-client";
+import { API_BASE, heroBanners as bannersApi } from "@/lib/api-client";
 import BannerAdminFab from "@/components/BannerAdminFab";
 
 const ROTATE_MS = 5000;
 
-/**
- * imageUrl 이 path 면 API_BASE prefix, 절대 URL 이면 그대로.
- */
 function resolveImageUrl(url) {
   if (!url) return null;
   if (/^https?:\/\//i.test(url)) return url;
@@ -18,9 +15,6 @@ function resolveImageUrl(url) {
   return url;
 }
 
-/**
- * backend hero_banners row → frontend slide schema 변환.
- */
 function mapApiBannerToSlide(b) {
   return {
     id: `api-${b.id}`,
@@ -35,25 +29,20 @@ function mapApiBannerToSlide(b) {
 }
 
 /**
- * HeroSlider — 최상단 슬라이딩 배너 (던파 공홈 메인 슬라이더 레이어).
- *  - banner.kind === "portrait": 허락 본인 portrait + 사이드 텍스트 (왕대가리 슬라이드)
- *    → 사이트 identity 라 코드 고정. content.js 에서 가져옴.
- *  - banner.kind === "wide": 카카오 오픈톡 배너 등.
- *    → backend hero_banners 도메인 (active=true) 가 있으면 그것이 우선. 없으면 content.js fallback.
- *  - 자동 5초 회전 (hover/focus 시 일시정지)
- *  - 좌하단 N/total 인디케이터 (공홈 1/17 형식)
- *  - 좌우 화살표 + 도트
- *  - 우상단 톱니바퀴 fab (운영자만) — BannerAdminFab.
+ * HeroSlider — 최상단 슬라이딩 배너. wide / wide-text 슬라이드만 지원.
+ *  - kind === "wide": 이미지 기반 배너 (백엔드 hero_banners 또는 content.js fallback).
+ *  - kind === "wide-text": 이미지 없이 emoji + 제목/부제 + cta. 콘테스트 / 이벤트 강조용.
+ *  - 5초 자동 회전 (hover/focus 시 일시정지).
+ *  - 좌상단 N/total, 우상단 톱니바퀴, 좌우 화살표 + 도트.
  */
 export default function HeroSlider() {
-  // portrait 고정 슬라이드 = content.js 의 portrait kind 만
-  const fixedSlides = fallbackHeroBanners.filter((b) => b.kind === "portrait");
+  // 코드 고정 슬라이드 = content.js wide-text (콘테스트/이벤트 강조 슬라이드)
+  const fixedSlides = fallbackHeroBanners.filter((b) => b.kind === "wide-text");
   const fallbackWide = fallbackHeroBanners.filter((b) => b.kind === "wide");
 
-  const [apiWide, setApiWide] = useState(null); // null=로딩, []=비어있음, [...]=실데이터
+  const [apiWide, setApiWide] = useState(null);
   const [reloadTick, setReloadTick] = useState(0);
 
-  // backend list fetch (public)
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -61,15 +50,13 @@ export default function HeroSlider() {
         const res = await bannersApi.list();
         if (!alive) return;
         const items = Array.isArray(res?.items) ? res.items : [];
-        // active=true 만, sortOrder asc
         const filtered = items
           .filter((b) => b.active !== false)
           .sort((a, b) => (a.sortOrder ?? 0) - (b.sortOrder ?? 0))
           .map(mapApiBannerToSlide)
           .filter((s) => !!s.src);
         setApiWide(filtered);
-      } catch (e) {
-        // backend 미응답 시 fallback 으로
+      } catch {
         if (!alive) return;
         setApiWide([]);
       }
@@ -79,9 +66,7 @@ export default function HeroSlider() {
     };
   }, [reloadTick]);
 
-  // wide 슬라이드 = API 우선, 비어있으면 content.js fallback
-  const wideSlides =
-    apiWide && apiWide.length > 0 ? apiWide : fallbackWide;
+  const wideSlides = apiWide && apiWide.length > 0 ? apiWide : fallbackWide;
   const banners = [...fixedSlides, ...wideSlides];
 
   const [idx, setIdx] = useState(0);
@@ -109,7 +94,6 @@ export default function HeroSlider() {
     return () => clearTimeout(timerRef.current);
   }, [idx, paused, banners.length]);
 
-  // banners 길이 변화 시 idx clamp
   useEffect(() => {
     if (idx >= banners.length && banners.length > 0) {
       setIdx(banners.length - 1);
@@ -132,40 +116,55 @@ export default function HeroSlider() {
         onBlurCapture={() => setPaused(false)}
       >
         <div className="hero-slider__track" aria-live="polite">
-          {banners.map((b, i) => (
-            <a
-              key={b.id}
-              href={b.href}
-              target={b.href?.startsWith("/") ? "_self" : "_blank"}
-              rel={b.href?.startsWith("/") ? undefined : "noreferrer"}
-              className={`hero-slider__slide hero-slider__slide--${b.kind || "wide"}${i === idx ? " is-active" : ""}`}
-              aria-hidden={i === idx ? undefined : true}
-              tabIndex={i === idx ? 0 : -1}
-              aria-label={`${b.title} — ${b.subtitle}`}
-            >
-              {b.kind === "portrait" ? (
-                <div className="hero-slider__portrait">
-                  <span className="hero-slider__portrait-avatar">
-                    <Image
-                      src={b.src}
-                      alt={b.alt || b.title}
-                      width={500}
-                      height={500}
-                      priority={i === 0}
-                      unoptimized
-                    />
+          {banners.map((b, i) => {
+            const isActive = i === idx;
+            const slideCls = `hero-slider__slide hero-slider__slide--${b.kind || "wide"}${
+              isActive ? " is-active" : ""
+            }`;
+            const isInternal = b.href?.startsWith("/");
+
+            // wide-text: 이미지 없는 카드형 슬라이드 (emoji + title + subtitle + cta)
+            if (b.kind === "wide-text") {
+              const tone = b.accentTone || "pink";
+              return (
+                <a
+                  key={b.id}
+                  href={b.href}
+                  target={isInternal ? "_self" : "_blank"}
+                  rel={isInternal ? undefined : "noreferrer"}
+                  className={`${slideCls} hero-slider__slide--tone-${tone}`}
+                  aria-hidden={isActive ? undefined : true}
+                  tabIndex={isActive ? 0 : -1}
+                  aria-label={`${b.title} — ${b.subtitle}`}
+                >
+                  <span className="hero-slider__wide-text-emoji" aria-hidden="true">
+                    {b.emoji}
                   </span>
-                  <div className="hero-slider__portrait-copy">
+                  <div className="hero-slider__wide-text-copy">
                     <strong>{b.title}</strong>
                     <small>{b.subtitle}</small>
                     {b.cta && (
-                      <span className="hero-slider__portrait-cta">
+                      <span className="hero-slider__wide-text-cta" aria-hidden="true">
                         {b.cta} →
                       </span>
                     )}
                   </div>
-                </div>
-              ) : (
+                </a>
+              );
+            }
+
+            // wide: 이미지 기반 일반 배너
+            return (
+              <a
+                key={b.id}
+                href={b.href}
+                target={isInternal ? "_self" : "_blank"}
+                rel={isInternal ? undefined : "noreferrer"}
+                className={slideCls}
+                aria-hidden={isActive ? undefined : true}
+                tabIndex={isActive ? 0 : -1}
+                aria-label={`${b.title} — ${b.subtitle}`}
+              >
                 <Image
                   src={b.src}
                   alt={b.alt || b.title}
@@ -175,12 +174,12 @@ export default function HeroSlider() {
                   unoptimized
                   className="hero-slider__img"
                 />
-              )}
-              <span className="hero-slider__hint" aria-hidden="true">
-                {b.title} →
-              </span>
-            </a>
-          ))}
+                <span className="hero-slider__hint" aria-hidden="true">
+                  {b.title} →
+                </span>
+              </a>
+            );
+          })}
         </div>
 
         <span className="hero-slider__counter" aria-hidden="true">
@@ -226,7 +225,6 @@ export default function HeroSlider() {
         )}
       </section>
 
-      {/* 운영자 톱니바퀴 — fab → drawer. onChanged 시 API 재조회. */}
       <BannerAdminFab onChanged={() => setReloadTick((t) => t + 1)} />
     </>
   );

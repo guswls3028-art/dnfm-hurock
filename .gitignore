@@ -20,3 +20,7 @@ Thumbs.db
 
 이미지/
 원본자료/
+
+# Local agent / QA scratch files
+.claude/
+_qa*.mjs

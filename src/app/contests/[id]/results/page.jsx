@@ -21,7 +21,7 @@ export default function ContestResultsPage({ params }) {
         if (!alive) return;
         if (detail) setContest(detail.contest || detail);
       } catch {
-        /* mock 유지 */
+        if (alive) setContest(null);
       }
       try {
         const data = await contestsApi.results(id);
@@ -30,7 +30,7 @@ export default function ContestResultsPage({ params }) {
           setResult(data);
         }
       } catch {
-        /* mock 유지 */
+        if (alive) setResult(null);
       }
       if (alive) setLoading(false);
     })();

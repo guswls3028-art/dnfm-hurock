@@ -20,6 +20,7 @@ export default function ContestVotePage({ params }) {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [voted, setVoted] = useState(false);
+  const [detailLoaded, setDetailLoaded] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -28,8 +29,10 @@ export default function ContestVotePage({ params }) {
         const detail = await contestsApi.detail(id);
         if (!alive) return;
         if (detail) setContest(detail.contest || detail);
-      } catch {
-        /* mock 유지 */
+      } catch (err) {
+        if (alive) setError({ message: err?.message || "콘테스트를 불러오지 못했습니다." });
+      } finally {
+        if (alive) setDetailLoaded(true);
       }
       try {
         const data = await contestsApi.entries.list(id);
@@ -51,8 +54,24 @@ export default function ContestVotePage({ params }) {
     return (
       <PageShell activePath="/contests">
         <div className="page-head">
-          <h1>로딩 중…</h1>
+          <div>
+            <h1>{detailLoaded ? "콘테스트를 찾을 수 없습니다" : "로딩 중…"}</h1>
+            {detailLoaded ? <p>투표 페이지를 열 수 없어요.</p> : null}
+          </div>
         </div>
+        {detailLoaded ? (
+          <>
+            {error ? (
+              <div className="callout-box is-pending">
+                <strong>불러오기 실패</strong>
+                {error.message || "다시 시도해 주세요."}
+              </div>
+            ) : null}
+            <Link href="/contests" className="btn btn-primary">
+              콘테스트 목록
+            </Link>
+          </>
+        ) : null}
       </PageShell>
     );
   }

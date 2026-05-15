@@ -156,7 +156,7 @@ export default function HeroBanner() {
           <small>{host.channelName} · {host.channelHandle}</small>
           <small style={{ opacity: 0.78 }}>{host.tagline}</small>
           <StickerBadge tone="pink" rotate="r">
-            {hero.portraitNote || "방송 준비중"}
+            {hero.portraitNote || "방송 채널"}
           </StickerBadge>
         </div>
       </div>

@@ -8,13 +8,7 @@ import { ApiError, auth } from "@/lib/api-client";
 import { isAdmin, isSuperAdmin, useCurrentUser } from "@/lib/use-current-user";
 
 /**
- * 회원 관리 — 현재 가능한 운영:
- *   - super 권한: 자체 가입자 비밀번호 reset (사용자 lockout 시 복구)
- *
- * 다음 단계 (백엔드):
- *   - GET /sites/hurock/members — 회원 목록 + 검색
- *   - PATCH /sites/hurock/members/:id/role — 권한 부여/회수
- *   - POST /sites/hurock/members/:id/ban — 차단
+ * 회원 관리 — super 권한 계정의 자체 가입자 비밀번호 복구.
  */
 export default function AdminMembersPage() {
   const { user, loading: userLoading } = useCurrentUser();
@@ -88,9 +82,9 @@ export default function AdminMembersPage() {
       <div className="page-head">
         <div>
           <h1>
-            회원 관리 <StickerBadge tone="amber" rotate="r">백엔드 작업중</StickerBadge>
+            회원 관리 <StickerBadge tone="amber" rotate="r">비밀번호 복구</StickerBadge>
           </h1>
-          <p>회원 목록 / 권한 변경 / 차단 — 백엔드 endpoint 작업 후 활성화.</p>
+          <p>자체 가입자 비밀번호 복구와 운영 메뉴 이동을 제공합니다.</p>
         </div>
         <Link href="/admin" className="btn btn-sm">← 어드민 홈</Link>
       </div>
@@ -101,13 +95,13 @@ export default function AdminMembersPage() {
           <ul style={{ margin: "8px 0 0 18px" }}>
             <li>특정 글/댓글이 부적절하면 <Link href="/admin/board">게시판 관리</Link> 에서 즉시 삭제</li>
             <li>콘테스트 참가자 심사 / 후보 선정 / 결과 발표는 <Link href="/admin">콘테스트 관리</Link></li>
-            <li>회원 차단은 현재 백엔드 API 가 없어 임시로 카톡 톡방장에게 문의</li>
+            <li>접수된 신고는 <Link href="/admin/reports">신고함</Link> 에서 처리</li>
           </ul>
         </div>
 
         {isSuper ? (
           <article className="form-block" style={{ marginTop: 14 }}>
-            <h2 style={{ marginTop: 0 }}>비밀번호 reset (super)</h2>
+            <h2 style={{ marginTop: 0 }}>비밀번호 초기화</h2>
             <p style={{ color: "var(--muted)", lineHeight: 1.6 }}>
               사용자가 비밀번호를 잊었을 때 임시 비번을 발급. 발급 즉시 해당 사용자의 모든 세션이 로그아웃되며,
               사용자는 임시 비번으로 로그인 후 <strong>강제로 새 비밀번호를 설정</strong>해야 합니다.
@@ -139,7 +133,7 @@ export default function AdminMembersPage() {
                 className="btn btn-primary"
                 disabled={resetting || !resetUsername.trim()}
               >
-                {resetting ? "reset 중…" : "임시 비번 발급"}
+                {resetting ? "초기화 중…" : "임시 비번 발급"}
               </button>
             </form>
 
@@ -174,19 +168,10 @@ export default function AdminMembersPage() {
           </article>
         ) : (
           <div className="callout-box is-pending" style={{ marginTop: 14 }}>
-            <strong>비밀번호 reset</strong>
+            <strong>비밀번호 초기화</strong>
             super 권한 전용입니다. (현재 계정은 일반 admin)
           </div>
         )}
-
-        <div className="callout-box is-pending" style={{ marginTop: 14 }}>
-          <strong>다음 단계 (백엔드)</strong>
-          <ul style={{ margin: "8px 0 0 18px" }}>
-            <li>GET <code>/sites/hurock/members</code> — 회원 목록 + 검색</li>
-            <li>PATCH <code>/sites/hurock/members/:id/role</code> — 어드민 권한 부여/회수</li>
-            <li>POST <code>/sites/hurock/members/:id/ban</code> — 차단</li>
-          </ul>
-        </div>
       </section>
     </PageShell>
   );

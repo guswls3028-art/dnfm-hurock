@@ -3,11 +3,11 @@
 import Link from "next/link";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
+import { chatRooms, platforms, sponsor } from "@/lib/content";
 import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
 
 /**
- * 사이트 설정 — 현재 편집 가능한 항목은 배너 (홈 ⚙ fab) 만.
- * 후원 URL / 톡방 URL / 채널 URL / 운영 정책 텍스트 등은 backend 가 받쳐주면 여기로 통합.
+ * 사이트 설정 — 운영자가 자주 확인하는 연결 지점과 관리 화면을 한곳에 모은다.
  */
 export default function AdminSettingsPage() {
   const { user, loading: userLoading } = useCurrentUser();
@@ -54,14 +54,14 @@ export default function AdminSettingsPage() {
           <h1>
             사이트 설정 <StickerBadge tone="lime" rotate="r">셀프서비스</StickerBadge>
           </h1>
-          <p>지금 만질 수 있는 항목 + 다음 단계 백엔드 작업.</p>
+          <p>배너, 채널, 후원, 게시판 운영 동선을 확인합니다.</p>
         </div>
         <Link href="/admin" className="btn btn-sm">← 어드민 홈</Link>
       </div>
 
       <section className="section">
         <div className="section-head">
-          <h2>지금 만질 수 있는 항목</h2>
+          <h2>관리 바로가기</h2>
         </div>
         <div className="grid grid-2">
           <article className="card card-tone-pink">
@@ -93,25 +93,74 @@ export default function AdminSettingsPage() {
               </Link>
             </div>
           </article>
+
+          <article className="card card-tone-lime">
+            <h3>💬 신고함</h3>
+            <p>게시글·댓글 신고를 확인하고 처리 결과를 남깁니다.</p>
+            <div className="card-actions">
+              <Link href="/admin/reports" className="btn btn-sm btn-primary">
+                신고함 열기
+              </Link>
+            </div>
+          </article>
         </div>
       </section>
 
       <section className="section">
         <div className="section-head">
-          <h2>다음 단계 — 백엔드 작업이 필요한 설정</h2>
+          <h2>현재 연결 정보</h2>
         </div>
-        <div className="callout-box is-pending">
-          <strong>준비중</strong>
-          <ul style={{ margin: "8px 0 0 18px" }}>
-            <li>후원 (toon.donate) URL 변경</li>
-            <li>방송 채널 URL (SOOP / 치지직 / 유튜브) 변경</li>
-            <li>오픈채팅방 URL 변경</li>
-            <li>사이트 풋터 안내 텍스트 / 공지사항 편집</li>
-            <li>회원 권한 / 차단 (회원 관리 메뉴 참조)</li>
-          </ul>
-          <p style={{ marginTop: 8 }}>
-            지금은 코드 (<code>src/lib/content.js</code>) 직접 수정 + 배포로 운영 중. 자주 바뀌는 항목 우선으로 편집 UI 추가 예정.
-          </p>
+        <div className="grid grid-2">
+          <article className="form-block">
+            <div className="form-step">방송 채널</div>
+            <div className="grid" style={{ gap: 8 }}>
+              {platforms.map((p) => (
+                <a
+                  key={p.id}
+                  href={p.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="board-row"
+                  style={{ gridTemplateColumns: "110px minmax(0,1fr) 70px" }}
+                >
+                  <strong>{p.label}</strong>
+                  <span className="board-row-meta">{p.note}</span>
+                  <span className="board-row-meta">열기 →</span>
+                </a>
+              ))}
+            </div>
+          </article>
+
+          <article className="form-block">
+            <div className="form-step">후원 / 톡방</div>
+            <div className="grid" style={{ gap: 8 }}>
+              <a
+                href={sponsor.url}
+                target="_blank"
+                rel="noreferrer"
+                className="board-row"
+                style={{ gridTemplateColumns: "110px minmax(0,1fr) 70px" }}
+              >
+                <strong>{sponsor.label}</strong>
+                <span className="board-row-meta">{sponsor.perkHeadline}</span>
+                <span className="board-row-meta">열기 →</span>
+              </a>
+              {chatRooms.map((room) => (
+                <a
+                  key={room.id}
+                  href={room.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="board-row"
+                  style={{ gridTemplateColumns: "110px minmax(0,1fr) 70px" }}
+                >
+                  <strong>{room.primary ? "메인 톡방" : "1:1 문의"}</strong>
+                  <span className="board-row-meta">{room.label}</span>
+                  <span className="board-row-meta">열기 →</span>
+                </a>
+              ))}
+            </div>
+          </article>
         </div>
       </section>
     </PageShell>

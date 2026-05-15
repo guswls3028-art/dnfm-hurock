@@ -30,6 +30,7 @@ export default function AdminContestDetailPage({ params }) {
   const [resultBusy, setResultBusy] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
+  const [detailLoaded, setDetailLoaded] = useState(false);
   const [resultForm, setResultForm] = useState([
     { rank: 1, entryId: "", comment: "" },
     { rank: 2, entryId: "", comment: "" },
@@ -43,8 +44,10 @@ export default function AdminContestDetailPage({ params }) {
         const detail = await contestsApi.detail(id);
         if (!alive) return;
         if (detail) setContest(detail.contest || detail);
-      } catch {
-        /* mock 유지 */
+      } catch (err) {
+        if (alive) setError(err instanceof ApiError ? err : { message: err?.message || "콘테스트 조회 실패" });
+      } finally {
+        if (alive) setDetailLoaded(true);
       }
       try {
         const data = await contestsApi.entries.list(id);
@@ -150,8 +153,24 @@ export default function AdminContestDetailPage({ params }) {
     return (
       <PageShell activePath="/admin">
         <div className="page-head">
-          <h1>로딩 중…</h1>
+          <div>
+            <h1>{detailLoaded ? "콘테스트를 찾을 수 없습니다" : "로딩 중…"}</h1>
+            {detailLoaded ? <p>관리 페이지를 열 수 없어요.</p> : null}
+          </div>
         </div>
+        {detailLoaded ? (
+          <>
+            {error ? (
+              <div className="callout-box is-pending">
+                <strong>불러오기 실패</strong>
+                {error.message || "다시 시도해 주세요."}
+              </div>
+            ) : null}
+            <Link href="/admin" className="btn btn-primary">
+              어드민 홈
+            </Link>
+          </>
+        ) : null}
       </PageShell>
     );
   }
@@ -189,10 +208,18 @@ export default function AdminContestDetailPage({ params }) {
         <button
           type="button"
           className="btn btn-sm"
-          onClick={() => changeStatus("submission")}
-          disabled={statusBusy || contest.status === "submission"}
+          onClick={() => changeStatus("open")}
+          disabled={statusBusy || contest.status === "open"}
         >
           단계: 참가 모집
+        </button>
+        <button
+          type="button"
+          className="btn btn-sm"
+          onClick={() => changeStatus("judging")}
+          disabled={statusBusy || contest.status === "judging"}
+        >
+          → 후보 심사
         </button>
         <button
           type="button"
@@ -205,18 +232,18 @@ export default function AdminContestDetailPage({ params }) {
         <button
           type="button"
           className="btn btn-sm btn-accent"
-          onClick={() => changeStatus("announced")}
-          disabled={statusBusy || contest.status === "announced"}
+          onClick={() => changeStatus("completed")}
+          disabled={statusBusy || contest.status === "completed"}
         >
           → 결과 발표
         </button>
         <button
           type="button"
           className="btn btn-sm btn-ghost"
-          onClick={() => changeStatus("ended")}
-          disabled={statusBusy || contest.status === "ended"}
+          onClick={() => changeStatus("draft")}
+          disabled={statusBusy || contest.status === "draft"}
         >
-          종료/숨김
+          임시저장
         </button>
       </section>
 
@@ -350,10 +377,11 @@ export default function AdminContestDetailPage({ params }) {
 
 function labelFor(status) {
   switch (status) {
-    case "submission": return "참가 모집중";
+    case "draft": return "임시저장";
+    case "open": return "참가 모집중";
+    case "judging": return "후보 심사중";
     case "voting": return "투표중";
-    case "ended": return "종료";
-    case "announced": return "결과 발표";
+    case "completed": return "결과 발표";
     default: return status;
   }
 }

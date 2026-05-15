@@ -6,15 +6,13 @@ import ContestCard from "@/components/ContestCard";
 import StickerBadge from "@/components/StickerBadge";
 import { contests as contestsApi } from "@/lib/api-client";
 
-// backend(open/voting/judging/completed) + 이전 mock(submission/voting/ended/announced)
-// 둘 다 한 탭으로 묶어 표시.
 const TAB_DEFS = [
-  { id: "submission", label: "참가중", matches: (s) => s === "submission" || s === "open" },
+  { id: "open", label: "참가중", matches: (s) => s === "open" },
   { id: "voting", label: "투표중", matches: (s) => s === "voting" || s === "judging" },
   {
-    id: "announced",
+    id: "completed",
     label: "결과 발표",
-    matches: (s) => s === "announced" || s === "ended" || s === "completed",
+    matches: (s) => s === "completed",
   },
 ];
 
@@ -54,7 +52,7 @@ export default function ContestsPage() {
             허락 콘테스트 <StickerBadge tone="pink" rotate="r">참가/투표</StickerBadge>
           </h1>
           <p>
-            아바타 콘테스트가 메인 이벤트입니다. 모험단명/캐릭터명/코디 제목/설명/사진 한 장으로 참가 가능.
+            진행 중인 콘테스트, 투표, 결과 발표를 한곳에서 확인합니다.
           </p>
         </div>
       </div>

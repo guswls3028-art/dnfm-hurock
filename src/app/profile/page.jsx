@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
-import { profileMock } from "@/lib/content";
 import { useCurrentUser } from "@/lib/use-current-user";
 
 const CAPTURE_TONE = {
@@ -20,17 +19,19 @@ const CAPTURE_LABEL = {
 };
 
 const HISTORY_TONE = {
-  submission: "pink",
+  draft: "ink",
+  open: "pink",
+  judging: "amber",
   voting: "cyan",
-  ended: "ink",
-  announced: "amber",
+  completed: "amber",
 };
 
 const HISTORY_LABEL = {
-  submission: "참가중",
+  draft: "임시저장",
+  open: "참가중",
+  judging: "심사중",
   voting: "투표중",
-  ended: "종료",
-  announced: "결과발표",
+  completed: "결과발표",
 };
 
 export default function ProfilePage() {
@@ -73,15 +74,19 @@ export default function ProfilePage() {
     router.refresh();
   }
 
-  // 사용자 정보 + mock fallback (백엔드에서 contestHistory/captures 가 안 오면 mock 일부 유지)
+  const userBadges = Array.isArray(user.badges) ? user.badges : [];
   const account = {
     nickname: user.displayName || user.username,
     joinedAt: user.joinedAt || user.created_at || "-",
     provider: user.provider || (user.providerType === "google" ? "Google" : user.providerType === "kakao" ? "Kakao" : "자체"),
-    badges: user.badges || profileMock.account.badges || [],
+    badges: userBadges,
   };
-  const dnfProfile = user.dnfProfile || profileMock.dnfProfile;
-  const contestHistory = user.contestHistory || profileMock.contestHistory || [];
+  const dnfProfile = user.dnfProfile || {};
+  const captures = Array.isArray(dnfProfile.captures) ? dnfProfile.captures : [];
+  const contestHistory = Array.isArray(user.contestHistory) ? user.contestHistory : [];
+  const adventureName = dnfProfile.adventureName || dnfProfile.adventurerName;
+  const characterName = dnfProfile.characterName || dnfProfile.mainCharacterName;
+  const serverName = dnfProfile.serverName || dnfProfile.mainCharacterServer;
 
   return (
     <PageShell activePath="/profile">
@@ -162,16 +167,20 @@ export default function ProfilePage() {
           <article className="form-block">
             <dl className="kvs">
               <dt>모험단</dt>
-              <dd>{dnfProfile?.adventureName || "(미등록)"}</dd>
+              <dd>{adventureName || "(미등록)"}</dd>
               <dt>대표 캐릭터</dt>
-              <dd>{dnfProfile?.characterName || "(미등록)"}</dd>
+              <dd>{characterName || "(미등록)"}</dd>
               <dt>서버</dt>
-              <dd>{dnfProfile?.serverName || "(미등록)"}</dd>
+              <dd>{serverName || "(미등록)"}</dd>
             </dl>
           </article>
           <article className="form-block">
             <div className="form-step">캡처 인증 상태</div>
-            {(dnfProfile?.captures || []).map((cap) => (
+            {captures.length === 0 ? (
+              <p style={{ margin: 0, color: "var(--muted)", lineHeight: 1.6 }}>
+                아직 저장된 인증 기록이 없습니다.
+              </p>
+            ) : captures.map((cap) => (
               <div
                 key={cap.key}
                 style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 10 }}
@@ -182,8 +191,8 @@ export default function ProfilePage() {
                 </StickerBadge>
               </div>
             ))}
-            <Link href="/signup" className="btn btn-sm">
-              캡처 재업로드
+            <Link href="/profile/verify" className="btn btn-sm">
+              인증 갱신
             </Link>
           </article>
         </div>
