@@ -23,12 +23,20 @@ export function useCurrentUser() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const readCurrentUser = useCallback(async () => {
+    const data = await auth.me();
+    const current = data?.user || data || null;
+    if (current) return current;
+    const refreshed = await auth.refresh();
+    return refreshed?.user || null;
+  }, []);
+
   const fetchMe = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const data = await auth.me();
-      setUser(data?.user || data || null);
+      const current = await readCurrentUser();
+      setUser(current);
     } catch (err) {
       if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
         setUser(null);
@@ -39,15 +47,15 @@ export function useCurrentUser() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [readCurrentUser]);
 
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        const data = await auth.me();
+        const current = await readCurrentUser();
         if (!alive) return;
-        setUser(data?.user || data || null);
+        setUser(current);
         setError(null);
       } catch (err) {
         if (!alive) return;
@@ -64,7 +72,7 @@ export function useCurrentUser() {
     return () => {
       alive = false;
     };
-  }, []);
+  }, [readCurrentUser]);
 
   const logout = useCallback(async () => {
     try {

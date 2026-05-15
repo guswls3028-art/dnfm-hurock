@@ -58,6 +58,44 @@ function buildQuery(query) {
   return s ? `?${s}` : "";
 }
 
+let refreshPromise = null;
+
+function canRetryAfterRefresh(path, { skipAuthRefresh, raw }) {
+  if (skipAuthRefresh || raw) return false;
+  const p = String(path || "").split("?")[0];
+  if (p.startsWith("/auth/login")) return false;
+  if (p.startsWith("/auth/signup")) return false;
+  if (p.startsWith("/auth/refresh")) return false;
+  if (p.startsWith("/auth/logout")) return false;
+  if (p.startsWith("/auth/oauth")) return false;
+  return true;
+}
+
+async function refreshAuthSession() {
+  if (!refreshPromise) {
+    refreshPromise = fetch(joinUrl(API_BASE, "/auth/refresh"), {
+      method: "POST",
+      credentials: "include",
+      headers: { Accept: "application/json" },
+    })
+      .then(async (res) => {
+        if (!res.ok) return false;
+        const ct = res.headers.get("content-type") || "";
+        if (!ct.includes("application/json")) return false;
+        const payload = await res.json().catch(() => null);
+        const data = payload && Object.prototype.hasOwnProperty.call(payload, "data")
+          ? payload.data
+          : payload;
+        return Boolean(data?.user);
+      })
+      .catch(() => false)
+      .finally(() => {
+        refreshPromise = null;
+      });
+  }
+  return refreshPromise;
+}
+
 /**
  * 저수준 호출. envelope `{data}` 자동 unwrap.
  *
@@ -76,6 +114,7 @@ export async function apiFetch(path, init = {}) {
     query,
     timeoutMs = DEFAULT_TIMEOUT_MS,
     raw = false,
+    skipAuthRefresh = false,
     headers: extraHeaders,
     ...rest
   } = init;
@@ -139,6 +178,13 @@ export async function apiFetch(path, init = {}) {
   }
 
   if (!res.ok) {
+    if (res.status === 401 && canRetryAfterRefresh(path, { skipAuthRefresh, raw })) {
+      const refreshed = await refreshAuthSession();
+      if (refreshed) {
+        return apiFetch(path, { ...init, skipAuthRefresh: true });
+      }
+    }
+
     const errBody = payload && payload.error ? payload.error : null;
     throw new ApiError({
       status: res.status,
@@ -164,8 +210,8 @@ export function buildApiUrl(path) {
 export const auth = {
   me: () => apiFetch("/auth/me"),
   logout: () => apiFetch("/auth/logout", { method: "POST" }),
-  loginLocal: ({ username, password }) =>
-    apiFetch("/auth/login/local", { method: "POST", json: { username, password } }),
+  loginLocal: ({ username, password, rememberMe = true }) =>
+    apiFetch("/auth/login/local", { method: "POST", json: { username, password, rememberMe } }),
   signupLocal: ({
     username,
     password,
@@ -175,6 +221,7 @@ export const auth = {
     characterSelectNames,
     captureR2Keys,
     acceptedTerms,
+    rememberMe = true,
   }) =>
     apiFetch("/auth/signup/local", {
       method: "POST",
@@ -187,6 +234,7 @@ export const auth = {
         characterSelectNames,
         captureR2Keys,
         acceptedTerms,
+        rememberMe,
       },
     }),
   checkAvailability: ({ username, displayName }) =>
@@ -228,6 +276,7 @@ export const auth = {
   revokeSession: (id) => apiFetch(`/auth/sessions/${id}`, { method: "DELETE" }),
   revokeOtherSessions: () =>
     apiFetch("/auth/sessions/revoke-others", { method: "POST" }),
+  unlinkOAuth: (provider) => apiFetch(`/auth/oauth/${provider}/link`, { method: "DELETE" }),
   // super 권한 — 자체 가입자 비번 reset. 응답: { tempPassword, userId, displayName }
   adminResetPassword: ({ username }) =>
     apiFetch("/auth/admin/reset-password", {
@@ -436,9 +485,19 @@ export const heroBanners = {
 
 /* ---------- OAuth helpers (browser redirect URL builder) ---------- */
 
+function oauthStart(provider, returnTo = "/", { rememberMe = true, mode = "login" } = {}) {
+  const qs = new URLSearchParams({
+    site: SITE,
+    returnTo,
+    rememberMe: rememberMe ? "1" : "0",
+  });
+  if (mode) qs.set("mode", mode);
+  return `${API_BASE}/auth/oauth/${provider}/start?${qs.toString()}`;
+}
+
 export const oauth = {
-  googleStart: (returnTo = "/") =>
-    `${API_BASE}/auth/oauth/google/start?site=${SITE}&returnTo=${encodeURIComponent(returnTo)}`,
-  kakaoStart: (returnTo = "/") =>
-    `${API_BASE}/auth/oauth/kakao/start?site=${SITE}&returnTo=${encodeURIComponent(returnTo)}`,
+  googleStart: (returnTo = "/", options) => oauthStart("google", returnTo, options),
+  kakaoStart: (returnTo = "/", options) => oauthStart("kakao", returnTo, options),
+  googleLink: (returnTo = "/profile") => oauthStart("google", returnTo, { mode: "link" }),
+  kakaoLink: (returnTo = "/profile") => oauthStart("kakao", returnTo, { mode: "link" }),
 };

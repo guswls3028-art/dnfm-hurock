@@ -31,7 +31,7 @@ function LoginInner() {
   const oauthErrorCode = params.get("oauth_error");
   const { user, loading: userLoading } = useCurrentUser();
 
-  const [form, setForm] = useState({ username: "", password: "" });
+  const [form, setForm] = useState({ username: "", password: "", rememberMe: true });
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState(
     oauthErrorCode ? { message: oauthErrorMessage(oauthErrorCode) } : null,
@@ -84,7 +84,11 @@ function LoginInner() {
     }
     setBusy(true);
     try {
-      const data = await auth.loginLocal({ username: form.username, password: form.password });
+      const data = await auth.loginLocal({
+        username: form.username,
+        password: form.password,
+        rememberMe: form.rememberMe,
+      });
       const must = data?.user?.mustChangePassword;
       router.push(must ? "/profile/password?required=1" : returnTo);
       router.refresh();
@@ -142,6 +146,24 @@ function LoginInner() {
             />
             <small>최소 4자. 짧아도 괜찮아요 — brute force 방어는 서버에서.</small>
           </div>
+          <label
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              fontSize: "0.9rem",
+              fontWeight: 800,
+              color: "var(--ink-soft)",
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={form.rememberMe}
+              onChange={(e) => setForm((f) => ({ ...f, rememberMe: e.target.checked }))}
+              style={{ width: 18, height: 18, accentColor: "var(--primary)" }}
+            />
+            자동 로그인 유지
+          </label>
 
           {error && (
             <div className="callout-box is-pending">
@@ -174,22 +196,22 @@ function LoginInner() {
             구글 / 카카오 계정으로 한 번에 입장. 처음 로그인하면 자동으로 가입됩니다.
           </p>
           <a
-            href={oauth.googleStart(returnTo)}
+            href={oauth.googleStart(returnTo, { rememberMe: form.rememberMe })}
             className="btn btn-google"
             style={{ justifyContent: "flex-start" }}
             onClick={(e) =>
-              handleOAuthClick(e, "google", oauth.googleStart(returnTo))
+              handleOAuthClick(e, "google", oauth.googleStart(returnTo, { rememberMe: form.rememberMe }))
             }
           >
             <span aria-hidden="true" style={{ fontWeight: 900 }}>G</span>
             Google 로 계속하기
           </a>
           <a
-            href={oauth.kakaoStart(returnTo)}
+            href={oauth.kakaoStart(returnTo, { rememberMe: form.rememberMe })}
             className="btn btn-kakao"
             style={{ justifyContent: "flex-start" }}
             onClick={(e) =>
-              handleOAuthClick(e, "kakao", oauth.kakaoStart(returnTo))
+              handleOAuthClick(e, "kakao", oauth.kakaoStart(returnTo, { rememberMe: form.rememberMe }))
             }
           >
             <span aria-hidden="true" style={{ fontWeight: 900 }}>K</span>

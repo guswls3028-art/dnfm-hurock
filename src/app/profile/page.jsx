@@ -2,8 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
+import { ApiError, auth, oauth } from "@/lib/api-client";
 import { useCurrentUser } from "@/lib/use-current-user";
 
 const CAPTURE_TONE = {
@@ -34,9 +36,32 @@ const HISTORY_LABEL = {
   completed: "결과발표",
 };
 
+function oauthLinkErrorMessage(code) {
+  if (!code) return null;
+  if (code === "oauth_account_already_linked") return "이미 다른 계정에 연동된 소셜 계정입니다.";
+  if (code === "oauth_provider_already_linked") return "이미 같은 소셜 제공자가 연동되어 있습니다.";
+  if (code === "oauth_link_login_required") return "로그인 후 다시 연동해 주세요.";
+  if (code === "last_auth_method") return "마지막 로그인 수단은 해제할 수 없습니다.";
+  return "소셜 계정 연동에 실패했어요. 다시 시도해 주세요.";
+}
+
 export default function ProfilePage() {
   const router = useRouter();
-  const { user, loading, logout } = useCurrentUser();
+  const { user, loading, logout, refresh } = useCurrentUser();
+  const [linkBusy, setLinkBusy] = useState(null);
+  const [linkError, setLinkError] = useState(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("oauth_error");
+    if (code) setLinkError(oauthLinkErrorMessage(code));
+    if (code || params.get("linked")) {
+      params.delete("oauth_error");
+      params.delete("linked");
+      const next = `${window.location.pathname}${params.toString() ? `?${params}` : ""}`;
+      window.history.replaceState(null, "", next);
+    }
+  }, []);
 
   if (loading) {
     return (
@@ -74,6 +99,36 @@ export default function ProfilePage() {
     router.refresh();
   }
 
+  async function handleUnlink(provider) {
+    setLinkBusy(provider);
+    setLinkError(null);
+    try {
+      await auth.unlinkOAuth(provider);
+      await refresh();
+    } catch (err) {
+      if (err instanceof ApiError) setLinkError(err.message);
+      else setLinkError(err?.message || "소셜 연동 해제에 실패했어요.");
+    } finally {
+      setLinkBusy(null);
+    }
+  }
+
+  async function handleLink(provider) {
+    const url = provider === "kakao" ? oauth.kakaoLink("/profile") : oauth.googleLink("/profile");
+    setLinkError(null);
+    try {
+      const res = await fetch(url, { method: "GET", redirect: "manual" });
+      if (res.status === 503) {
+        const label = provider === "kakao" ? "카카오" : "구글";
+        setLinkError(`${label} 연동은 아직 준비 중입니다. OAuth 설정을 확인해 주세요.`);
+        return;
+      }
+    } catch {
+      /* redirect 시도 */
+    }
+    window.location.href = url;
+  }
+
   const userBadges = Array.isArray(user.badges) ? user.badges : [];
   const account = {
     nickname: user.displayName || user.username,
@@ -87,6 +142,13 @@ export default function ProfilePage() {
   const adventureName = dnfProfile.adventureName || dnfProfile.adventurerName;
   const characterName = dnfProfile.characterName || dnfProfile.mainCharacterName;
   const serverName = dnfProfile.serverName || dnfProfile.mainCharacterServer;
+  const authProviders = user.authProviders || {
+    local: Boolean(user.username),
+    oauth: [],
+  };
+  const oauthAccounts = Array.isArray(authProviders.oauth) ? authProviders.oauth : [];
+  const authMethodCount = (authProviders.local ? 1 : 0) + oauthAccounts.length;
+  const isLinked = (provider) => oauthAccounts.some((item) => item.provider === provider);
 
   return (
     <PageShell activePath="/profile">
@@ -153,6 +215,71 @@ export default function ProfilePage() {
               )}
             </dd>
           </dl>
+        </article>
+      </section>
+
+      <section className="section" aria-labelledby="profile-auth-link">
+        <div className="section-head">
+          <h2 id="profile-auth-link">로그인 연동</h2>
+          <span style={{ color: "var(--muted)", fontSize: "0.84rem", fontWeight: 800 }}>
+            자동 로그인과 계정 복구용
+          </span>
+        </div>
+        <article className="form-block">
+          {linkError ? (
+            <div className="callout-box is-pending" role="alert" style={{ marginBottom: 12 }}>
+              <strong>연동 처리 실패</strong>
+              {linkError}
+            </div>
+          ) : null}
+          <dl className="kvs">
+            <dt>자체 계정</dt>
+            <dd>{authProviders.local ? "연결됨" : "없음"}</dd>
+          </dl>
+          {["google", "kakao"].map((provider) => {
+            const linked = isLinked(provider);
+            const label = provider === "google" ? "Google" : "Kakao";
+            const cannotUnlinkLast = linked && authMethodCount <= 1;
+            return (
+              <div
+                key={provider}
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 12,
+                  padding: "12px 0",
+                  borderTop: "1px solid rgba(0,0,0,0.08)",
+                }}
+              >
+                <div>
+                  <strong>{label}</strong>
+                  <div style={{ color: "var(--muted)", fontSize: "0.84rem", marginTop: 3 }}>
+                    {linked ? "이 계정으로 로그인 가능" : "기존 회원 계정에 추가 연동"}
+                  </div>
+                </div>
+                {linked ? (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => handleUnlink(provider)}
+                    disabled={linkBusy === provider || cannotUnlinkLast}
+                  >
+                    {linkBusy === provider ? "해제 중…" : "연동 해제"}
+                  </button>
+                ) : (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm"
+                    onClick={() => handleLink(provider)}
+                    disabled={Boolean(linkBusy)}
+                  >
+                    연동하기
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </article>
       </section>
 
