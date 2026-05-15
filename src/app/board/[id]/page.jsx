@@ -435,6 +435,7 @@ export default function BoardDetailPage({ params }) {
         <AuthorCard
           author={{
             displayName: post.author.displayName || post.authorDisplayName,
+            avatarR2Key: post.author.avatarR2Key,
             dnfProfile: post.author.dnfProfile,
           }}
         />

@@ -38,6 +38,21 @@ export const DNF_CLASSES_GROUPED = [
   { group: "마창사", classes: ["뱅가드", "다크 랜서"] },
 ];
 
+function iconFile(group, baseClass) {
+  const g = group.replace(/[()]/g, (m) => (m === "(" ? "-" : ""));
+  const k = baseClass.replace(/\s+/g, "");
+  return `/class/${g}_${k}.png`;
+}
+
+/** baseClass 만 알 때 — 첫 매치 entry 의 iconPath (group 가변일 때 fallback). */
+export function findFirstClassIcon(baseClass) {
+  if (!baseClass) return null;
+  for (const g of DNF_CLASSES_GROUPED) {
+    if (g.classes.includes(baseClass)) return iconFile(g.group, baseClass);
+  }
+  return null;
+}
+
 /**
  * select option value — "group::baseClass" 의 정규화 키.
  * 저장 시 backend 로 보내는 klass 문자열은 baseClass 만 (group 은 컨텍스트).
