@@ -53,6 +53,42 @@ export function findFirstClassIcon(baseClass) {
   return null;
 }
 
+export function findFirstClassGroup(baseClass) {
+  if (!baseClass) return "";
+  for (const g of DNF_CLASSES_GROUPED) {
+    if (g.classes.includes(baseClass)) return g.group;
+  }
+  return "";
+}
+
+export function findClassIcon(group, baseClass) {
+  if (!group || !baseClass) return null;
+  const row = DNF_CLASSES_GROUPED.find((x) => x.group === group);
+  return row?.classes.includes(baseClass) ? iconFile(group, baseClass) : null;
+}
+
+export function classOptionValue(group, baseClass) {
+  return group && baseClass ? `${group}::${baseClass}` : "";
+}
+
+export function parseClassOptionValue(value) {
+  if (!value || !value.includes("::")) return { classGroup: "", baseClass: value || "" };
+  const [classGroup, ...rest] = value.split("::");
+  return { classGroup, baseClass: rest.join("::") };
+}
+
+function duplicateClassGroups(baseClass) {
+  return DNF_CLASSES_GROUPED.filter((g) => g.classes.includes(baseClass));
+}
+
+export function formatClassText(classGroup, baseClass) {
+  if (!baseClass) return "";
+  const groups = duplicateClassGroups(baseClass);
+  if (groups.length <= 1 || !classGroup) return baseClass;
+  const gender = classGroup.match(/\((남|여)\)/)?.[1];
+  return gender ? `(${gender})${baseClass}` : `${classGroup} ${baseClass}`;
+}
+
 /**
  * select option value — "group::baseClass" 의 정규화 키.
  * 저장 시 backend 로 보내는 klass 문자열은 baseClass 만 (group 은 컨텍스트).

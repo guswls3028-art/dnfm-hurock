@@ -1,7 +1,7 @@
 "use client";
 
 import StickerBadge from "./StickerBadge";
-import { findFirstClassIcon } from "@/lib/dnf-classes";
+import { findClassIcon, findFirstClassIcon, formatClassText } from "@/lib/dnf-classes";
 
 function avatarPublicUrl(r2Key) {
   if (!r2Key) return null;
@@ -24,9 +24,10 @@ export default function AuthorCard({ author }) {
   const verified = !!dnf.verifiedBySelectScreen;
   const main = dnf.mainCharacterName;
   const klass = dnf.mainCharacterClass;
+  const mainClassGroup = dnf.mainCharacterClassGroup;
   const adv = dnf.adventurerName;
   const avatarUrl = avatarPublicUrl(author.avatarR2Key);
-  const mainIcon = findFirstClassIcon(klass);
+  const mainIcon = findClassIcon(mainClassGroup, klass) || findFirstClassIcon(klass);
   const characters = Array.isArray(dnf.characters) ? dnf.characters : [];
   const subCharacters = characters.filter((c) => c?.name && c.name !== main);
 
@@ -123,7 +124,7 @@ export default function AuthorCard({ author }) {
                         marginLeft: 6,
                       }}
                     >
-                      · {klass}
+                      · {formatClassText(mainClassGroup, klass)}
                     </em>
                   ) : null}
                 </span>
@@ -141,7 +142,7 @@ export default function AuthorCard({ author }) {
               <span style={{ color: "var(--muted)", fontWeight: 700 }}>부캐</span>
               <span style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
                 {subCharacters.slice(0, 12).map((c, i) => {
-                  const icon = findFirstClassIcon(c.klass);
+                  const icon = findClassIcon(c.classGroup, c.klass) || findFirstClassIcon(c.klass);
                   return (
                     <span
                       key={i}
@@ -166,6 +167,11 @@ export default function AuthorCard({ author }) {
                         />
                       ) : null}
                       {c.name}
+                      {c.klass ? (
+                        <em style={{ fontStyle: "normal", color: "var(--muted)" }}>
+                          · {formatClassText(c.classGroup, c.klass)}
+                        </em>
+                      ) : null}
                     </span>
                   );
                 })}

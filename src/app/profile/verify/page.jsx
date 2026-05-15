@@ -7,7 +7,14 @@ import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
 import { ApiError, auth } from "@/lib/api-client";
 import { useCurrentUser } from "@/lib/use-current-user";
-import { DNF_CLASSES_GROUPED } from "@/lib/dnf-classes";
+import {
+  DNF_CLASSES_GROUPED,
+  classOptionValue,
+  findClassIcon,
+  findFirstClassGroup,
+  findFirstClassIcon,
+  parseClassOptionValue,
+} from "@/lib/dnf-classes";
 
 const MAX_FILE_BYTES = 10 * 1024 * 1024;
 
@@ -121,9 +128,14 @@ function VerifyInner() {
         adventurerName: m?.adventurerName ?? "",
         mainCharacterName: m?.mainCharacterName ?? "",
         mainCharacterClass: m?.mainCharacterClass ?? "",
+        mainCharacterClassGroup: m?.mainCharacterClassGroup ?? "",
       });
       setEditedCharacters(
-        (m?.characters || []).map((c) => ({ name: c.name || "", klass: c.klass || "" }))
+        (m?.characters || []).map((c) => ({
+          name: c.name || "",
+          klass: c.klass || "",
+          classGroup: c.classGroup || "",
+        }))
       );
       setRecognized(true);
     } catch (err) {
@@ -149,12 +161,20 @@ function VerifyInner() {
         .flatMap((p) => (p.characters || []).map((c) => c.name))
         .filter(Boolean);
       const cleanedCharacters = editedCharacters
-        .map((c) => ({ name: (c.name || "").trim(), klass: (c.klass || "").trim() }))
+        .map((c) => ({
+          name: (c.name || "").trim(),
+          klass: (c.klass || "").trim(),
+          classGroup: (c.classGroup || "").trim() || undefined,
+        }))
         .filter((c) => c.name);
+      const mainCharacterClassGroup =
+        edited.mainCharacterClassGroup?.trim() ||
+        cleanedCharacters.find((c) => c.name === mainCharacterName)?.classGroup;
       await auth.confirmDnfProfile({
         adventurerName,
         mainCharacterName,
         mainCharacterClass: edited.mainCharacterClass?.trim() || undefined,
+        mainCharacterClassGroup: mainCharacterClassGroup || undefined,
         characters: cleanedCharacters.length ? cleanedCharacters : undefined,
         characterSelectNames: characterSelectNames.length ? characterSelectNames : undefined,
       });
@@ -174,7 +194,7 @@ function VerifyInner() {
     setEditedCharacters((prev) => prev.filter((_, i) => i !== idx));
   }
   function addEmptyCharacter() {
-    setEditedCharacters((prev) => [...prev, { name: "", klass: "" }]);
+    setEditedCharacters((prev) => [...prev, { name: "", klass: "", classGroup: "" }]);
   }
 
   if (loading) {
@@ -420,16 +440,33 @@ function VerifyInner() {
           <div className="form-row">
             <label>캐릭터 목록 ({editedCharacters.length}) · 잘못 인식된 이름·직업은 직접 고쳐주세요</label>
             <div style={{ display: "grid", gap: 6 }}>
-              {editedCharacters.map((c, i) => (
+              {editedCharacters.map((c, i) => {
+                const iconSrc = findClassIcon(c.classGroup, c.klass) || findFirstClassIcon(c.klass);
+                return (
                 <div
                   key={i}
                   style={{
                     display: "grid",
-                    gridTemplateColumns: "minmax(0,1fr) minmax(0,1.4fr) auto",
+                    gridTemplateColumns: "36px minmax(0,1fr) minmax(0,1.4fr) auto",
                     gap: 6,
                     alignItems: "center",
                   }}
                 >
+                  {iconSrc ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={iconSrc}
+                      alt={c.klass}
+                      width={36}
+                      height={36}
+                      style={{ borderRadius: "50%", objectFit: "cover", border: "1px solid var(--ink-line, #ddd)" }}
+                    />
+                  ) : (
+                    <div
+                      aria-hidden="true"
+                      style={{ width: 36, height: 36, borderRadius: "50%", background: "rgba(0,0,0,0.08)" }}
+                    />
+                  )}
                   <input
                     className="form-input"
                     value={c.name}
@@ -439,15 +476,28 @@ function VerifyInner() {
                   />
                   <select
                     className="form-input"
-                    value={c.klass || ""}
-                    onChange={(e) => updateCharacter(i, { klass: e.target.value })}
+                    value={
+                      c.klass
+                        ? classOptionValue(
+                            c.classGroup || findFirstClassGroup(c.klass),
+                            c.klass,
+                          )
+                        : ""
+                    }
+                    onChange={(e) => {
+                      const parsed = parseClassOptionValue(e.target.value);
+                      updateCharacter(i, {
+                        klass: parsed.baseClass,
+                        classGroup: parsed.classGroup,
+                      });
+                    }}
                     aria-label={`캐릭터 ${i + 1} 직업`}
                   >
                     <option value="">직업 선택</option>
                     {DNF_CLASSES_GROUPED.map((g) => (
                       <optgroup key={g.group} label={g.group}>
                         {g.classes.map((kls) => (
-                          <option key={`${g.group}::${kls}`} value={kls}>
+                          <option key={`${g.group}::${kls}`} value={classOptionValue(g.group, kls)}>
                             {g.group} · {kls}
                           </option>
                         ))}
@@ -463,7 +513,8 @@ function VerifyInner() {
                     ✕
                   </button>
                 </div>
-              ))}
+                );
+              })}
               <button
                 type="button"
                 className="btn btn-ghost btn-sm"
