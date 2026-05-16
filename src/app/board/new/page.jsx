@@ -8,6 +8,7 @@ import StickerBadge from "@/components/StickerBadge";
 import { ApiError, posts as postsApi } from "@/lib/api-client";
 import { useCurrentUser } from "@/lib/use-current-user";
 import ImageUploader from "@/components/ImageUploader";
+import PostComposerEditor from "@/components/PostComposerEditor";
 
 // hurock 사이트 카테고리 fallback (backend fetch 실패 시).
 // backend seed (api/src/shared/db/seed.ts HUROCK_CATEGORIES) 와 slug 일치 유지.
@@ -18,6 +19,20 @@ const HUROCK_CATEGORY_FALLBACK = [
 ];
 
 const MIN_GUEST_PW = 4;
+const HUROCK_TEMPLATES = [
+  {
+    label: "방송 후기",
+    text: "방송/콘텐츠:\n좋았던 장면:\n같이 보고 싶은 클립/링크:\n한 줄 후기:",
+  },
+  {
+    label: "질문 양식",
+    text: "상황:\n궁금한 점:\n해본 것:\n스크린샷/링크:",
+  },
+  {
+    label: "콘테스트",
+    text: "참가/투표 부문:\n캐릭터/작품명:\n문의 내용:\n확인한 공지:",
+  },
+];
 
 export default function BoardNewPage() {
   // useSearchParams 는 Suspense boundary 안에서만 prerender 통과 (Next.js 15).
@@ -242,20 +257,15 @@ function BoardNewInner() {
           />
         </div>
 
-        <div className="form-row">
-          <label htmlFor="post-body">본문</label>
-          <textarea
-            id="post-body"
-            className="form-textarea"
-            value={form.body}
-            onChange={(e) => update("body", e.target.value)}
-            placeholder="자유롭게. 매너만 지켜주세요."
-            required
-          />
-          <small style={{ color: "var(--muted)" }}>
-            마크다운 지원 — <code>**굵게**</code> <code>*기울임*</code> <code>- 목록</code> <code>[링크](url)</code> <code>`코드`</code>
-          </small>
-        </div>
+        <PostComposerEditor
+          id="post-body"
+          label="본문"
+          value={form.body}
+          onChange={(next) => update("body", next)}
+          placeholder={"자유롭게. 매너만 지켜주세요.\n\n클립이나 스크린샷 맥락을 같이 적으면 댓글이 빨라져요."}
+          rows={16}
+          templates={HUROCK_TEMPLATES}
+        />
 
         {isAuthed ? (
           <div className="form-row">
@@ -265,6 +275,11 @@ function BoardNewInner() {
               onChange={setAttachmentR2Keys}
               max={5}
             />
+          </div>
+        ) : !mustLogin ? (
+          <div className="callout-box">
+            <strong>이미지 첨부는 회원만</strong>
+            <Link href={`/login?returnTo=${encodeURIComponent("/board/new")}`}>로그인 →</Link>
           </div>
         ) : null}
 

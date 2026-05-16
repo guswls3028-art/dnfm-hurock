@@ -8,6 +8,7 @@ import StickerBadge from "@/components/StickerBadge";
 import { ApiError, posts as postsApi } from "@/lib/api-client";
 import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
 import ImageUploader from "@/components/ImageUploader";
+import PostComposerEditor from "@/components/PostComposerEditor";
 
 /**
  * 글 수정 (hurock).
@@ -15,6 +16,17 @@ import ImageUploader from "@/components/ImageUploader";
  * - 비회원: guestPassword 입력으로 본인 확인
  * - admin: 무조건 OK + pinned/locked 토글
  */
+
+const EDIT_TEMPLATES = [
+  {
+    label: "방송 후기",
+    text: "방송/콘텐츠:\n좋았던 장면:\n같이 보고 싶은 클립/링크:\n한 줄 후기:",
+  },
+  {
+    label: "질문 양식",
+    text: "상황:\n궁금한 점:\n해본 것:\n스크린샷/링크:",
+  },
+];
 
 export default function PostEditPage({ params }) {
   const { id } = use(params);
@@ -199,16 +211,15 @@ export default function PostEditPage({ params }) {
           />
         </div>
 
-        <div className="form-row">
-          <label htmlFor="edit-body">본문</label>
-          <textarea
-            id="edit-body"
-            className="form-textarea"
-            rows={12}
-            value={body}
-            onChange={(e) => setBody(e.target.value)}
-          />
-        </div>
+        <PostComposerEditor
+          id="edit-body"
+          label="본문"
+          value={body}
+          onChange={setBody}
+          placeholder="본문을 수정해주세요."
+          rows={14}
+          templates={EDIT_TEMPLATES}
+        />
 
         {isOwnMember || userIsAdmin ? (
           <div className="form-row">

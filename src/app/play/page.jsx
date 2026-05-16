@@ -1,19 +1,22 @@
 "use client";
 
-import { useState } from "react";
+import Link from "next/link";
+import { useEffect, useState } from "react";
 import PageShell from "@/components/PageShell";
 import StickerBadge from "@/components/StickerBadge";
+import { draws } from "@/lib/api-client";
+import { isAdmin, useCurrentUser } from "@/lib/use-current-user";
 
 /**
- * /play — 방송 중 쓰는 게임 포탈.
- * 외부 게임 바로가기 + 인라인 즉석 뽑기 (참가자 paste → 무작위 1명).
+ * /play — 방송 게임 포탈.
+ * 공식 추첨은 서버에서 실행된 draw_sessions 기록을 기준으로 공개한다.
  */
 const GAMES = [
   {
     id: "kr-roulette",
     label: "한글 도메인 룰렛",
     url: "https://xn--ok0bj0i6sfoyp9no.com/",
-    note: "쓸 ID/PS 로 로그인 후 운영",
+    note: "외부 룰렛 연출용",
     emoji: "🎰",
     tone: "pink",
   },
@@ -21,110 +24,100 @@ const GAMES = [
     id: "lazygyu-roulette",
     label: "lazygyu 핀볼 룰렛",
     url: "https://lazygyu.github.io/roulette/",
-    note: "참가자 이름 붙여넣기 → 핀볼 떨굼",
+    note: "방송 화면 연출용",
     emoji: "🎯",
     tone: "cyan",
   },
 ];
 
-function parseParticipants(text) {
-  return text
-    .split(/[\n,;]+/)
-    .map((s) => s.trim())
-    .filter((s) => s.length > 0);
-}
-
-function pickRandom(list) {
-  if (list.length === 0) return null;
-  const idx = Math.floor(Math.random() * list.length);
-  return { winner: list[idx], idx };
+function formatDate(value) {
+  if (!value) return "-";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return "-";
+  return new Intl.DateTimeFormat("ko-KR", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(d);
 }
 
 export default function PlayPortalPage() {
-  const [raw, setRaw] = useState("");
-  const [result, setResult] = useState(null);
+  const { user } = useCurrentUser();
   const [history, setHistory] = useState([]);
-  const participants = parseParticipants(raw);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  function handlePick() {
-    if (participants.length === 0) {
-      setResult({ error: "참가자를 한 줄에 한 명씩 (또는 쉼표로) 적어 주세요." });
-      return;
-    }
-    const r = pickRandom(participants);
-    setResult({ winner: r.winner, count: participants.length, ts: Date.now() });
-    setHistory((h) => [{ winner: r.winner, count: participants.length, ts: Date.now() }, ...h].slice(0, 5));
-  }
-
-  function handleReset() {
-    setRaw("");
-    setResult(null);
-  }
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const data = await draws.list({ pageSize: 30 });
+        if (alive) setHistory(data?.items || []);
+      } catch (err) {
+        if (alive) setError(err?.message || "추첨 기록을 불러오지 못했습니다.");
+      } finally {
+        if (alive) setLoading(false);
+      }
+    })();
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   return (
     <PageShell activePath="/play">
       <div className="page-head">
         <div>
-          <h1>방송 게임 포탈 <StickerBadge tone="cyan" rotate="r">바로가기</StickerBadge></h1>
-          <p>매번 새 창 띄우기 번거로워서 한 페이지에 모았어요. 즉석 뽑기는 아래에서 바로 가능.</p>
+          <h1>
+            방송 게임 포탈 <StickerBadge tone="cyan" rotate="r">기록 중심</StickerBadge>
+          </h1>
+          <p>상품이 걸린 추첨은 서버 기록 기준으로 남기고, 외부 룰렛은 방송 연출 도구로 씁니다.</p>
         </div>
+        {isAdmin(user) ? (
+          <Link href="/admin/draws" className="btn btn-primary">추첨 실행</Link>
+        ) : null}
       </div>
 
-      <section className="section" aria-labelledby="play-quick">
+      <section className="section" aria-labelledby="draw-history">
         <div className="section-head">
-          <h2 id="play-quick">즉석 뽑기 <StickerBadge tone="pink" rotate="r">방송용</StickerBadge></h2>
+          <h2 id="draw-history">추첨 기록</h2>
         </div>
-        <article className="card card-tone-yellow play-quick-pick">
-          <p style={{ margin: "0 0 8px", color: "var(--ink-soft)", fontWeight: 800 }}>
-            참가자 닉네임을 한 줄에 한 명씩 붙여넣고 <b>뽑기</b> 클릭. 외부 룰렛 안 켜도 즉석 추첨 가능.
-          </p>
-          <textarea
-            className="form-input"
-            rows={6}
-            value={raw}
-            onChange={(e) => setRaw(e.target.value)}
-            placeholder={"외계가재\n허락팬1\nLynn-kr5ky\n..."}
-            style={{ width: "100%", fontFamily: "var(--font-body)", fontSize: "0.92rem" }}
-          />
-          <div style={{ display: "flex", gap: 8, marginTop: 10, alignItems: "center", flexWrap: "wrap" }}>
-            <button type="button" className="btn btn-primary" onClick={handlePick}>
-              🎲 뽑기 ({participants.length}명)
-            </button>
-            <button type="button" className="btn btn-sm btn-ghost" onClick={handleReset}>
-              초기화
-            </button>
-            <small style={{ color: "var(--muted)", fontWeight: 800 }}>
-              한 줄에 한 명씩 · 쉼표/세미콜론 구분도 OK
-            </small>
+        {error ? (
+          <div className="callout-box is-pending">
+            <strong>불러오기 실패</strong>
+            {error}
           </div>
-          {result?.error ? (
-            <div className="callout-box" style={{ marginTop: 12 }}>
-              <strong>안내</strong>
-              {result.error}
+        ) : null}
+        <div className="board-list">
+          <div className="board-row is-head">
+            <span>회차</span>
+            <span>이벤트</span>
+            <span>상품</span>
+            <span>당첨자</span>
+            <span>시간</span>
+          </div>
+          {history.map((draw) => (
+            <div key={draw.id} className="board-row">
+              <span>
+                <StickerBadge tone="amber" rotate="0">{draw.roundNumber ? `${draw.roundNumber}회` : "추첨"}</StickerBadge>
+              </span>
+              <span className="board-row-title">{draw.title}</span>
+              <span className="board-row-meta">{draw.prize || "-"}</span>
+              <span className="board-row-meta">{Array.isArray(draw.winners) ? draw.winners.join(", ") : "-"}</span>
+              <span className="board-row-meta">{formatDate(draw.executedAt)}</span>
             </div>
-          ) : result?.winner ? (
-            <div className="play-quick-pick__result" role="status" aria-live="polite">
-              <span aria-hidden="true">🎉</span>
-              <strong>{result.winner}</strong>
-              <small>{result.count}명 중 1명 추첨</small>
-            </div>
-          ) : null}
-          {history.length > 0 && (
-            <details style={{ marginTop: 12 }}>
-              <summary style={{ cursor: "pointer", fontWeight: 800, color: "var(--ink-soft)" }}>
-                최근 뽑기 ({history.length})
-              </summary>
-              <ul style={{ margin: "8px 0 0", paddingLeft: 18 }}>
-                {history.map((h, i) => (
-                  <li key={`${h.ts}-${i}`} style={{ fontSize: "0.88rem" }}>
-                    <strong>{h.winner}</strong>{" "}
-                    <small style={{ color: "var(--muted)" }}>({h.count}명 중)</small>
-                  </li>
-                ))}
-              </ul>
-            </details>
-          )}
-        </article>
+          ))}
+        </div>
+        {!loading && history.length === 0 ? (
+          <div className="callout-box">
+            <strong>추첨 기록 없음</strong>
+            아직 서버에 저장된 추첨 기록이 없습니다.
+          </div>
+        ) : null}
       </section>
 
       <section className="section" aria-labelledby="play-games">
@@ -150,7 +143,7 @@ export default function PlayPortalPage() {
                   <h3 style={{ margin: 0 }}>{g.label}</h3>
                   <small style={{ color: "var(--ink-soft)", fontWeight: 800 }}>{g.note}</small>
                 </div>
-                <StickerBadge tone="amber" rotate="r">새 탭 ↗</StickerBadge>
+                <StickerBadge tone="amber" rotate="r">새 탭</StickerBadge>
               </div>
               <p style={{ margin: "10px 0 0", fontSize: "0.84rem", color: "var(--muted)", wordBreak: "break-all" }}>
                 {g.url}

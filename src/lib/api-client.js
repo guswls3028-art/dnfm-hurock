@@ -411,6 +411,7 @@ async function detailContestNormalized(id) {
 export const contests = {
   list: ({ status, page, pageSize } = {}) => listContestsNormalized({ status, page, pageSize }),
   detail: (id) => detailContestNormalized(id),
+  myEntries: () => apiFetch(sitePath("/me/contest-entries")),
   create: (data) => apiFetch(sitePath("/contests"), { method: "POST", json: data }),
   update: (id, input) =>
     apiFetch(sitePath(`/contests/${id}`), { method: "PATCH", json: input }),
@@ -452,6 +453,43 @@ export const contests = {
   auditLogs: (contestId, { includeEntries = true, limit = 100 } = {}) =>
     apiFetch(sitePath(`/contests/${contestId}/audit-logs`), {
       query: { includeEntries: includeEntries ? "1" : undefined, limit },
+    }),
+};
+
+/* ---------- Broadcast operations (질문 큐 / OBS / 운영 대시보드) ---------- */
+
+export const broadcast = {
+  dashboard: () => apiFetch(sitePath("/broadcast/dashboard")),
+  questions: {
+    create: ({ nickname, category, content, imageR2Key }) =>
+      apiFetch(sitePath("/broadcast/questions"), {
+        method: "POST",
+        json: { nickname, category, content, imageR2Key },
+      }),
+    list: ({ status, category, page, pageSize } = {}) =>
+      apiFetch(sitePath("/broadcast/questions"), {
+        query: { status, category, page, pageSize },
+      }),
+    update: (id, { status, moderationReason } = {}) =>
+      apiFetch(sitePath(`/broadcast/questions/${id}`), {
+        method: "PATCH",
+        json: { status, moderationReason },
+      }),
+    live: () => apiFetch(sitePath("/broadcast/questions/live")),
+  },
+};
+
+/* ---------- Draw sessions (서버 추첨 기록) ---------- */
+
+export const draws = {
+  list: ({ page, pageSize } = {}) =>
+    apiFetch(sitePath("/draw-sessions"), {
+      query: { page, pageSize },
+    }),
+  create: ({ title, roundNumber, prize, participants, winnerCount, note }) =>
+    apiFetch(sitePath("/draw-sessions"), {
+      method: "POST",
+      json: { title, roundNumber, prize, participants, winnerCount, note },
     }),
 };
 
