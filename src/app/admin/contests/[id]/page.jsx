@@ -138,10 +138,16 @@ export default function AdminContestDetailPage({ params }) {
     setError(null);
     setSuccess(null);
     try {
+      let reason;
+      if (["results", "archived", "cancelled"].includes(nextStatus)) {
+        reason = window.prompt("상태 변경 사유를 입력해 주세요.");
+        if (!reason) throw new Error("상태 변경 사유가 필요합니다.");
+      }
       // backend 는 별도 status endpoint 없이 PATCH /contests/:id 로 받음.
-      await contestsApi.update(id, { status: nextStatus });
+      await contestsApi.update(id, { status: nextStatus, reason });
       setContest((c) => (c ? { ...c, status: nextStatus, statusLabel: labelFor(nextStatus) } : c));
       setSuccess(`상태가 "${labelFor(nextStatus)}" 로 변경되었습니다.`);
+      refreshAuditLogs();
     } catch (err) {
       setError(err instanceof ApiError ? err : { message: err?.message || "상태 변경 실패" });
     } finally {

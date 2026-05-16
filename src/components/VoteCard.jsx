@@ -4,7 +4,7 @@ import { entryPhotoValue, uploadPublicUrl } from "@/lib/upload-url";
 /**
  * VoteCard — backend 콘테스트 투표 entry 카드.
  */
-export default function VoteCard({ entry, groupName, selected, onSelect, disabled }) {
+export default function VoteCard({ entry, groupName, selected, onSelect, disabled, votes = 0 }) {
   const id = `vote-${entry.id}`;
   const fields = entry.fields || entry;
   const title = entry.title || fields.title || "제목 없음";
@@ -33,7 +33,7 @@ export default function VoteCard({ entry, groupName, selected, onSelect, disable
           {fields.adventureName || "-"} · {fields.characterName || "-"}
         </span>
         <p>{description}</p>
-        <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 6 }}>
+        <div style={{ marginTop: 8, display: "flex", alignItems: "center", gap: 6, flexWrap: "wrap" }}>
           <input
             id={id}
             type="radio"
@@ -45,6 +45,9 @@ export default function VoteCard({ entry, groupName, selected, onSelect, disable
             style={{ width: 18, height: 18 }}
           />
           <span style={{ fontWeight: 800, fontSize: "0.86rem" }}>이 코디에 투표</span>
+          <StickerBadge tone="cyan" rotate="0">
+            {votes}표
+          </StickerBadge>
         </div>
       </div>
     </label>

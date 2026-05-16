@@ -16,6 +16,7 @@ export default function ContestVotePage({ params }) {
 
   const [contest, setContest] = useState(null);
   const [entries, setEntries] = useState([]);
+  const [voteCounts, setVoteCounts] = useState({});
   const [selected, setSelected] = useState(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
@@ -41,6 +42,14 @@ export default function ContestVotePage({ params }) {
         setEntries(list.filter((e) => e.selectedForVote || e.selected_for_vote));
       } catch {
         if (alive) setEntries([]);
+      }
+      try {
+        const data = await contestsApi.tally(id);
+        if (!alive) return;
+        const tally = Array.isArray(data?.tally) ? data.tally : [];
+        setVoteCounts(Object.fromEntries(tally.map((row) => [row.entryId, Number(row.votes) || 0])));
+      } catch {
+        if (alive) setVoteCounts({});
       }
     })();
     return () => {
@@ -90,6 +99,7 @@ export default function ContestVotePage({ params }) {
     try {
       await contestsApi.vote(contest.id, { entryId: selected });
       setVoted(true);
+      setVoteCounts((prev) => ({ ...prev, [selected]: (prev[selected] || 0) + 1 }));
     } catch (err) {
       if (err instanceof ApiError) setError(err);
       else setError({ message: err?.message || "투표 실패" });
@@ -115,7 +125,7 @@ export default function ContestVotePage({ params }) {
             ← {contest.title}
           </Link>
           <h1>투표하기</h1>
-          <p>1인 1표. 마감 후 결과 페이지가 켜집니다.</p>
+          <p>1인 1표. 득표수는 공개로 집계됩니다.</p>
         </div>
         <StickerBadge tone={disabled ? "ink" : "cyan"} rotate="r">
           {disabled ? "투표 비활성" : "투표중"}
@@ -166,6 +176,7 @@ export default function ContestVotePage({ params }) {
                 selected={selected === entry.id}
                 onSelect={setSelected}
                 disabled={disabled || voted}
+                votes={voteCounts[entry.id] || 0}
               />
             ))}
           </div>
