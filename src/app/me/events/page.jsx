@@ -65,7 +65,21 @@ export default function MyEventsPage() {
     };
   }, [user, userLoading]);
 
-  if (!userLoading && !user) {
+  if (userLoading) {
+    return (
+      <PageShell activePath="/me/events">
+        <div className="page-head">
+          <div>
+            <h1>로그인 확인 중…</h1>
+            <p>내 이벤트 상태를 불러오기 전에 로그인 상태를 확인하고 있습니다.</p>
+          </div>
+          <StickerBadge tone="ink" rotate="r">확인중</StickerBadge>
+        </div>
+      </PageShell>
+    );
+  }
+
+  if (!user) {
     return (
       <PageShell activePath="/me/events">
         <div className="page-head">

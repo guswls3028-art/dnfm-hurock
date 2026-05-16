@@ -3,12 +3,27 @@
 import { useCallback, useEffect, useState } from "react";
 import { ApiError, auth } from "@/lib/api-client";
 
+const REFRESH_CHECK_KEY = "hurock:last-refresh-check";
+const REFRESH_CHECK_TTL_MS = 60_000;
+
 function unwrapAuthUser(data) {
   if (!data) return null;
   if (Object.prototype.hasOwnProperty.call(data, "user")) {
     return data.user || null;
   }
   return data;
+}
+
+function shouldTrySessionRefresh() {
+  if (typeof window === "undefined") return true;
+  try {
+    const last = Number(window.sessionStorage.getItem(REFRESH_CHECK_KEY) || 0);
+    if (last && Date.now() - last < REFRESH_CHECK_TTL_MS) return false;
+    window.sessionStorage.setItem(REFRESH_CHECK_KEY, String(Date.now()));
+    return true;
+  } catch {
+    return true;
+  }
 }
 
 /**
@@ -32,11 +47,26 @@ export function useCurrentUser() {
   const [error, setError] = useState(null);
 
   const readCurrentUser = useCallback(async () => {
-    const data = await auth.me();
-    const current = unwrapAuthUser(data);
-    if (current) return current;
-    const refreshed = await auth.refresh();
-    return refreshed?.user || null;
+    try {
+      const data = await auth.me();
+      const current = unwrapAuthUser(data);
+      if (current) return current;
+      if (!shouldTrySessionRefresh()) return null;
+      const refreshed = await auth.refresh().catch(() => null);
+      return refreshed?.user || null;
+    } catch (err) {
+      if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+        const canRefresh = new Set([
+          "session_expired",
+          "session_invalid",
+          "token_version_mismatch",
+        ]).has(err.code);
+        if (!canRefresh || !shouldTrySessionRefresh()) return null;
+        const refreshed = await auth.refresh().catch(() => null);
+        return refreshed?.user || null;
+      }
+      throw err;
+    }
   }, []);
 
   const fetchMe = useCallback(async () => {

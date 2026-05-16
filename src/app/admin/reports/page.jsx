@@ -105,7 +105,21 @@ export default function AdminReportsPage() {
     }
   }
 
-  if (!userLoading && !user) {
+  if (userLoading) {
+    return (
+      <PageShell activePath="/admin">
+        <div className="page-head">
+          <div>
+            <h1>권한 확인 중…</h1>
+            <p>운영자 권한을 확인하고 있습니다.</p>
+          </div>
+          <StickerBadge tone="ink" rotate="r">확인중</StickerBadge>
+        </div>
+      </PageShell>
+    );
+  }
+
+  if (!user) {
     return (
       <PageShell activePath="/admin">
         <div className="page-head">
@@ -125,7 +139,7 @@ export default function AdminReportsPage() {
     );
   }
 
-  if (!userLoading && user && !userIsAdmin) {
+  if (user && !userIsAdmin) {
     return (
       <PageShell activePath="/admin">
         <div className="page-head">

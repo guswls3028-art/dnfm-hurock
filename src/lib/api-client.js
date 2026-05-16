@@ -65,6 +65,7 @@ function canRetryAfterRefresh(path, { skipAuthRefresh, raw }) {
   const p = String(path || "").split("?")[0];
   if (p.startsWith("/auth/login")) return false;
   if (p.startsWith("/auth/signup")) return false;
+  if (p.startsWith("/auth/me")) return false;
   if (p.startsWith("/auth/refresh")) return false;
   if (p.startsWith("/auth/logout")) return false;
   if (p.startsWith("/auth/oauth")) return false;
