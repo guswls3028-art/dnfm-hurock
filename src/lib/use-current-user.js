@@ -51,9 +51,7 @@ export function useCurrentUser() {
       const data = await auth.me();
       const current = unwrapAuthUser(data);
       if (current) return current;
-      if (!shouldTrySessionRefresh()) return null;
-      const refreshed = await auth.refresh().catch(() => null);
-      return refreshed?.user || null;
+      return null;
     } catch (err) {
       if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
         const canRefresh = new Set([

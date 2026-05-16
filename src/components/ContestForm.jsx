@@ -14,26 +14,20 @@ import PhotoField from "@/components/PhotoField";
  *   - textarea
  *   - file (R2 presigned PUT 으로 업로드 → publicUrl 을 값으로 저장)
  *
- * dnfProfile 이 있으면 prefillFrom 으로 자동 채움. 비회원이면 빈 form + 닉/비번 입력.
- *
- * 비회원 정책 SSOT: project_anonymous_posting_policy.md (2026-05-14).
- *   - isGuest=true 면 guestNickname/guestPassword 입력 받음.
- *   - 비번 입력하면 backend 가 bcrypt 해시 저장 → 추후 본인 삭제 가능.
- *   - 비번 비우면 작성은 가능하나 수정/삭제 불가 (디시 스타일).
+ * dnfProfile 이 있으면 prefillFrom 으로 자동 채움.
+ * 상품/이미지 업로드 이벤트라 참가 제출은 로그인 계정 기준으로만 받는다.
  *
  * submit:
- *   POST /sites/hurock/contests/:id/entries  body={fields, guestNickname?, guestPassword?}
+ *   POST /sites/hurock/contests/:id/entries  body={fields}
  *   성공 시 redirect: /contests/:id
  */
-export default function ContestForm({ contestId, schema = [], dnfProfile, isGuest = false }) {
+export default function ContestForm({ contestId, schema = [], dnfProfile }) {
   const router = useRouter();
   const [values, setValues] = useState(() => initialValues(schema, dnfProfile));
   const [uploads, setUploads] = useState({}); // { [key]: { uploading, url, error } }
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(false);
-  const [guestNickname, setGuestNickname] = useState("");
-  const [guestPassword, setGuestPassword] = useState("");
   const initRef = useRef(false);
 
   // dnfProfile 이 늦게 도착하는 경우 한 번 더 prefill
@@ -91,23 +85,7 @@ export default function ContestForm({ contestId, schema = [], dnfProfile, isGues
           });
         }
       }
-      // 비회원이면 닉/비번 같이 전송. 회원이면 fields 만 (backend optionalAuth 가 userId 박음).
       const payload = { fields: values };
-      if (isGuest) {
-        const nick = guestNickname.trim();
-        if (nick) payload.guestNickname = nick;
-        if (guestPassword) {
-          // backend dto: min(4). client 도 사전 검증.
-          if (guestPassword.length < 4) {
-            throw new ApiError({
-              status: 0,
-              code: "validation",
-              message: "비밀번호는 4자 이상이어야 합니다 (비울 거면 완전히 비워주세요).",
-            });
-          }
-          payload.guestPassword = guestPassword;
-        }
-      }
       await contestsApi.entries.create(contestId, payload);
       setSuccess(true);
       // 잠깐 표시 후 리스트로
@@ -294,42 +272,6 @@ export default function ContestForm({ contestId, schema = [], dnfProfile, isGues
           </div>
         );
       })}
-
-      {isGuest && (
-        <>
-          <div className="form-divider" />
-          <div className="form-step">비회원 정보 (선택)</div>
-          <div className="form-row">
-            <label htmlFor="guest-nick">닉네임</label>
-            <input
-              id="guest-nick"
-              type="text"
-              className="form-input"
-              placeholder="비우면 'ㅇㅇ(IP끝자리)' 로 표시"
-              value={guestNickname}
-              onChange={(e) => setGuestNickname(e.target.value)}
-              maxLength={32}
-            />
-          </div>
-          <div className="form-row">
-            <label htmlFor="guest-pw">비밀번호 (수정/삭제용)</label>
-            <input
-              id="guest-pw"
-              type="password"
-              className="form-input"
-              placeholder="비우면 작성은 가능하나 수정/삭제 불가"
-              value={guestPassword}
-              onChange={(e) => setGuestPassword(e.target.value)}
-              minLength={4}
-              maxLength={128}
-              autoComplete="new-password"
-            />
-            <small style={{ color: "var(--muted)" }}>
-              4자 이상. 디시 스타일 — 같은 비번 입력 시 본인 인증.
-            </small>
-          </div>
-        </>
-      )}
 
       {error && (
         <div className="callout-box is-pending">

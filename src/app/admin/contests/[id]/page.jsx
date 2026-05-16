@@ -32,6 +32,7 @@ const STATE_LABEL = {
 export default function AdminContestDetailPage({ params }) {
   const { id } = use(params);
   const { user, loading: userLoading } = useCurrentUser();
+  const userIsAdmin = isAdmin(user);
 
   const [contest, setContest] = useState(null);
   const [entries, setEntries] = useState([]);
@@ -50,6 +51,7 @@ export default function AdminContestDetailPage({ params }) {
   const [resultReason, setResultReason] = useState("방송 결과 발표");
 
   useEffect(() => {
+    if (userLoading || !userIsAdmin) return;
     let alive = true;
     (async () => {
       try {
@@ -82,7 +84,7 @@ export default function AdminContestDetailPage({ params }) {
     return () => {
       alive = false;
     };
-  }, [id]);
+  }, [id, userLoading, userIsAdmin]);
 
   async function refreshAuditLogs() {
     try {
@@ -211,7 +213,7 @@ export default function AdminContestDetailPage({ params }) {
       </PageShell>
     );
   }
-  if (user && !isAdmin(user)) {
+  if (user && !userIsAdmin) {
     return (
       <PageShell activePath="/admin">
         <div className="page-head">

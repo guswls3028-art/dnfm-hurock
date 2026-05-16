@@ -2,7 +2,6 @@
 
 import Link from "next/link";
 import { use, useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 import PageShell from "@/components/PageShell";
 import ContestForm from "@/components/ContestForm";
 import StickerBadge from "@/components/StickerBadge";
@@ -11,7 +10,6 @@ import { useCurrentUser } from "@/lib/use-current-user";
 
 export default function ContestNewPage({ params }) {
   const { id } = use(params);
-  const router = useRouter();
   const { user, loading: userLoading } = useCurrentUser();
   const [contest, setContest] = useState(null);
   const [fetchError, setFetchError] = useState(null);
@@ -93,10 +91,8 @@ export default function ContestNewPage({ params }) {
     );
   }
 
-  // 비회원 정책 SSOT (project_anonymous_posting_policy 2026-05-14):
-  // 콘테스트 참가 = 비회원 가능. 회원이면 dnfProfile 자동 채움 편의.
-  // userLoading 동안엔 isGuest 결정 보류 — form 깜빡임 방지.
-  const isGuest = !userLoading && !user;
+  // 상품/이미지 업로드 이벤트라 참가 제출은 로그인 계정으로만 받는다.
+  // 질문/게시판은 비회원 가능, 콘테스트 참가/투표는 기록성을 우선한다.
   // backend formSchema = { fields: [...] }.
   const schema = Array.isArray(contest.formSchema)
     ? contest.formSchema
@@ -140,13 +136,36 @@ export default function ContestNewPage({ params }) {
           <div className="form-step">참가 양식 로딩 중…</div>
           <div style={{ minHeight: 320 }} />
         </div>
+      ) : !user ? (
+        <div className="grid grid-2">
+          <div className="form-block">
+            <div className="form-step">로그인 필요</div>
+            <div className="callout-box">
+              <strong>콘테스트 참가 전 로그인</strong>
+              이미지 업로드와 상품 지급 기록을 남겨야 해서 참가 제출은 로그인 계정으로만 받습니다.
+            </div>
+            <Link
+              href={`/login?returnTo=${encodeURIComponent(`/contests/${contest.id}/new`)}`}
+              className="btn btn-primary"
+            >
+              로그인 / 가입
+            </Link>
+          </div>
+          <div className="form-block">
+            <div className="form-step">참가 안내</div>
+            <ul style={{ paddingLeft: 18, margin: 0, lineHeight: 1.7, color: "var(--ink-soft)" }}>
+              <li>방송 질문과 게시판은 비회원도 이용할 수 있습니다.</li>
+              <li>콘테스트 참가와 투표는 중복/분쟁 방지를 위해 로그인 계정 기준으로 기록합니다.</li>
+              <li>회원이면 모험단명/캐릭터명을 던파 프로필에서 자동 채워줘요.</li>
+            </ul>
+          </div>
+        </div>
       ) : (
         <div className="grid grid-2">
           <ContestForm
             contestId={contest.id}
             schema={schema}
             dnfProfile={user?.dnfProfile}
-            isGuest={isGuest}
           />
           <div className="form-block">
             <div className="form-step">참가 안내</div>
@@ -157,31 +176,11 @@ export default function ContestNewPage({ params }) {
               <li>
                 <strong>회원</strong>이면 모험단명/캐릭터명을 던파 프로필에서 자동 채워줘요.
               </li>
-              <li>
-                <strong>비회원</strong>도 참가 가능. 닉/비번은 비워도 됩니다 (수정/삭제는 비번 필요).
-              </li>
             </ul>
-            {isGuest ? (
-              <div className="callout-box">
-                <strong>비회원으로 참가 중</strong>
-                자동 채움은 없어요. 모든 필드를 직접 입력. 회원으로 참가하려면{" "}
-                <Link
-                  href={`/login?returnTo=${encodeURIComponent(`/contests/${contest.id}/new`)}`}
-                  style={{
-                    borderBottom: "2px solid var(--primary)",
-                    color: "var(--primary-ink)",
-                    fontWeight: 800,
-                  }}
-                >
-                  로그인 / 가입
-                </Link>.
-              </div>
-            ) : (
-              <div className="callout-box">
-                <strong>로그인 계정</strong>
-                {user?.displayName || user?.username} · 모험단: {user?.dnfProfile?.adventureName || "(미등록)"}
-              </div>
-            )}
+            <div className="callout-box">
+              <strong>로그인 계정</strong>
+              {user?.displayName || user?.username} · 모험단: {user?.dnfProfile?.adventureName || "(미등록)"}
+            </div>
           </div>
         </div>
       )}
